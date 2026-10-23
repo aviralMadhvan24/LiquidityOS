@@ -1,6 +1,7 @@
 import SwiftUI
 
-/// Main Hero Dashboard screen reproducing Slide 07 from the pitch deck.
+/// Main Hero Dashboard screen reproducing Slide 07 from the pitch deck,
+/// enhanced with 1-tap navigation to Portfolio Holdings, Reverse Stress, AI Recovery, and Explainable Score Breakdown.
 struct DashboardView: View {
     @ObservedObject var viewModel: ResilienceViewModel
     
@@ -15,7 +16,7 @@ struct DashboardView: View {
                         VStack(alignment: .leading, spacing: 4) {
                             Text("Good morning")
                                 .font(.system(size: 14, weight: .medium, design: .rounded))
-                                .foregroundStyle(.secondary)
+                                .foregroundStyle(Color.secondary)
                             Text("Resilience Overview")
                                 .font(.system(size: 26, weight: .bold, design: .rounded))
                         }
@@ -57,7 +58,7 @@ struct DashboardView: View {
                         HStack {
                             Text("STRESS-TEST SELECTOR")
                                 .font(.system(size: 11, weight: .bold, design: .rounded))
-                                .foregroundStyle(.secondary)
+                                .foregroundStyle(Color.secondary)
                                 .tracking(0.8)
                             Spacer()
                             Text("\(Int(viewModel.currentDeclinePercentage))% Shock Active")
@@ -78,23 +79,94 @@ struct DashboardView: View {
                     )
                     .padding(.horizontal)
                     
-                    // Hero Resilience Gauge
-                    VStack(spacing: 8) {
-                        ResilienceGaugeView(
-                            score: report.resilienceScore,
-                            band: report.resilienceBand,
-                            headline: report.summaryHeadline
+                    // Hero Resilience Gauge (Tappable for 5-Pillar Score Breakdown)
+                    Button {
+                        viewModel.isShowingScoreBreakdownSheet = true
+                    } label: {
+                        VStack(spacing: 8) {
+                            ResilienceGaugeView(
+                                score: report.resilienceScore,
+                                band: report.resilienceBand,
+                                headline: report.summaryHeadline
+                            )
+                            
+                            HStack(spacing: 4) {
+                                Text("Inspect 5-Pillar Breakdown")
+                                    .font(.system(size: 12, weight: .semibold, design: .rounded))
+                                Image(systemName: "chevron.right")
+                                    .font(.system(size: 10, weight: .bold))
+                            }
+                            .foregroundStyle(LOSTheme.primary)
+                            .padding(.top, 2)
+                        }
+                        .padding(16)
+                        .frame(maxWidth: .infinity)
+                        .background(LOSTheme.cardBackground)
+                        .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 20, style: .continuous)
+                                .stroke(LOSTheme.cardBorder, lineWidth: 1)
                         )
                     }
-                    .padding(16)
-                    .frame(maxWidth: .infinity)
-                    .background(LOSTheme.cardBackground)
-                    .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 20, style: .continuous)
-                            .stroke(LOSTheme.cardBorder, lineWidth: 1)
-                    )
+                    .buttonStyle(.plain)
                     .padding(.horizontal)
+                    
+                    // MARK: - Advanced Resilience Suite (Quick Access Navigation)
+                    VStack(alignment: .leading, spacing: 10) {
+                        HStack {
+                            Text("RESILIENCE SUITE")
+                                .font(.system(size: 11, weight: .bold, design: .rounded))
+                                .foregroundStyle(Color.secondary)
+                                .tracking(0.8)
+                            Spacer()
+                            Text("3 Upgraded Modules")
+                                .font(.system(size: 11))
+                                .foregroundStyle(Color.secondary)
+                        }
+                        .padding(.horizontal)
+                        
+                        ScrollView(.horizontal, showsIndicators: false) {
+                            HStack(spacing: 12) {
+                                // 1. Portfolio Management
+                                QuickModuleCard(
+                                    title: "Portfolio Holdings",
+                                    badgeText: "\(viewModel.profile.activeHoldings.count) Stocks",
+                                    detailText: LOSTheme.formatRupee(viewModel.profile.portfolioValue),
+                                    icon: "chart.pie.fill",
+                                    color: LOSTheme.primary
+                                ) {
+                                    viewModel.isShowingPortfolioSheet = true
+                                }
+                                
+                                // 2. Reverse Stress Testing
+                                let revResult = viewModel.reverseStressResult
+                                let revText = revResult.breakingPointDeclinePercent != nil
+                                    ? "\(Int(revResult.breakingPointDeclinePercent!))% Crash Limit"
+                                    : "Safe > 100%"
+                                QuickModuleCard(
+                                    title: "Reverse Stress",
+                                    badgeText: "Threshold",
+                                    detailText: revText,
+                                    icon: "gauge.with.needle.fill",
+                                    color: LOSTheme.warningAmber
+                                ) {
+                                    viewModel.isShowingReverseStressSheet = true
+                                }
+                                
+                                // 3. AI Recovery Planner
+                                QuickModuleCard(
+                                    title: "AI Recovery",
+                                    badgeText: "Blueprint",
+                                    detailText: "3 Strategic Paths",
+                                    icon: "wand.and.stars",
+                                    color: LOSTheme.safeGreen
+                                ) {
+                                    viewModel.isShowingRecoverySheet = true
+                                }
+                            }
+                            .padding(.horizontal)
+                        }
+                    }
                     
                     // 4 Core Financial Metrics Grid
                     LazyVGrid(columns: [GridItem(.flexible(), spacing: 12), GridItem(.flexible(), spacing: 12)], spacing: 12) {
@@ -173,13 +245,13 @@ struct DashboardView: View {
                                 .foregroundStyle(report.resilienceBand.color)
                             Text("RESILIENCE SUMMARY")
                                 .font(.system(size: 11, weight: .bold, design: .rounded))
-                                .foregroundStyle(.secondary)
+                                .foregroundStyle(Color.secondary)
                                 .tracking(0.8)
                         }
                         
                         Text(report.summaryVerdict)
                             .font(.system(size: 14, weight: .medium, design: .rounded))
-                            .foregroundStyle(.primary)
+                            .foregroundStyle(Color.primary)
                             .lineSpacing(3)
                         
                         Divider()
@@ -193,7 +265,7 @@ struct DashboardView: View {
                                     .padding(.top, 2)
                                 Text(tip)
                                     .font(.system(size: 12, weight: .regular))
-                                    .foregroundStyle(.secondary)
+                                    .foregroundStyle(Color.secondary)
                             }
                         }
                     }
@@ -215,6 +287,70 @@ struct DashboardView: View {
             .sheet(isPresented: $viewModel.isShowingZerodhaSheet) {
                 ZerodhaConnectSheet(resilienceViewModel: viewModel)
             }
+            .sheet(isPresented: $viewModel.isShowingScoreBreakdownSheet) {
+                ResilienceScoreBreakdownSheet(viewModel: viewModel)
+            }
+            .sheet(isPresented: $viewModel.isShowingPortfolioSheet) {
+                PortfolioManagementView(viewModel: viewModel)
+            }
+            .sheet(isPresented: $viewModel.isShowingReverseStressSheet) {
+                ReverseStressTestView(viewModel: viewModel)
+            }
+            .sheet(isPresented: $viewModel.isShowingRecoverySheet) {
+                RecoveryPlannerView(viewModel: viewModel)
+            }
+        }
+    }
+}
+
+/// Compact horizontal card for fast navigation to upgraded modules
+private struct QuickModuleCard: View {
+    let title: String
+    let badgeText: String
+    let detailText: String
+    let icon: String
+    let color: Color
+    let action: () -> Void
+    
+    var body: some View {
+        Button(action: action) {
+            VStack(alignment: .leading, spacing: 8) {
+                HStack {
+                    ZStack {
+                        Circle()
+                            .fill(color.opacity(0.15))
+                            .frame(width: 28, height: 28)
+                        Image(systemName: icon)
+                            .font(.system(size: 12, weight: .bold))
+                            .foregroundStyle(color)
+                    }
+                    Spacer()
+                    Text(badgeText)
+                        .font(.system(size: 9, weight: .bold, design: .rounded))
+                        .padding(.horizontal, 6)
+                        .padding(.vertical, 3)
+                        .background(color.opacity(0.12))
+                        .foregroundStyle(color)
+                        .clipShape(Capsule())
+                }
+                
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(title)
+                        .font(.system(size: 13, weight: .bold, design: .rounded))
+                        .foregroundStyle(Color.primary)
+                    Text(detailText)
+                        .font(.system(size: 11, weight: .medium, design: .rounded))
+                        .foregroundStyle(Color.secondary)
+                }
+            }
+            .frame(width: 145)
+            .padding(12)
+            .background(LOSTheme.cardBackground)
+            .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
+            .overlay(
+                RoundedRectangle(cornerRadius: 14, style: .continuous)
+                    .stroke(LOSTheme.cardBorder, lineWidth: 1)
+            )
         }
     }
 }

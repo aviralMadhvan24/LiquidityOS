@@ -1,6 +1,7 @@
 import Foundation
+import SwiftUI
 
-/// Core mathematical engine that models financial shock waves and calculates resilience.
+/// Core mathematical engine that models financial shock waves, runway, and transparent resilience scoring.
 struct ResilienceEngine {
     
     /// Computes a full resilience assessment given a financial profile and a simulated market drop percentage.
@@ -21,9 +22,9 @@ struct ResilienceEngine {
             ? min(100.0, max(0.0, (unexpectedBill / initialCash) * 100.0))
             : 100.0
         
-        // 3. Cash Burn & Runway
+        // 3. Cash Burn & Runway (incorporating optional monthly debt commitments)
         let income = profile.monthlyIncome
-        let expenses = profile.monthlyExpenses
+        let expenses = profile.monthlyExpenses + profile.monthlyDebtPayments
         let netBurn = expenses - income // positive = burning cash, negative = surplus
         
         let runwayMonths: Double
@@ -44,29 +45,11 @@ struct ResilienceEngine {
         }
         
         // 4. Resilience Score Calculation (0 - 100)
-        let score = calculateResilienceScore(
-            runwayMonths: runwayMonths,
-            remainingCash: remainingCash,
-            initialCash: initialCash,
-            portfolioRetentionPercent: portfolioRetentionPercent,
-            netBurn: netBurn,
-            monthlyExpenses: expenses
-        )
+        let explainable = calculateExplainableScore(profile: profile, declinePercent: marketDeclinePercent)
+        let score = explainable.totalScore
+        let band = explainable.band
         
-        // 5. Band and Verdict Categorization
-        let band: ResilienceBand
-        switch score {
-        case ..<40:
-            band = .critical
-        case 40..<70:
-            band = .moderate
-        case 70..<85:
-            band = .healthy
-        default:
-            band = .bulletproof
-        }
-        
-        // 6. Summary Headline and Plain-English Verdict
+        // 5. Summary Headline and Plain-English Verdict
         let headline: String
         let formattedLoss = LOSTheme.formatRupee(portfolioLoss)
         let formattedRemainingCash = LOSTheme.formatRupee(remainingCash)
@@ -82,7 +65,7 @@ struct ResilienceEngine {
         
         let verdict = "\(band.rawValue.capitalized): \(Int(marketDeclinePercent))% crash + \(formattedBill) bill leaves \(formattedRemainingCash) cash, \(runwayState == .cashSurplus ? "cash surplus" : String(format: "%.1f months runway", runwayMonths))."
         
-        // 7. Actionable Recommendations
+        // 6. Actionable Recommendations
         var recommendations: [String] = []
         if remainingCash < (expenses * 3) {
             let targetCash = expenses * 3
@@ -120,35 +103,224 @@ struct ResilienceEngine {
         )
     }
     
-    /// Calibrated formula matching the pitch deck:
-    /// - At ₹5L portfolio, ₹80k cash, ₹10k income, ₹20k expense, ₹50k bill, 15% shock => Score is 64.
-    private static func calculateResilienceScore(
-        runwayMonths: Double,
-        remainingCash: Double,
-        initialCash: Double,
-        portfolioRetentionPercent: Double,
-        netBurn: Double,
-        monthlyExpenses: Double
-    ) -> Int {
-        if remainingCash < 0 {
-            return Int(max(5.0, (portfolioRetentionPercent / 100.0) * 20.0))
+    // MARK: - 5-Pillar Explainable Resilience Score Engine
+    static func calculateExplainableScore(
+        profile: FinancialProfile,
+        declinePercent: Double
+    ) -> ExplainableResilienceReport {
+        let totalOutflows = profile.monthlyExpenses + profile.monthlyDebtPayments
+        let postShockCash = max(0, profile.liquidCash - profile.unexpectedExpense)
+        let netBurn = max(0, totalOutflows - profile.monthlyIncome)
+        
+        var missingDataNotes: [String] = []
+        var scoreDrivers: [String] = []
+        
+        // Pillar 1: Emergency Cash Coverage (Weight: 30 pts)
+        // 6+ months of total monthly outflows = 30 pts
+        let coverageMonths = totalOutflows > 0 ? postShockCash / totalOutflows : 6.0
+        let p1Earned: Double
+        let p1Rating: String
+        let p1Color: Color
+        if coverageMonths >= 6.0 {
+            p1Earned = 30.0
+            p1Rating = "Optimal"
+            p1Color = LOSTheme.safeGreen
+            scoreDrivers.append("+30 pts: Emergency cash covers over 6 months of living expenses.")
+        } else if coverageMonths >= 3.0 {
+            p1Earned = 15.0 + ((coverageMonths - 3.0) / 3.0) * 15.0
+            p1Rating = "Moderate"
+            p1Color = LOSTheme.warningAmber
+        } else if coverageMonths >= 1.0 {
+            p1Earned = 5.0 + ((coverageMonths - 1.0) / 2.0) * 10.0
+            p1Rating = "Fragile"
+            p1Color = LOSTheme.warningAmber
+            scoreDrivers.append("−15 pts: Emergency cash covers under 3 months of expenses.")
+        } else {
+            p1Earned = max(0, coverageMonths * 5.0)
+            p1Rating = "Critical"
+            p1Color = LOSTheme.criticalRed
+            scoreDrivers.append("Critical: Under 1 month cash buffer after emergency shock.")
         }
         
-        // 1. Runway component (40 points max, 6 months = 100% target)
-        let cappedRunway = min(6.0, max(0.0, runwayMonths))
-        let runwayPts = (cappedRunway / 6.0) * 40.0 // At 3.0 mos = 20.0
+        let pillar1 = ResiliencePillar(
+            name: "Emergency Cash Coverage",
+            earnedPoints: round(p1Earned * 10) / 10,
+            maxPoints: 30.0,
+            weightPercent: 30.0,
+            rating: p1Rating,
+            statusColor: p1Color,
+            formulaDescription: "Evaluates post-emergency cash divided by monthly fixed outflows (target: 6+ months).",
+            currentMetricValue: "\(String(format: "%.1f", coverageMonths)) months covered",
+            improvementTip: "Increasing cash buffer to \(LOSTheme.formatRupee(totalOutflows * 6)) maximizes this pillar (+30 pts)."
+        )
         
-        // 2. Portfolio Retention component (25 points max)
-        let retentionPts = (portfolioRetentionPercent / 100.0) * 25.0 // At 85% = 21.25
+        // Pillar 2: Cash Flow & Burn Rate (Weight: 25 pts)
+        let p2Earned: Double
+        let p2Rating: String
+        let p2Color: Color
+        if profile.monthlyIncome >= totalOutflows {
+            let surplusRate = profile.monthlyIncome > 0 ? (profile.monthlyIncome - totalOutflows) / profile.monthlyIncome : 0
+            if surplusRate >= 0.20 {
+                p2Earned = 25.0
+                p2Rating = "Strong Surplus"
+                p2Color = LOSTheme.safeGreen
+            } else {
+                p2Earned = 18.0 + (surplusRate / 0.20) * 7.0
+                p2Rating = "Mild Surplus"
+                p2Color = LOSTheme.safeGreen
+            }
+        } else {
+            // Deficit
+            let deficitRatio = totalOutflows > 0 ? netBurn / totalOutflows : 0.5
+            p2Earned = max(2.0, (1.0 - min(1.0, deficitRatio)) * 12.0)
+            p2Rating = "Monthly Burn"
+            p2Color = LOSTheme.warningAmber
+            scoreDrivers.append("−\(Int(25.0 - p2Earned)) pts: Spending exceeds income by \(LOSTheme.formatRupee(netBurn))/mo.")
+        }
         
-        // 3. Emergency Cash Absorption buffer (35 points max)
-        // Ratio of remaining cash compared to initial cash and baseline safety buffer
-        let cashPreservedRatio = initialCash > 0 ? (remainingCash / initialCash) : 0
-        let cashBufferFactor = monthlyExpenses > 0 ? min(1.0, remainingCash / (monthlyExpenses * 2)) : 1.0
-        let emergencyPts = (cashPreservedRatio * 0.4 + cashBufferFactor * 0.6) * 35.0 // ~22.75
+        let pillar2 = ResiliencePillar(
+            name: "Cash Flow & Burn",
+            earnedPoints: round(p2Earned * 10) / 10,
+            maxPoints: 25.0,
+            weightPercent: 25.0,
+            rating: p2Rating,
+            statusColor: p2Color,
+            formulaDescription: "Measures whether your income covers monthly expenses without eating into savings.",
+            currentMetricValue: netBurn == 0 ? "Zero Burn (Break-Even)" : "\(LOSTheme.formatRupee(netBurn))/mo Burn",
+            improvementTip: "Eliminating monthly cash burn adds up to +\(Int(25.0 - p2Earned)) pts to your resilience score."
+        )
         
-        let rawScore = runwayPts + retentionPts + emergencyPts
-        let boundedScore = max(5, min(100, Int(round(rawScore))))
-        return boundedScore
+        // Pillar 3: Debt & EMI Burden (Weight: 15 pts)
+        let p3Earned: Double
+        let p3Rating: String
+        let p3Color: Color
+        if profile.monthlyDebtPayments == 0 {
+            p3Earned = 15.0
+            p3Rating = "Debt-Free"
+            p3Color = LOSTheme.safeGreen
+        } else {
+            let debtRatio = profile.monthlyIncome > 0 ? profile.monthlyDebtPayments / profile.monthlyIncome : 1.0
+            if debtRatio <= 0.20 {
+                p3Earned = 13.0
+                p3Rating = "Safe (< 20%)"
+                p3Color = LOSTheme.safeGreen
+            } else if debtRatio <= 0.40 {
+                p3Earned = 8.0
+                p3Rating = "Moderate (20-40%)"
+                p3Color = LOSTheme.warningAmber
+            } else {
+                p3Earned = 3.0
+                p3Rating = "High Debt Burden"
+                p3Color = LOSTheme.criticalRed
+                scoreDrivers.append("−12 pts: Debt obligations take up \(Int(debtRatio * 100))% of monthly income.")
+            }
+        }
+        
+        let pillar3 = ResiliencePillar(
+            name: "Debt & EMI Burden",
+            earnedPoints: round(p3Earned * 10) / 10,
+            maxPoints: 15.0,
+            weightPercent: 15.0,
+            rating: p3Rating,
+            statusColor: p3Color,
+            formulaDescription: "Evaluates monthly debt service ratio (EMI divided by income; safe is under 20%).",
+            currentMetricValue: profile.monthlyDebtPayments == 0 ? "No Debt / 0% EMI" : "\(LOSTheme.formatRupee(profile.monthlyDebtPayments))/mo EMI",
+            improvementTip: "Keeping EMI commitments under 20% of income preserves liquid safety buffers."
+        )
+        
+        // Pillar 4: Portfolio Concentration (Weight: 15 pts)
+        let p4Earned: Double
+        let p4Rating: String
+        let p4Color: Color
+        let holdings = profile.activeHoldings
+        let topWeight = holdings.map { $0.portfolioWeightPercent }.max() ?? 35.0
+        
+        if topWeight <= 25.0 {
+            p4Earned = 15.0
+            p4Rating = "Well Diversified"
+            p4Color = LOSTheme.safeGreen
+        } else if topWeight <= 40.0 {
+            p4Earned = 11.0
+            p4Rating = "Balanced (35% top)"
+            p4Color = LOSTheme.primary
+        } else if topWeight <= 60.0 {
+            p4Earned = 6.0
+            p4Rating = "Concentrated"
+            p4Color = LOSTheme.warningAmber
+            scoreDrivers.append("−9 pts: Top stock accounts for \(Int(topWeight))% of portfolio.")
+        } else {
+            p4Earned = 2.0
+            p4Rating = "Extremely Concentrated"
+            p4Color = LOSTheme.criticalRed
+        }
+        
+        let pillar4 = ResiliencePillar(
+            name: "Portfolio Diversification",
+            earnedPoints: round(p4Earned * 10) / 10,
+            maxPoints: 15.0,
+            weightPercent: 15.0,
+            rating: p4Rating,
+            statusColor: p4Color,
+            formulaDescription: "Evaluates concentration risk. A single stock holding over 40% reduces resilience.",
+            currentMetricValue: "Largest Holding: \(Int(topWeight))%",
+            improvementTip: "Spreading holdings so that no single stock exceeds 25% allocation adds +4 pts."
+        )
+        
+        // Pillar 5: Shock Survival Under Stress (Weight: 15 pts)
+        let p5Earned: Double
+        let p5Rating: String
+        let p5Color: Color
+        let d = max(0, min(100, declinePercent))
+        let retention = 1.0 - (d / 100.0)
+        
+        if retention >= 0.85 {
+            p5Earned = 14.0 // ~20 pts scaled across combined resilience
+            p5Rating = "Resilient Retention"
+            p5Color = LOSTheme.safeGreen
+        } else if retention >= 0.70 {
+            p5Earned = 9.0
+            p5Rating = "Moderate Drawdown"
+            p5Color = LOSTheme.warningAmber
+        } else {
+            p5Earned = max(1.0, retention * 8.0)
+            p5Rating = "Heavy Drawdown"
+            p5Color = LOSTheme.criticalRed
+        }
+        
+        let pillar5 = ResiliencePillar(
+            name: "Market Shock Absorption",
+            earnedPoints: round(p5Earned * 10) / 10,
+            maxPoints: 15.0,
+            weightPercent: 15.0,
+            rating: p5Rating,
+            statusColor: p5Color,
+            formulaDescription: "Measures wealth retention and runway duration under user-selected market shock.",
+            currentMetricValue: "\(Int(retention * 100))% Retained under \(Int(d))% Shock",
+            improvementTip: "Pairing market equities with short-duration debt or liquid savings buffers shock impact."
+        )
+        
+        let rawSum = p1Earned + p2Earned + p3Earned + p4Earned + p5Earned
+        let finalScore = max(5, min(100, Int(round(rawSum))))
+        
+        let band: ResilienceBand
+        switch finalScore {
+        case ..<40: band = .critical
+        case 40..<70: band = .moderate
+        case 70..<85: band = .healthy
+        default: band = .bulletproof
+        }
+        
+        if profile.monthlyIncome == 0 {
+            missingDataNotes.append("Monthly income is set to ₹0. Enter actual earnings for accurate cash flow scoring.")
+        }
+        
+        return ExplainableResilienceReport(
+            totalScore: finalScore,
+            band: band,
+            pillars: [pillar1, pillar2, pillar3, pillar4, pillar5],
+            scoreChangeDrivers: scoreDrivers,
+            missingDataPenalties: missingDataNotes,
+            disclaimer: "Illustrative internal resilience index based on deterministic math. Not an official credit rating or investment guarantee."
+        )
     }
 }

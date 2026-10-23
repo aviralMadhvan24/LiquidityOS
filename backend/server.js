@@ -4,6 +4,8 @@ const cors = require('cors');
 const path = require('path');
 const concallRouter = require('./routes/concall');
 const zerodhaRouter = require('./routes/zerodha');
+const marketRouter = require('./routes/market');
+const recoveryRouter = require('./routes/recovery');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -41,6 +43,12 @@ app.use('/api/concall', concallRouter);
 
 // Mount Zerodha Kite Connect routes
 app.use('/api/zerodha', zerodhaRouter);
+
+// Mount Stock Market Data routes
+app.use('/api/market', marketRouter);
+
+// Mount AI Financial Recovery Planner routes
+app.use('/api/recovery', recoveryRouter);
 
 // Root informative endpoint
 app.get('/', (req, res) => {
