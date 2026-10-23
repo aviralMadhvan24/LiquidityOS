@@ -1,7 +1,7 @@
 import SwiftUI
 
-/// Animated circular gauge visualizing the 0-100 Resilience Score.
-/// Designed for responsive scaling across small, regular, and Max iPhone viewports.
+/// Animated circular gauge visualizing the 0-100 Financial Resilience Score.
+/// Follows Apple HIG with dynamic typography, spring animations, and WCAG AA contrast.
 struct ResilienceGaugeView: View {
     let score: Int
     let band: ResilienceBand
@@ -11,65 +11,64 @@ struct ResilienceGaugeView: View {
     @State private var animatedScore: Double = 0
     
     var body: some View {
-        VStack(spacing: 10) {
+        VStack(spacing: LOSTheme.space12) {
             ZStack {
                 // Background Track
                 Circle()
                     .trim(from: 0.15, to: 0.85)
                     .stroke(
                         Color.primary.opacity(0.08),
-                        style: StrokeStyle(lineWidth: 16, lineCap: .round)
+                        style: StrokeStyle(lineWidth: 14, lineCap: .round)
                     )
                     .rotationEffect(.degrees(90))
                 
-                // Active Colored Arc
+                // Active Gradient Arc
                 Circle()
-                    .trim(from: 0.15, to: 0.15 + (0.70 * (animatedScore / 100.0)))
+                    .trim(from: 0.15, to: 0.15 + (0.70 * (max(0, min(100, animatedScore)) / 100.0)))
                     .stroke(
                         gradientForBand(band),
-                        style: StrokeStyle(lineWidth: 16, lineCap: .round)
+                        style: StrokeStyle(lineWidth: 14, lineCap: .round)
                     )
                     .rotationEffect(.degrees(90))
-                    .animation(reduceMotion ? nil : .spring(response: 0.8, dampingFraction: 0.75), value: animatedScore)
+                    .shadow(color: band.color.opacity(0.3), radius: 8, x: 0, y: 4)
+                    .animation(reduceMotion ? nil : .spring(response: 0.85, dampingFraction: 0.78), value: animatedScore)
                 
-                // Score Labels
-                VStack(spacing: 3) {
+                // Centered Score Typography
+                VStack(spacing: LOSTheme.space4) {
                     HStack(alignment: .firstTextBaseline, spacing: 2) {
                         Text("\(Int(animatedScore))")
-                            .font(.system(size: 48, design: .rounded).bold())
+                            .font(.system(.largeTitle, design: .rounded).weight(.bold))
+                            .monospacedDigit()
+                            .foregroundStyle(LOSTheme.textPrimary)
                             .contentTransition(.numericText())
                             .minimumScaleFactor(0.8)
                         
                         Text("/ 100")
-                            .font(.system(size: 15, weight: .semibold, design: .rounded))
-                            .foregroundStyle(Color.secondary)
+                            .font(.subheadline.weight(.semibold))
+                            .foregroundStyle(LOSTheme.textSecondary)
                     }
                     
-                    // Band Status Pill
-                    Text(band.rawValue)
-                        .font(.caption2.bold())
-                        .padding(.horizontal, 10)
-                        .padding(.vertical, 3)
-                        .background(band.color.opacity(0.15))
-                        .foregroundStyle(band.color)
-                        .clipShape(Capsule())
+                    StatusPill(
+                        text: band.rawValue,
+                        icon: band == .critical ? "exclamationmark.triangle.fill" : "shield.fill",
+                        color: band.color
+                    )
                 }
             }
-            .frame(width: 200, height: 175)
+            .frame(width: 210, height: 175)
             
-            // Subtitle status line
+            // Subtitle headline
             Text(headline)
-                .font(.system(size: 12, weight: .semibold, design: .monospaced))
-                .foregroundStyle(Color.secondary)
+                .font(.footnote)
+                .foregroundStyle(LOSTheme.textSecondary)
                 .multilineTextAlignment(.center)
                 .lineLimit(2)
-                .minimumScaleFactor(0.85)
                 .fixedSize(horizontal: false, vertical: true)
-                .padding(.horizontal, 12)
+                .padding(.horizontal, LOSTheme.space16)
         }
-        .padding(.vertical, 4)
+        .padding(.vertical, LOSTheme.space4)
         .accessibilityElement(children: .ignore)
-        .accessibilityLabel("Financial Resilience Score \(score) out of 100, \(band.rawValue). \(headline)")
+        .accessibilityLabel("Financial Resilience Score: \(score) out of 100, \(band.rawValue). \(headline)")
         .onAppear {
             animatedScore = Double(score)
         }
@@ -82,22 +81,39 @@ struct ResilienceGaugeView: View {
         switch band {
         case .critical:
             return LinearGradient(
-                colors: [Color.red, Color.orange],
+                colors: [LOSTheme.critical, Color.orange],
                 startPoint: .topLeading,
                 endPoint: .bottomTrailing
             )
         case .moderate:
             return LinearGradient(
-                colors: [Color.orange, Color.yellow],
+                colors: [Color.orange, LOSTheme.warning],
                 startPoint: .topLeading,
                 endPoint: .bottomTrailing
             )
         case .healthy, .bulletproof:
             return LinearGradient(
-                colors: [LOSTheme.safeGreen, Color.cyan],
+                colors: [LOSTheme.positive, Color.cyan],
                 startPoint: .topLeading,
                 endPoint: .bottomTrailing
             )
         }
     }
+}
+
+#Preview("Resilience Gauge") {
+    VStack(spacing: 30) {
+        ResilienceGaugeView(
+            score: 72,
+            band: .healthy,
+            headline: "Strong runway buffer and positive monthly cashflow."
+        )
+        ResilienceGaugeView(
+            score: 38,
+            band: .critical,
+            headline: "Emergency bill exceeds available liquid cash."
+        )
+    }
+    .padding()
+    .background(LOSTheme.background)
 }

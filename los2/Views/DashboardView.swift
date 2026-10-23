@@ -28,36 +28,33 @@ struct DashboardView: View {
     var body: some View {
         NavigationStack {
             ScrollView {
-                VStack(spacing: 20) {
+                VStack(spacing: LOSTheme.space24) {
                     // MARK: - Top Header with Greeting & Action Hub
                     HStack(alignment: .center) {
-                        VStack(alignment: .leading, spacing: 2) {
+                        VStack(alignment: .leading, spacing: LOSTheme.space4) {
                             Text("LIQUIDITYOS")
-                                .font(.system(size: 11, weight: .bold, design: .rounded))
-                                .foregroundStyle(LOSTheme.primary)
+                                .font(.caption.weight(.bold))
+                                .foregroundStyle(LOSTheme.accent)
                                 .tracking(1.0)
                             Text("Financial Command")
-                                .font(.system(size: 26, weight: .bold, design: .rounded))
+                                .font(.title2.weight(.bold))
+                                .foregroundStyle(LOSTheme.textPrimary)
                         }
+                        
                         Spacer()
                         
-                        HStack(spacing: 8) {
-                            // Prominent "Edit Finances" Action Button
+                        HStack(spacing: LOSTheme.space8) {
+                            // Edit Finances Button
                             Button {
                                 viewModel.isShowingEditSheet = true
                             } label: {
-                                HStack(spacing: 5) {
-                                    Image(systemName: "pencil.line")
-                                        .font(.system(size: 12, weight: .bold))
-                                    Text("Edit")
-                                        .font(.system(size: 13, weight: .bold, design: .rounded))
-                                }
-                                .padding(.horizontal, 12)
-                                .padding(.vertical, 8)
-                                .background(LOSTheme.primary)
-                                .foregroundStyle(.white)
-                                .clipShape(Capsule())
-                                .shadow(color: LOSTheme.primary.opacity(0.3), radius: 6, y: 3)
+                                Label("Edit", systemImage: "pencil.line")
+                                    .font(.subheadline.weight(.semibold))
+                                    .padding(.horizontal, LOSTheme.space12)
+                                    .padding(.vertical, LOSTheme.space8)
+                                    .background(LOSTheme.accent)
+                                    .foregroundStyle(Color.white)
+                                    .clipShape(Capsule())
                             }
                             
                             // Zerodha Kite Connection Icon Button
@@ -65,10 +62,10 @@ struct DashboardView: View {
                                 viewModel.isShowingZerodhaSheet = true
                             } label: {
                                 Image(systemName: viewModel.isZerodhaConnected ? "checkmark.circle.fill" : "link")
-                                    .font(.system(size: 13, weight: .bold))
-                                    .frame(width: 34, height: 34)
-                                    .background(Color(red: 1.0, green: 0.34, blue: 0.13).opacity(0.12))
-                                    .foregroundStyle(Color(red: 1.0, green: 0.34, blue: 0.13))
+                                    .font(.subheadline.weight(.semibold))
+                                    .frame(width: 36, height: 36)
+                                    .background(viewModel.isZerodhaConnected ? LOSTheme.positive.opacity(0.14) : Color(red: 1.0, green: 0.34, blue: 0.13).opacity(0.12))
+                                    .foregroundStyle(viewModel.isZerodhaConnected ? LOSTheme.positive : Color(red: 1.0, green: 0.34, blue: 0.13))
                                     .clipShape(Circle())
                             }
                             .accessibilityLabel(viewModel.isZerodhaConnected ? "Zerodha Connected" : "Connect Zerodha Account")
@@ -87,17 +84,17 @@ struct DashboardView: View {
                                 }
                             } label: {
                                 Image(systemName: "person.fill")
-                                    .font(.system(size: 13, weight: .semibold))
-                                    .frame(width: 34, height: 34)
-                                    .background(Color.primary.opacity(0.06))
-                                    .foregroundStyle(Color.primary)
+                                    .font(.subheadline.weight(.semibold))
+                                    .frame(width: 36, height: 36)
+                                    .background(LOSTheme.surfaceElevated)
+                                    .foregroundStyle(LOSTheme.textPrimary)
                                     .clipShape(Circle())
                             }
                             .accessibilityLabel("User Account Profile")
                         }
                     }
                     .padding(.horizontal)
-                    .padding(.top, 4)
+                    .padding(.top, LOSTheme.space4)
                     
                     // MARK: - Empty State (If Profile Unconfigured)
                     if viewModel.isProfileIncomplete && viewModel.profile.portfolioValue == 0 && viewModel.profile.liquidCash == 0 {
@@ -110,32 +107,32 @@ struct DashboardView: View {
                                 viewModel.isShowingEditSheet = true
                             }
                             .buttonStyle(.borderedProminent)
-                            .tint(LOSTheme.primary)
-                            .foregroundStyle(Color.black)
+                            .tint(LOSTheme.accent)
                             .clipShape(Capsule())
                         }
-                        .padding(18)
-                        .background(LOSTheme.cardBackground)
-                        .clipShape(.rect(cornerRadius: LOSTheme.radiusLarge))
+                        .padding(LOSTheme.space16)
+                        .background(LOSTheme.surface)
+                        .clipShape(.rect(cornerRadius: LOSTheme.radiusLarge, style: .continuous))
                         .overlay(
-                            RoundedRectangle(cornerRadius: LOSTheme.radiusLarge)
-                                .stroke(LOSTheme.cardBorder, lineWidth: 1)
+                            RoundedRectangle(cornerRadius: LOSTheme.radiusLarge, style: .continuous)
+                                .stroke(LOSTheme.borderHairline, lineWidth: LOSTheme.hairline)
                         )
                         .padding(.horizontal)
                     }
                     
-                    // MARK: - Hero Financial Resilience Score Card (Baseline Front & Center)
-                    VStack(spacing: 14) {
+                    // MARK: - Hero Financial Resilience Score Card
+                    VStack(spacing: LOSTheme.space16) {
                         HStack {
-                            VStack(alignment: .leading, spacing: 3) {
-                                Text("FINANCIAL RESILIENCE SCORE")
-                                    .font(.system(size: 11, weight: .bold, design: .rounded))
-                                    .foregroundStyle(Color.secondary)
+                            VStack(alignment: .leading, spacing: LOSTheme.space4) {
+                                Text("FINANCIAL RESILIENCE")
+                                    .font(.footnote.weight(.semibold))
+                                    .foregroundStyle(LOSTheme.textSecondary)
                                     .tracking(0.8)
                                 Text(isPreviewingShock ? "Under −\(Int(viewModel.currentDeclinePercentage))% Shock" : "Baseline Financial Posture")
-                                    .font(.system(size: 13, weight: .semibold, design: .rounded))
-                                    .foregroundStyle(Color.secondary)
+                                    .font(.subheadline.weight(.medium))
+                                    .foregroundStyle(LOSTheme.textSecondary)
                             }
+                            
                             Spacer()
                             
                             // Shock Preview Toggle Pill
@@ -144,21 +141,21 @@ struct DashboardView: View {
                                     isPreviewingShock.toggle()
                                 }
                             } label: {
-                                HStack(spacing: 5) {
+                                HStack(spacing: LOSTheme.space4) {
                                     Image(systemName: isPreviewingShock ? "waveform.path.badge.minus" : "shield.lefthalf.filled")
-                                        .font(.system(size: 11, weight: .bold))
+                                        .font(.caption2.weight(.bold))
                                     Text(isPreviewingShock ? "Shock Active" : "Simulate Shock")
-                                        .font(.system(size: 11, weight: .bold, design: .rounded))
+                                        .font(.caption.weight(.semibold))
                                 }
-                                .padding(.horizontal, 10)
-                                .padding(.vertical, 6)
-                                .background(isPreviewingShock ? LOSTheme.criticalRed : LOSTheme.primary.opacity(0.12))
-                                .foregroundStyle(isPreviewingShock ? .white : LOSTheme.primary)
+                                .padding(.horizontal, LOSTheme.space12)
+                                .padding(.vertical, LOSTheme.space8 - 2)
+                                .background(isPreviewingShock ? LOSTheme.critical : LOSTheme.accent.opacity(0.12))
+                                .foregroundStyle(isPreviewingShock ? Color.white : LOSTheme.accent)
                                 .clipShape(Capsule())
                             }
                         }
                         
-                        // Display Active or Baseline Score
+                        // Active or Baseline Score Gauge
                         let displayedScore = isPreviewingShock ? activeReport.resilienceScore : baselineReport.totalScore
                         let displayedBand = isPreviewingShock ? activeReport.resilienceBand : baselineReport.band
                         
@@ -170,28 +167,27 @@ struct DashboardView: View {
                         
                         // Provisional notice if data is missing
                         if let notice = viewModel.provisionalScoreNotice {
-                            HStack(spacing: 6) {
+                            HStack(spacing: LOSTheme.space6) {
                                 Image(systemName: "exclamationmark.circle.fill")
-                                    .font(.system(size: 11))
-                                    .foregroundStyle(LOSTheme.warningAmber)
+                                    .font(.caption)
+                                    .foregroundStyle(LOSTheme.warning)
                                 Text(notice)
-                                    .font(.system(size: 11, weight: .medium))
-                                    .foregroundStyle(LOSTheme.warningAmber)
+                                    .font(.caption.weight(.medium))
+                                    .foregroundStyle(LOSTheme.warning)
                             }
-                            .padding(.horizontal, 10)
-                            .padding(.vertical, 4)
-                            .background(LOSTheme.warningAmber.opacity(0.12))
+                            .padding(.horizontal, LOSTheme.space12)
+                            .padding(.vertical, LOSTheme.space4)
+                            .background(LOSTheme.warning.opacity(0.12))
                             .clipShape(Capsule())
                         }
                         
-                        Divider()
-                            .overlay(LOSTheme.cardBorder)
+                        Divider().overlay(LOSTheme.borderHairline)
                         
                         // 5-Pillar Score Preview: Sleek segmented bar + breakdown button
-                        HStack(spacing: 8) {
-                            HStack(spacing: 4) {
+                        HStack(spacing: LOSTheme.space8) {
+                            HStack(spacing: LOSTheme.space4) {
                                 ForEach(baselineReport.pillars) { p in
-                                    RoundedRectangle(cornerRadius: 3)
+                                    RoundedRectangle(cornerRadius: 3, style: .continuous)
                                         .fill(p.statusColor)
                                         .frame(height: 5)
                                 }
@@ -202,219 +198,222 @@ struct DashboardView: View {
                             Button {
                                 viewModel.isShowingScoreBreakdownSheet = true
                             } label: {
-                                HStack(spacing: 3) {
-                                    Text("Breakdown")
-                                        .font(.system(size: 11, weight: .bold, design: .rounded))
+                                HStack(spacing: LOSTheme.space4) {
+                                    Text("Why this score?")
+                                        .font(.caption.weight(.semibold))
                                     Image(systemName: "chevron.right")
-                                        .font(.system(size: 9, weight: .bold))
+                                        .font(.caption2.weight(.bold))
                                 }
-                                .foregroundStyle(LOSTheme.primary)
+                                .foregroundStyle(LOSTheme.accent)
                             }
                         }
                     }
-                    .padding(20)
-                    .background(LOSTheme.cardBackground)
-                    .clipShape(.rect(cornerRadius: LOSTheme.radiusLarge))
+                    .padding(LOSTheme.space20)
+                    .background(LOSTheme.surface)
+                    .clipShape(.rect(cornerRadius: LOSTheme.radiusCard, style: .continuous))
                     .overlay(
-                        RoundedRectangle(cornerRadius: LOSTheme.radiusLarge)
-                            .stroke(LOSTheme.cardBorder, lineWidth: 1)
+                        RoundedRectangle(cornerRadius: LOSTheme.radiusCard, style: .continuous)
+                            .stroke(LOSTheme.borderHairline, lineWidth: LOSTheme.hairline)
                     )
                     .shadow(color: Color.black.opacity(0.04), radius: 12, y: 5)
                     .padding(.horizontal)
                     
-                    // MARK: - "What Needs Attention?" Actionable Section
+                    // MARK: - "What Needs Attention?" Actionable Carousel
                     if !viewModel.attentionItems.isEmpty {
-                        VStack(alignment: .leading, spacing: 10) {
-                            HStack {
-                                Image(systemName: "bell.badge.fill")
-                                    .font(.system(size: 12, weight: .bold))
-                                    .foregroundStyle(LOSTheme.warningAmber)
-                                Text("WHAT NEEDS ATTENTION")
-                                    .font(.system(size: 11, weight: .bold, design: .rounded))
-                                    .foregroundStyle(Color.secondary)
-                                    .tracking(0.8)
-                                Spacer()
-                            }
+                        VStack(alignment: .leading, spacing: LOSTheme.space12) {
+                            SectionHeader(
+                                title: "Needs Attention",
+                                subtitle: "\(viewModel.attentionItems.count) proactive resilience recommendations"
+                            )
                             .padding(.horizontal)
                             
-                            VStack(spacing: 8) {
-                                ForEach(viewModel.attentionItems) { item in
-                                    AttentionCard(item: item) {
-                                        handleAttentionAction(item.targetAction)
+                            ScrollView(.horizontal) {
+                                HStack(spacing: LOSTheme.space12) {
+                                    ForEach(viewModel.attentionItems) { item in
+                                        AttentionTile(item: item) {
+                                            handleAttentionAction(item.targetAction)
+                                        }
                                     }
                                 }
+                                .padding(.horizontal)
                             }
-                            .padding(.horizontal)
+                            .scrollIndicators(.hidden)
                         }
                     }
                     
-                    // MARK: - Interactive Financial Metrics Grid (Tappable Cards)
-                    VStack(alignment: .leading, spacing: 10) {
-                        HStack {
-                            Text("FINANCIAL POSITION")
-                                .font(.system(size: 11, weight: .bold, design: .rounded))
-                                .foregroundStyle(Color.secondary)
-                                .tracking(0.8)
-                            Spacer()
-                        }
+                    // MARK: - Financial Snapshot (2-Column StatTile Grid)
+                    VStack(alignment: .leading, spacing: LOSTheme.space12) {
+                        SectionHeader(
+                            title: "Financial Position",
+                            subtitle: "Tap any tile to inspect or adjust"
+                        )
                         .padding(.horizontal)
                         
-                        LazyVGrid(columns: [GridItem(.flexible(), spacing: 12), GridItem(.flexible(), spacing: 12)], spacing: 12) {
-                            // 1. Portfolio Value (Tappable -> Opens Portfolio)
-                            InteractiveMetricCard(
-                                title: "PORTFOLIO VALUE",
-                                value: LOSTheme.formatRupee(viewModel.profile.portfolioValue),
-                                subtitle: "\(viewModel.profile.activeHoldings.count) active holdings",
-                                badgeText: "Holdings",
-                                badgeColor: LOSTheme.primary,
-                                iconName: "chart.pie.fill",
-                                isNegative: false
-                            ) {
+                        LazyVGrid(
+                            columns: [GridItem(.flexible(), spacing: LOSTheme.space12), GridItem(.flexible(), spacing: LOSTheme.space12)],
+                            spacing: LOSTheme.space12
+                        ) {
+                            // 1. Portfolio Value
+                            Button {
                                 viewModel.isShowingPortfolioSheet = true
+                            } label: {
+                                StatTile(
+                                    title: "Portfolio",
+                                    value: LOSTheme.formatRupee(viewModel.profile.portfolioValue),
+                                    subtitle: "\(viewModel.profile.activeHoldings.count) holdings",
+                                    icon: "chart.pie.fill",
+                                    tint: LOSTheme.accent
+                                )
                             }
+                            .buttonStyle(.plain)
                             
-                            // 2. Liquid Cash (Tappable -> Opens Emergency Shock Simulator)
-                            InteractiveMetricCard(
-                                title: "LIQUID SAVINGS",
-                                value: LOSTheme.formatRupee(viewModel.profile.liquidCash),
-                                subtitle: "Instant buffer",
-                                badgeText: "Simulate",
-                                badgeColor: LOSTheme.safeGreen,
-                                iconName: "banknote.fill",
-                                isNegative: false
-                            ) {
+                            // 2. Liquid Savings
+                            Button {
                                 isShowingEmergencySheet = true
+                            } label: {
+                                StatTile(
+                                    title: "Liquid Cash",
+                                    value: LOSTheme.formatRupee(viewModel.profile.liquidCash),
+                                    subtitle: "Immediate reserve",
+                                    icon: "banknote.fill",
+                                    tint: LOSTheme.positive
+                                )
                             }
+                            .buttonStyle(.plain)
                             
-                            // 3. Monthly Income vs Outflows (Tappable -> Opens Edit Finances)
+                            // 3. Monthly Net Burn
                             let netBurn = viewModel.profile.baselineNetCashBurn
-                            InteractiveMetricCard(
-                                title: "MONTHLY NET BURN",
-                                value: "\(LOSTheme.formatRupee(max(0, netBurn)))/mo",
-                                subtitle: "Outflows \(LOSTheme.formatRupeeCompact(viewModel.profile.totalMonthlyOutflows)) vs \(LOSTheme.formatRupeeCompact(viewModel.profile.monthlyIncome))",
-                                badgeText: netBurn <= 0 ? "Surplus" : "Drain",
-                                badgeColor: netBurn <= 0 ? LOSTheme.safeGreen : LOSTheme.warningAmber,
-                                iconName: "flame.fill",
-                                isNegative: false
-                            ) {
+                            Button {
                                 viewModel.isShowingEditSheet = true
+                            } label: {
+                                StatTile(
+                                    title: "Monthly Burn",
+                                    value: "\(LOSTheme.formatRupee(max(0, netBurn)))/mo",
+                                    subtitle: netBurn <= 0 ? "Cash Surplus" : "Net Outflow",
+                                    icon: "flame.fill",
+                                    tint: netBurn <= 0 ? LOSTheme.positive : LOSTheme.warning
+                                )
                             }
+                            .buttonStyle(.plain)
                             
-                            // 4. Cash Runway (Tappable -> Opens Runway View)
-                            InteractiveMetricCard(
-                                title: "CASH RUNWAY",
-                                value: activeReport.runwayState == .cashSurplus ? "Surplus" : "\(String(format: "%.1f", activeReport.runwayMonths)) mos",
-                                subtitle: "Under baseline burn",
-                                badgeText: activeReport.runwayMonths < 3.0 ? "Tight" : "Stable",
-                                badgeColor: activeReport.runwayMonths < 3.0 ? LOSTheme.criticalRed : LOSTheme.safeGreen,
-                                iconName: "hourglass.bottomhalf.filled",
-                                isNegative: activeReport.runwayMonths < 3.0
-                            ) {
+                            // 4. Cash Runway
+                            Button {
                                 isShowingRunwaySheet = true
+                            } label: {
+                                StatTile(
+                                    title: "Cash Runway",
+                                    value: activeReport.runwayState == .cashSurplus ? "Surplus" : "\(String(format: "%.1f", activeReport.runwayMonths)) mos",
+                                    subtitle: activeReport.runwayMonths < 3.0 ? "Tight Buffer" : "Healthy Buffer",
+                                    icon: "hourglass.bottomhalf.filled",
+                                    tint: activeReport.runwayMonths < 3.0 ? LOSTheme.critical : LOSTheme.positive,
+                                    isNegative: activeReport.runwayMonths < 3.0
+                                )
                             }
+                            .buttonStyle(.plain)
                         }
                         .padding(.horizontal)
                     }
                     
-                    // MARK: - Mini Stress Scenario Curve Visualization
-                    VStack(alignment: .leading, spacing: 10) {
-                        HStack {
-                            Text("PORTFOLIO VOLATILITY EXPOSURE")
-                                .font(.system(size: 11, weight: .bold, design: .rounded))
-                                .foregroundStyle(Color.secondary)
-                                .tracking(0.8)
-                            Spacer()
-                            Button("Full Stress Test >") {
-                                isShowingStressSheet = true
-                            }
-                            .font(.system(size: 11, weight: .bold, design: .rounded))
-                            .foregroundStyle(LOSTheme.primary)
-                        }
-                        .padding(.horizontal)
-                        
-                        // Mini Chart
-                        VStack(alignment: .leading, spacing: 8) {
-                            let points = ResilienceEngine.calculateDeclineCurve(portfolioValue: viewModel.profile.portfolioValue)
-                            
-                            Chart(points) { pt in
-                                LineMark(
-                                    x: .value("Decline %", pt.declinePercent),
-                                    y: .value("Value", pt.remainingPortfolio)
-                                )
-                                .foregroundStyle(LOSTheme.primary)
-                                .lineStyle(StrokeStyle(lineWidth: 2))
-                                
-                                AreaMark(
-                                    x: .value("Decline %", pt.declinePercent),
-                                    y: .value("Value", pt.remainingPortfolio)
-                                )
-                                .foregroundStyle(
-                                    LinearGradient(
-                                        colors: [LOSTheme.primary.opacity(0.2), Color.clear],
-                                        startPoint: .top,
-                                        endPoint: .bottom
-                                    )
-                                )
-                            }
-                            .frame(height: 100)
-                            .chartXAxis {
-                                AxisMarks(values: [0, 20, 40, 60]) { val in
-                                    if let num = val.as(Int.self) {
-                                        AxisValueLabel {
-                                            Text("−\(num)%").font(.system(size: 9))
-                                        }
-                                    }
-                                }
-                            }
-                            .chartYAxis {
-                                AxisMarks(position: .leading) { val in
-                                    if let num = val.as(Double.self) {
-                                        AxisValueLabel {
-                                            Text(LOSTheme.formatRupeeCompact(num)).font(.system(size: 9))
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                        .padding(14)
-                        .background(LOSTheme.cardBackground)
-                        .clipShape(RoundedRectangle(cornerRadius: 16))
-                        .overlay(RoundedRectangle(cornerRadius: 16).stroke(LOSTheme.cardBorder, lineWidth: 1))
-                        .padding(.horizontal)
-                    }
-                    
-                    // MARK: - Quick-Action Resilience Command Bar
-                    VStack(alignment: .leading, spacing: 10) {
-                        HStack {
-                            Text("QUICK COMMANDS")
-                                .font(.system(size: 11, weight: .bold, design: .rounded))
-                                .foregroundStyle(Color.secondary)
-                                .tracking(0.8)
-                            Spacer()
-                        }
-                        .padding(.horizontal)
-                        
-                        ScrollView(.horizontal) {
-                            HStack(spacing: 10) {
-                                CommandHubPill(title: "Edit Finances", icon: "pencil.line", color: LOSTheme.primary) {
-                                    viewModel.isShowingEditSheet = true
-                                }
-                                CommandHubPill(title: "Stress Test", icon: "chart.line.downtrend.xyaxis", color: LOSTheme.criticalRed) {
+                    // MARK: - Mini Volatility Exposure Chart
+                    VStack(alignment: .leading, spacing: LOSTheme.space12) {
+                        ChartCard(
+                            title: "Portfolio Volatility Exposure",
+                            subtitle: "Simulated decline across market downturns",
+                            accessibilityLabel: "Portfolio decline curve comparing drawdown percentage to portfolio value",
+                            trailing: {
+                                Button("Full Stress Test >") {
                                     isShowingStressSheet = true
                                 }
-                                CommandHubPill(title: "Simulate Shock", icon: "bolt.shield.fill", color: LOSTheme.warningAmber) {
+                                .font(.caption.weight(.semibold))
+                                .foregroundStyle(LOSTheme.accent)
+                            }
+                        ) {
+                            let points = ResilienceEngine.calculateDeclineCurve(portfolioValue: viewModel.profile.portfolioValue)
+                            
+                            if viewModel.profile.portfolioValue <= 0 {
+                                ContentUnavailableView {
+                                    Label("No Portfolio Holdings", systemImage: "chart.line.downtrend.xyaxis")
+                                        .font(.subheadline)
+                                } description: {
+                                    Text("Add investments in Edit Finances to view potential drawdown impact.")
+                                        .font(.caption)
+                                }
+                                .frame(height: 120)
+                            } else {
+                                Chart(points) { pt in
+                                    AreaMark(
+                                        x: .value("Decline %", pt.declinePercent),
+                                        y: .value("Value", pt.remainingPortfolio)
+                                    )
+                                    .foregroundStyle(
+                                        LinearGradient(
+                                            colors: [LOSTheme.accent.opacity(0.25), Color.clear],
+                                            startPoint: .top,
+                                            endPoint: .bottom
+                                        )
+                                    )
+                                    
+                                    LineMark(
+                                        x: .value("Decline %", pt.declinePercent),
+                                        y: .value("Value", pt.remainingPortfolio)
+                                    )
+                                    .foregroundStyle(LOSTheme.accent)
+                                    .lineStyle(StrokeStyle(lineWidth: 2))
+                                }
+                                .frame(height: 130)
+                                .chartXAxis {
+                                    AxisMarks(values: [0, 20, 40, 60]) { val in
+                                        if let num = val.as(Int.self) {
+                                            AxisValueLabel {
+                                                Text("−\(num)%")
+                                                    .font(.caption2)
+                                                    .foregroundStyle(LOSTheme.textSecondary)
+                                            }
+                                        }
+                                    }
+                                }
+                                .chartYAxis {
+                                    AxisMarks(position: .leading) { val in
+                                        if let num = val.as(Double.self) {
+                                            AxisValueLabel {
+                                                Text(LOSTheme.formatRupeeCompact(num))
+                                                    .font(.caption2)
+                                                    .foregroundStyle(LOSTheme.textSecondary)
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                        .padding(.horizontal)
+                    }
+                    
+                    // MARK: - Quick Action Hub
+                    VStack(alignment: .leading, spacing: LOSTheme.space12) {
+                        SectionHeader(title: "Quick Hubs")
+                            .padding(.horizontal)
+                        
+                        ScrollView(.horizontal) {
+                            HStack(spacing: LOSTheme.space8) {
+                                QuickHubPill(title: "Edit Finances", icon: "pencil.line", color: LOSTheme.accent) {
+                                    viewModel.isShowingEditSheet = true
+                                }
+                                QuickHubPill(title: "Stress Test", icon: "chart.line.downtrend.xyaxis", color: LOSTheme.critical) {
+                                    isShowingStressSheet = true
+                                }
+                                QuickHubPill(title: "Simulate Shock", icon: "bolt.shield.fill", color: LOSTheme.warning) {
                                     isShowingEmergencySheet = true
                                 }
-                                CommandHubPill(title: "Cash Runway", icon: "hourglass", color: LOSTheme.safeGreen) {
+                                QuickHubPill(title: "Cash Runway", icon: "hourglass", color: LOSTheme.positive) {
                                     isShowingRunwaySheet = true
                                 }
-                                CommandHubPill(title: "Portfolio", icon: "chart.pie.fill", color: LOSTheme.primary) {
+                                QuickHubPill(title: "Portfolio", icon: "chart.pie.fill", color: LOSTheme.accent) {
                                     viewModel.isShowingPortfolioSheet = true
                                 }
-                                CommandHubPill(title: "Reverse Stress", icon: "gauge.with.needle.fill", color: LOSTheme.warningAmber) {
+                                QuickHubPill(title: "Reverse Stress", icon: "gauge.with.needle.fill", color: LOSTheme.warning) {
                                     viewModel.isShowingReverseStressSheet = true
                                 }
-                                CommandHubPill(title: "AI Recovery", icon: "wand.and.stars", color: LOSTheme.safeGreen) {
+                                QuickHubPill(title: "AI Recovery", icon: "wand.and.stars", color: LOSTheme.positive) {
                                     viewModel.isShowingRecoverySheet = true
                                 }
                             }
@@ -422,10 +421,10 @@ struct DashboardView: View {
                         }
                         .scrollIndicators(.hidden)
                     }
-                    .padding(.bottom, 64)
+                    .padding(.bottom, LOSTheme.space32 + 16)
                 }
             }
-            .background(LOSTheme.background.ignoresSafeArea())
+            .background(LOSTheme.backgroundGradient.ignoresSafeArea())
             .sensoryFeedback(.impact(weight: .light), trigger: isPreviewingShock)
             // Sheet presentations
             .sheet(isPresented: $viewModel.isShowingEditSheet) {
@@ -484,128 +483,57 @@ struct DashboardView: View {
     }
 }
 
-/// Dynamic card for items in "What Needs Attention?"
-private struct AttentionCard: View {
+/// Compact attention recommendation card for the horizontal carousel.
+private struct AttentionTile: View {
     let item: ResilienceViewModel.AttentionItem
     let onAction: () -> Void
     
     var body: some View {
-        HStack(alignment: .center, spacing: 12) {
-            ZStack {
-                Circle()
-                    .fill(item.severityColor.opacity(0.12))
-                    .frame(width: 36, height: 36)
+        VStack(alignment: .leading, spacing: LOSTheme.space8) {
+            HStack(spacing: LOSTheme.space6) {
                 Image(systemName: item.iconName)
-                    .font(.system(size: 15, weight: .bold))
+                    .font(.caption.weight(.bold))
                     .foregroundStyle(item.severityColor)
-            }
-            
-            VStack(alignment: .leading, spacing: 3) {
+                
                 Text(item.title)
-                    .font(.system(size: 13, weight: .bold, design: .rounded))
-                    .foregroundStyle(Color.primary)
-                    .lineLimit(2)
-                    .fixedSize(horizontal: false, vertical: true)
-                Text(item.message)
-                    .font(.system(size: 11))
-                    .foregroundStyle(Color.secondary)
-                    .lineLimit(2)
-                    .fixedSize(horizontal: false, vertical: true)
+                    .font(.caption.weight(.semibold))
+                    .foregroundStyle(LOSTheme.textPrimary)
+                    .lineLimit(1)
+                
+                Spacer(minLength: 0)
             }
             
-            Spacer(minLength: 6)
+            Text(item.message)
+                .font(.caption2)
+                .foregroundStyle(LOSTheme.textSecondary)
+                .lineLimit(2)
+                .fixedSize(horizontal: false, vertical: true)
+            
+            Spacer(minLength: 0)
             
             Button(action: onAction) {
                 Text(item.actionLabel)
-                    .font(.system(size: 11, weight: .bold, design: .rounded))
-                    .padding(.horizontal, 10)
-                    .padding(.vertical, 6)
+                    .font(.caption2.weight(.bold))
+                    .padding(.horizontal, LOSTheme.space12)
+                    .padding(.vertical, LOSTheme.space4)
                     .background(item.severityColor)
-                    .foregroundStyle(.white)
+                    .foregroundStyle(Color.white)
                     .clipShape(Capsule())
-                    .shadow(color: item.severityColor.opacity(0.25), radius: 4, y: 2)
             }
-            .layoutPriority(1)
         }
-        .padding(14)
-        .background(LOSTheme.cardBackground)
-        .clipShape(.rect(cornerRadius: LOSTheme.radiusMedium))
+        .padding(LOSTheme.space12)
+        .frame(width: 220, height: 110, alignment: .leading)
+        .background(LOSTheme.surface)
+        .clipShape(.rect(cornerRadius: LOSTheme.radiusMedium, style: .continuous))
         .overlay(
-            RoundedRectangle(cornerRadius: LOSTheme.radiusMedium)
-                .stroke(LOSTheme.cardBorder, lineWidth: 1)
+            RoundedRectangle(cornerRadius: LOSTheme.radiusMedium, style: .continuous)
+                .stroke(item.severityColor.opacity(0.3), lineWidth: LOSTheme.hairline * 2)
         )
-        .shadow(color: Color.black.opacity(0.025), radius: 6, y: 2)
     }
 }
 
-/// Interactive Tappable Metric Card
-private struct InteractiveMetricCard: View {
-    let title: String
-    let value: String
-    let subtitle: String
-    let badgeText: String
-    let badgeColor: Color
-    let iconName: String
-    let isNegative: Bool
-    let onTap: () -> Void
-    
-    var body: some View {
-        Button(action: onTap) {
-            VStack(alignment: .leading, spacing: 10) {
-                HStack(alignment: .center, spacing: 6) {
-                    ZStack {
-                        Circle()
-                            .fill(badgeColor.opacity(0.12))
-                            .frame(width: 28, height: 28)
-                        Image(systemName: iconName)
-                            .font(.system(size: 12, weight: .bold))
-                            .foregroundStyle(badgeColor)
-                    }
-                    Spacer(minLength: 2)
-                    Text(badgeText)
-                        .font(.system(size: 9, weight: .bold, design: .rounded))
-                        .padding(.horizontal, 7)
-                        .padding(.vertical, 3)
-                        .background(badgeColor.opacity(0.14))
-                        .foregroundStyle(badgeColor)
-                        .clipShape(Capsule())
-                        .layoutPriority(1)
-                }
-                
-                VStack(alignment: .leading, spacing: 3) {
-                    Text(title)
-                        .font(.system(size: 10, weight: .bold, design: .rounded))
-                        .foregroundStyle(Color.secondary)
-                        .tracking(0.6)
-                        .lineLimit(1)
-                    Text(value)
-                        .font(.system(size: 19, weight: .bold, design: .rounded))
-                        .foregroundStyle(isNegative ? LOSTheme.criticalRed : Color.primary)
-                        .lineLimit(1)
-                        .minimumScaleFactor(0.70)
-                    Text(subtitle)
-                        .font(.system(size: 11))
-                        .foregroundStyle(Color.secondary)
-                        .lineLimit(2)
-                        .fixedSize(horizontal: false, vertical: true)
-                }
-            }
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .padding(14)
-            .background(LOSTheme.cardBackground)
-            .clipShape(.rect(cornerRadius: LOSTheme.radiusMedium))
-            .overlay(
-                RoundedRectangle(cornerRadius: LOSTheme.radiusMedium)
-                    .stroke(LOSTheme.cardBorder, lineWidth: 1)
-            )
-            .shadow(color: Color.black.opacity(0.025), radius: 6, y: 2)
-        }
-        .buttonStyle(.plain)
-    }
-}
-
-/// Pill Button for Quick Command Bar
-private struct CommandHubPill: View {
+/// Pill button for the Quick Action Command Bar.
+private struct QuickHubPill: View {
     let title: String
     let icon: String
     let color: Color
@@ -613,22 +541,21 @@ private struct CommandHubPill: View {
     
     var body: some View {
         Button(action: action) {
-            HStack(spacing: 6) {
+            HStack(spacing: LOSTheme.space6) {
                 Image(systemName: icon)
-                    .font(.system(size: 11, weight: .bold))
+                    .font(.caption.weight(.bold))
                 Text(title)
-                    .font(.system(size: 12, weight: .semibold, design: .rounded))
-                    .lineLimit(1)
-                    .minimumScaleFactor(0.85)
+                    .font(.subheadline.weight(.medium))
             }
-            .padding(.horizontal, 12)
-            .padding(.vertical, 8)
-            .background(LOSTheme.cardBackground)
-            .foregroundStyle(Color.primary)
+            .padding(.horizontal, LOSTheme.space12 + 2)
+            .padding(.vertical, LOSTheme.space8)
+            .background(LOSTheme.surface)
+            .foregroundStyle(LOSTheme.textPrimary)
             .clipShape(Capsule())
             .overlay(
-                Capsule().stroke(color.opacity(0.3), lineWidth: 1)
+                Capsule().stroke(color.opacity(0.35), lineWidth: LOSTheme.hairline * 2)
             )
         }
+        .sensoryFeedback(.selection, trigger: title)
     }
 }

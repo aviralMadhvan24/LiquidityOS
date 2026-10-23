@@ -1,8 +1,9 @@
 import SwiftUI
 
 /// Production-grade authentication screen for LiquidityOS.
-/// Connects to the backend user database with local cryptographic fallback,
-/// supports both Sign In and Account Registration, and enforces strict credential validation.
+/// Redesigned strictly following swiftui-pro standards:
+/// Minimalist layout, large glowing brand mark, adaptive gradient background,
+/// single focused card, semantic typography, and native credential validation.
 struct LoginView: View {
     @AppStorage("isLoggedIn") private var isLoggedIn: Bool = false
     @AppStorage("loggedInUserEmail") private var loggedInUserEmail: String = "user@gmail.com"
@@ -52,407 +53,24 @@ struct LoginView: View {
     var body: some View {
         NavigationStack {
             ZStack {
-                LOSTheme.background.ignoresSafeArea()
+                LOSTheme.backgroundGradient.ignoresSafeArea()
                 
                 ScrollView {
-                    VStack(spacing: 20) {
-                        Spacer(minLength: 12)
+                    VStack(spacing: LOSTheme.space24) {
+                        Spacer(minLength: LOSTheme.space16)
                         
-                        // MARK: - App Branding
-                        VStack(spacing: 10) {
-                            ZStack {
-                                RoundedRectangle(cornerRadius: 22)
-                                    .fill(LOSTheme.primary.gradient)
-                                    .frame(width: 68, height: 68)
-                                    .shadow(color: LOSTheme.primary.opacity(0.35), radius: 10, y: 5)
-                                
-                                Image(systemName: "shield.lefthalf.filled")
-                                    .font(.system(size: 32, weight: .semibold))
-                                    .foregroundStyle(Color.white)
-                            }
-                            
-                            VStack(spacing: 3) {
-                                Text("LiquidityOS")
-                                    .font(.system(size: 26, weight: .bold, design: .rounded))
-                                    .foregroundStyle(Color.primary)
-                                
-                                Text("Financial Resilience Operating System")
-                                    .font(.system(size: 13, weight: .medium, design: .rounded))
-                                    .foregroundStyle(Color.secondary)
-                            }
-                            
-                            // Database Connectivity Indicator Badge
-                            HStack(spacing: 6) {
-                                Circle()
-                                    .fill(isServerOnline ? LOSTheme.safeGreen : Color.secondary)
-                                    .frame(width: 7, height: 7)
-                                Text(isServerOnline ? "Connected to Auth Database" : "Local Database Active")
-                                    .font(.caption2.bold())
-                                    .foregroundStyle(isServerOnline ? LOSTheme.safeGreen : Color.secondary)
-                            }
-                            .padding(.horizontal, 10)
-                            .padding(.vertical, 4)
-                            .background(isServerOnline ? LOSTheme.safeGreen.opacity(0.12) : Color.primary.opacity(0.05))
-                            .clipShape(Capsule())
-                        }
-                        .padding(.top, 6)
+                        // MARK: - 1. Brand Mark & Subdued Database Indicator
+                        brandingHeader
                         
-                        // MARK: - Auth Card Container
-                        VStack(spacing: 16) {
-                            // Mode Switcher: Sign In vs Create Account
-                            Picker("Authentication Mode", selection: $authMode) {
-                                ForEach(AuthMode.allCases) { mode in
-                                    Text(mode.rawValue).tag(mode)
-                                }
-                            }
-                            .pickerStyle(.segmented)
-                            .onChange(of: authMode) { _, _ in
-                                errorMessage = nil
-                                successNotice = nil
-                            }
-                            
-                            // Error Callout
-                            if let error = errorMessage {
-                                HStack(alignment: .top, spacing: 8) {
-                                    Image(systemName: "exclamationmark.triangle.fill")
-                                        .foregroundStyle(LOSTheme.criticalRed)
-                                        .font(.system(size: 13, weight: .bold))
-                                        .padding(.top, 1)
-                                    Text(error)
-                                        .font(.caption.bold())
-                                        .foregroundStyle(LOSTheme.criticalRed)
-                                        .lineSpacing(2)
-                                        .fixedSize(horizontal: false, vertical: true)
-                                    Spacer()
-                                }
-                                .padding(10)
-                                .background(LOSTheme.criticalRed.opacity(0.12))
-                                .clipShape(.rect(cornerRadius: LOSTheme.radiusSmall))
-                            }
-                            
-                            // Success Callout
-                            if let notice = successNotice {
-                                HStack(spacing: 8) {
-                                    Image(systemName: "checkmark.circle.fill")
-                                        .foregroundStyle(LOSTheme.safeGreen)
-                                        .font(.system(size: 13))
-                                    Text(notice)
-                                        .font(.caption.bold())
-                                        .foregroundStyle(LOSTheme.safeGreen)
-                                    Spacer()
-                                }
-                                .padding(10)
-                                .background(LOSTheme.safeGreen.opacity(0.12))
-                                .clipShape(.rect(cornerRadius: LOSTheme.radiusSmall))
-                            }
-                            
-                            // Full Name (Only for Registration)
-                            if authMode == .register {
-                                VStack(alignment: .leading, spacing: 5) {
-                                    Text("FULL NAME")
-                                        .font(.system(size: 10, weight: .bold, design: .rounded))
-                                        .foregroundStyle(Color.secondary)
-                                        .tracking(0.6)
-                                    
-                                    HStack(spacing: 10) {
-                                        Image(systemName: "person.fill")
-                                            .font(.system(size: 14))
-                                            .foregroundStyle(LOSTheme.primary)
-                                            .frame(width: 20)
-                                        
-                                        TextField("e.g. Rohit Sharma", text: $name)
-                                            .textInputAutocapitalization(.words)
-                                            .autocorrectionDisabled()
-                                            .font(.system(size: 14, weight: .medium))
-                                    }
-                                    .padding(12)
-                                    .background(LOSTheme.background)
-                                    .clipShape(.rect(cornerRadius: LOSTheme.radiusSmall))
-                                    .overlay(
-                                        RoundedRectangle(cornerRadius: LOSTheme.radiusSmall)
-                                            .stroke(LOSTheme.cardBorder, lineWidth: 1)
-                                    )
-                                }
-                                .transition(.opacity.combined(with: .move(edge: .top)))
-                            }
-                            
-                            // Email Address Field
-                            VStack(alignment: .leading, spacing: 5) {
-                                HStack {
-                                    Text("EMAIL ADDRESS")
-                                        .font(.system(size: 10, weight: .bold, design: .rounded))
-                                        .foregroundStyle(Color.secondary)
-                                        .tracking(0.6)
-                                    Spacer()
-                                    if !email.isEmpty {
-                                        if isEmailValid {
-                                            Label("Valid format", systemImage: "checkmark.circle.fill")
-                                                .labelStyle(.iconOnly)
-                                                .font(.system(size: 11))
-                                                .foregroundStyle(LOSTheme.safeGreen)
-                                        } else {
-                                            Text("Invalid format")
-                                                .font(.caption2)
-                                                .foregroundStyle(LOSTheme.criticalRed)
-                                        }
-                                    }
-                                }
-                                
-                                HStack(spacing: 10) {
-                                    Image(systemName: "envelope.fill")
-                                        .font(.system(size: 14))
-                                        .foregroundStyle(LOSTheme.primary)
-                                        .frame(width: 20)
-                                    
-                                    TextField("user@gmail.com", text: $email)
-                                        .textInputAutocapitalization(.never)
-                                        .autocorrectionDisabled()
-                                        .keyboardType(.emailAddress)
-                                        .font(.system(size: 14, weight: .medium))
-                                    
-                                    if !email.isEmpty {
-                                        Button {
-                                            email = ""
-                                        } label: {
-                                            Label("Clear email", systemImage: "xmark.circle.fill")
-                                        }
-                                        .labelStyle(.iconOnly)
-                                        .font(.system(size: 14))
-                                        .foregroundStyle(Color.secondary)
-                                    }
-                                }
-                                .padding(12)
-                                .background(LOSTheme.background)
-                                .clipShape(.rect(cornerRadius: LOSTheme.radiusSmall))
-                                .overlay(
-                                    RoundedRectangle(cornerRadius: LOSTheme.radiusSmall)
-                                        .stroke(LOSTheme.cardBorder, lineWidth: 1)
-                                )
-                            }
-                            
-                            // Password Field
-                            VStack(alignment: .leading, spacing: 5) {
-                                HStack {
-                                    Text("PASSWORD")
-                                        .font(.system(size: 10, weight: .bold, design: .rounded))
-                                        .foregroundStyle(Color.secondary)
-                                        .tracking(0.6)
-                                    Spacer()
-                                    if !password.isEmpty && authMode == .register {
-                                        Text(isPasswordValid ? "Min length met" : "Min 6 chars")
-                                            .font(.caption2)
-                                            .foregroundStyle(isPasswordValid ? LOSTheme.safeGreen : LOSTheme.warningAmber)
-                                    }
-                                }
-                                
-                                HStack(spacing: 10) {
-                                    Image(systemName: "lock.fill")
-                                        .font(.system(size: 14))
-                                        .foregroundStyle(LOSTheme.primary)
-                                        .frame(width: 20)
-                                    
-                                    if isPasswordVisible {
-                                        TextField("Enter password", text: $password)
-                                            .textInputAutocapitalization(.never)
-                                            .autocorrectionDisabled()
-                                            .font(.system(size: 14, weight: .medium))
-                                    } else {
-                                        SecureField("Enter password", text: $password)
-                                            .textInputAutocapitalization(.never)
-                                            .autocorrectionDisabled()
-                                            .font(.system(size: 14, weight: .medium))
-                                    }
-                                    
-                                    Button {
-                                        isPasswordVisible.toggle()
-                                    } label: {
-                                        Label(isPasswordVisible ? "Hide password" : "Show password", systemImage: isPasswordVisible ? "eye.slash.fill" : "eye.fill")
-                                    }
-                                    .labelStyle(.iconOnly)
-                                    .font(.system(size: 14))
-                                    .foregroundStyle(Color.secondary)
-                                }
-                                .padding(12)
-                                .background(LOSTheme.background)
-                                .clipShape(.rect(cornerRadius: LOSTheme.radiusSmall))
-                                .overlay(
-                                    RoundedRectangle(cornerRadius: LOSTheme.radiusSmall)
-                                        .stroke(LOSTheme.cardBorder, lineWidth: 1)
-                                )
-                            }
-                            
-                            // Confirm Password (Only for Registration)
-                            if authMode == .register {
-                                VStack(alignment: .leading, spacing: 5) {
-                                    HStack {
-                                        Text("CONFIRM PASSWORD")
-                                            .font(.system(size: 10, weight: .bold, design: .rounded))
-                                            .foregroundStyle(Color.secondary)
-                                            .tracking(0.6)
-                                        Spacer()
-                                        if !confirmPassword.isEmpty {
-                                            Text(doPasswordsMatch ? "Passwords match" : "Does not match")
-                                                .font(.caption2)
-                                                .foregroundStyle(doPasswordsMatch ? LOSTheme.safeGreen : LOSTheme.criticalRed)
-                                        }
-                                    }
-                                    
-                                    HStack(spacing: 10) {
-                                        Image(systemName: "lock.shield.fill")
-                                            .font(.system(size: 14))
-                                            .foregroundStyle(LOSTheme.primary)
-                                            .frame(width: 20)
-                                        
-                                        if isConfirmPasswordVisible {
-                                            TextField("Re-enter password", text: $confirmPassword)
-                                                .textInputAutocapitalization(.never)
-                                                .autocorrectionDisabled()
-                                                .font(.system(size: 14, weight: .medium))
-                                        } else {
-                                            SecureField("Re-enter password", text: $confirmPassword)
-                                                .textInputAutocapitalization(.never)
-                                                .autocorrectionDisabled()
-                                                .font(.system(size: 14, weight: .medium))
-                                        }
-                                        
-                                        Button {
-                                            isConfirmPasswordVisible.toggle()
-                                        } label: {
-                                            Label(isConfirmPasswordVisible ? "Hide password" : "Show password", systemImage: isConfirmPasswordVisible ? "eye.slash.fill" : "eye.fill")
-                                        }
-                                        .labelStyle(.iconOnly)
-                                        .font(.system(size: 14))
-                                        .foregroundStyle(Color.secondary)
-                                    }
-                                    .padding(12)
-                                    .background(LOSTheme.background)
-                                    .clipShape(.rect(cornerRadius: LOSTheme.radiusSmall))
-                                    .overlay(
-                                        RoundedRectangle(cornerRadius: LOSTheme.radiusSmall)
-                                            .stroke(LOSTheme.cardBorder, lineWidth: 1)
-                                    )
-                                }
-                                .transition(.opacity.combined(with: .move(edge: .top)))
-                            }
-                            
-                            // Primary Submit Action Button
-                            Button(action: handleAuthAction) {
-                                HStack(spacing: 8) {
-                                    if isLoading {
-                                        ProgressView()
-                                            .tint(.white)
-                                            .scaleEffect(0.85)
-                                    } else {
-                                        Text(authMode == .signIn ? "Sign In" : "Register Account")
-                                            .font(.system(size: 15, weight: .bold, design: .rounded))
-                                        Image(systemName: authMode == .signIn ? "arrow.right" : "person.badge.plus")
-                                            .font(.system(size: 13, weight: .bold))
-                                    }
-                                }
-                                .frame(maxWidth: .infinity)
-                                .padding(.vertical, 13)
-                                .background(LOSTheme.primary)
-                                .foregroundStyle(Color.white)
-                                .clipShape(.rect(cornerRadius: LOSTheme.radiusSmall))
-                                .shadow(color: LOSTheme.primary.opacity(0.35), radius: 6, y: 3)
-                            }
-                            .disabled(isLoading)
-                            
-                            // Mode Switcher Footer Text
-                            HStack(spacing: 4) {
-                                Text(authMode == .signIn ? "Don't have an account?" : "Already have an account?")
-                                    .font(.caption)
-                                    .foregroundStyle(Color.secondary)
-                                
-                                Button(authMode == .signIn ? "Sign Up" : "Sign In") {
-                                    withAnimation(.spring(response: 0.35, dampingFraction: 0.8)) {
-                                        authMode = (authMode == .signIn) ? .register : .signIn
-                                    }
-                                }
-                                .font(.caption.bold())
-                                .foregroundStyle(LOSTheme.primary)
-                            }
-                            .padding(.top, 2)
-                        }
-                        .padding(20)
-                        .background(LOSTheme.cardBackground)
-                        .clipShape(.rect(cornerRadius: LOSTheme.radiusLarge))
-                        .overlay(
-                            RoundedRectangle(cornerRadius: LOSTheme.radiusLarge)
-                                .stroke(LOSTheme.cardBorder, lineWidth: 1)
-                        )
-                        .shadow(color: Color.black.opacity(0.04), radius: 12, y: 4)
-                        .padding(.horizontal)
+                        // MARK: - 2. Focused Auth Card
+                        authCard
                         
-                        // MARK: - Credentials Helper & Quick Fill
-                        VStack(spacing: 10) {
-                            HStack {
-                                Image(systemName: "person.crop.circle.badge.checkmark")
-                                    .font(.system(size: 12, weight: .bold))
-                                    .foregroundStyle(LOSTheme.primary)
-                                Text("DATABASE DEMO ACCOUNTS")
-                                    .font(.system(size: 10, weight: .bold, design: .rounded))
-                                    .foregroundStyle(Color.secondary)
-                                    .tracking(0.6)
-                                Spacer()
-                            }
-                            
-                            VStack(spacing: 8) {
-                                Button {
-                                    fillDemoCredentials(email: Self.demoEmail, password: Self.demoPassword)
-                                } label: {
-                                    HStack {
-                                        Text("Investor")
-                                            .font(.caption.bold())
-                                            .foregroundStyle(Color.primary)
-                                        Spacer()
-                                        Text("user@gmail.com")
-                                            .font(.caption.monospaced())
-                                            .foregroundStyle(Color.secondary)
-                                        Image(systemName: "arrow.right.circle.fill")
-                                            .font(.caption)
-                                            .foregroundStyle(LOSTheme.primary.opacity(0.8))
-                                    }
-                                    .padding(.horizontal, 12)
-                                    .padding(.vertical, 8)
-                                    .background(LOSTheme.background)
-                                    .clipShape(.rect(cornerRadius: LOSTheme.radiusSmall))
-                                }
-                                .buttonStyle(.plain)
-                                
-                                Button {
-                                    fillDemoCredentials(email: Self.adminEmail, password: Self.adminPassword)
-                                } label: {
-                                    HStack {
-                                        Text("Admin")
-                                            .font(.caption.bold())
-                                            .foregroundStyle(Color.primary)
-                                        Spacer()
-                                        Text("admin@gmail.com")
-                                            .font(.caption.monospaced())
-                                            .foregroundStyle(Color.secondary)
-                                        Image(systemName: "arrow.right.circle.fill")
-                                            .font(.caption)
-                                            .foregroundStyle(LOSTheme.primary.opacity(0.8))
-                                    }
-                                    .padding(.horizontal, 12)
-                                    .padding(.vertical, 8)
-                                    .background(LOSTheme.background)
-                                    .clipShape(.rect(cornerRadius: LOSTheme.radiusSmall))
-                                }
-                                .buttonStyle(.plain)
-                            }
-                        }
-                        .padding(14)
-                        .background(LOSTheme.cardBackground.opacity(0.8))
-                        .clipShape(.rect(cornerRadius: LOSTheme.radiusMedium))
-                        .overlay(
-                            RoundedRectangle(cornerRadius: LOSTheme.radiusMedium)
-                                .stroke(LOSTheme.cardBorder, lineWidth: 1)
-                        )
-                        .padding(.horizontal)
-                        .padding(.bottom, 30)
+                        // MARK: - 3. Demo Credentials Helper
+                        demoAccountsStrip
+                        
+                        Spacer(minLength: LOSTheme.space24)
                     }
+                    .padding(.horizontal, LOSTheme.space20)
                 }
             }
         }
@@ -466,7 +84,420 @@ struct LoginView: View {
         }
     }
     
-    // MARK: - Validation & Authentication Logic
+    // MARK: - Subviews
+    
+    private var brandingHeader: some View {
+        VStack(spacing: LOSTheme.space12) {
+            ZStack {
+                RoundedRectangle(cornerRadius: 24, style: .continuous)
+                    .fill(LOSTheme.accent.gradient)
+                    .frame(width: 72, height: 72)
+                    .heroGlow(color: LOSTheme.accent)
+                
+                Image(systemName: "shield.lefthalf.filled")
+                    .font(.system(.largeTitle, design: .rounded).weight(.semibold))
+                    .foregroundStyle(Color.white)
+            }
+            
+            VStack(spacing: LOSTheme.space4) {
+                Text("LiquidityOS")
+                    .font(.title.weight(.bold))
+                    .fontDesign(.rounded)
+                    .foregroundStyle(LOSTheme.textPrimary)
+                
+                Text("Financial Resilience Operating System")
+                    .font(.subheadline)
+                    .foregroundStyle(LOSTheme.textSecondary)
+            }
+            
+            // Server / Database Indicator
+            HStack(spacing: 6) {
+                Circle()
+                    .fill(isServerOnline ? LOSTheme.positive : LOSTheme.textSecondary)
+                    .frame(width: 7, height: 7)
+                Text(isServerOnline ? "Auth Cloud DB Connected" : "Local Database Active")
+                    .font(.caption2.weight(.medium))
+                    .foregroundStyle(LOSTheme.textSecondary)
+            }
+            .padding(.horizontal, 10)
+            .padding(.vertical, 4)
+            .background(LOSTheme.surface)
+            .clipShape(Capsule())
+            .overlay(
+                Capsule()
+                    .stroke(LOSTheme.borderHairline, lineWidth: LOSTheme.hairline)
+            )
+        }
+        .padding(.top, LOSTheme.space8)
+    }
+    
+    private var authCard: some View {
+        VStack(spacing: LOSTheme.space16) {
+            // Mode Switcher: Sign In vs Create Account
+            Picker("Authentication Mode", selection: $authMode) {
+                ForEach(AuthMode.allCases) { mode in
+                    Text(mode.rawValue).tag(mode)
+                }
+            }
+            .pickerStyle(.segmented)
+            .onChange(of: authMode) { _, _ in
+                errorMessage = nil
+                successNotice = nil
+            }
+            
+            // Error Callout
+            if let error = errorMessage {
+                HStack(alignment: .top, spacing: LOSTheme.space8) {
+                    Image(systemName: "exclamationmark.triangle.fill")
+                        .foregroundStyle(LOSTheme.critical)
+                        .font(.footnote.weight(.bold))
+                        .padding(.top, 1)
+                    Text(error)
+                        .font(.footnote.weight(.medium))
+                        .foregroundStyle(LOSTheme.critical)
+                        .fixedSize(horizontal: false, vertical: true)
+                    Spacer()
+                }
+                .padding(LOSTheme.space12)
+                .background(LOSTheme.critical.opacity(0.12))
+                .clipShape(.rect(cornerRadius: LOSTheme.radiusSmall, style: .continuous))
+            }
+            
+            // Success Notice
+            if let notice = successNotice {
+                HStack(spacing: LOSTheme.space8) {
+                    Image(systemName: "checkmark.circle.fill")
+                        .foregroundStyle(LOSTheme.positive)
+                        .font(.footnote)
+                    Text(notice)
+                        .font(.footnote.weight(.medium))
+                        .foregroundStyle(LOSTheme.positive)
+                    Spacer()
+                }
+                .padding(LOSTheme.space12)
+                .background(LOSTheme.positive.opacity(0.12))
+                .clipShape(.rect(cornerRadius: LOSTheme.radiusSmall, style: .continuous))
+            }
+            
+            // Registration: Full Name
+            if authMode == .register {
+                VStack(alignment: .leading, spacing: LOSTheme.space4) {
+                    Text("FULL NAME")
+                        .font(.caption2.weight(.bold))
+                        .foregroundStyle(LOSTheme.textSecondary)
+                        .tracking(0.6)
+                    
+                    HStack(spacing: LOSTheme.space8) {
+                        Image(systemName: "person.fill")
+                            .font(.subheadline)
+                            .foregroundStyle(LOSTheme.accent)
+                            .frame(width: 22)
+                        
+                        TextField("e.g. Rohit Sharma", text: $name)
+                            .textInputAutocapitalization(.words)
+                            .autocorrectionDisabled()
+                            .font(.subheadline)
+                    }
+                    .padding(LOSTheme.space12)
+                    .background(LOSTheme.surfaceElevated)
+                    .clipShape(.rect(cornerRadius: LOSTheme.radiusSmall, style: .continuous))
+                    .overlay(
+                        RoundedRectangle(cornerRadius: LOSTheme.radiusSmall, style: .continuous)
+                            .stroke(LOSTheme.borderHairline, lineWidth: LOSTheme.hairline)
+                    )
+                }
+                .transition(.opacity.combined(with: .move(edge: .top)))
+            }
+            
+            // Email Address Field
+            VStack(alignment: .leading, spacing: LOSTheme.space4) {
+                HStack {
+                    Text("EMAIL ADDRESS")
+                        .font(.caption2.weight(.bold))
+                        .foregroundStyle(LOSTheme.textSecondary)
+                        .tracking(0.6)
+                    Spacer()
+                    if !email.isEmpty {
+                        if isEmailValid {
+                            Image(systemName: "checkmark.circle.fill")
+                                .font(.caption2)
+                                .foregroundStyle(LOSTheme.positive)
+                        } else {
+                            Text("Invalid format")
+                                .font(.caption2)
+                                .foregroundStyle(LOSTheme.critical)
+                        }
+                    }
+                }
+                
+                HStack(spacing: LOSTheme.space8) {
+                    Image(systemName: "envelope.fill")
+                        .font(.subheadline)
+                        .foregroundStyle(LOSTheme.accent)
+                        .frame(width: 22)
+                    
+                    TextField("user@gmail.com", text: $email)
+                        .textInputAutocapitalization(.never)
+                        .autocorrectionDisabled()
+                        .keyboardType(.emailAddress)
+                        .font(.subheadline)
+                    
+                    if !email.isEmpty {
+                        Button {
+                            email = ""
+                        } label: {
+                            Image(systemName: "xmark.circle.fill")
+                                .font(.subheadline)
+                                .foregroundStyle(LOSTheme.textSecondary)
+                        }
+                        .buttonStyle(.plain)
+                    }
+                }
+                .padding(LOSTheme.space12)
+                .background(LOSTheme.surfaceElevated)
+                .clipShape(.rect(cornerRadius: LOSTheme.radiusSmall, style: .continuous))
+                .overlay(
+                    RoundedRectangle(cornerRadius: LOSTheme.radiusSmall, style: .continuous)
+                        .stroke(LOSTheme.borderHairline, lineWidth: LOSTheme.hairline)
+                )
+            }
+            
+            // Password Field
+            VStack(alignment: .leading, spacing: LOSTheme.space4) {
+                HStack {
+                    Text("PASSWORD")
+                        .font(.caption2.weight(.bold))
+                        .foregroundStyle(LOSTheme.textSecondary)
+                        .tracking(0.6)
+                    Spacer()
+                    if !password.isEmpty && authMode == .register {
+                        Text(isPasswordValid ? "Min 6 met" : "Min 6 chars")
+                            .font(.caption2)
+                            .foregroundStyle(isPasswordValid ? LOSTheme.positive : LOSTheme.warning)
+                    }
+                }
+                
+                HStack(spacing: LOSTheme.space8) {
+                    Image(systemName: "lock.fill")
+                        .font(.subheadline)
+                        .foregroundStyle(LOSTheme.accent)
+                        .frame(width: 22)
+                    
+                    if isPasswordVisible {
+                        TextField("Enter password", text: $password)
+                            .textInputAutocapitalization(.never)
+                            .autocorrectionDisabled()
+                            .font(.subheadline)
+                    } else {
+                        SecureField("Enter password", text: $password)
+                            .textInputAutocapitalization(.never)
+                            .autocorrectionDisabled()
+                            .font(.subheadline)
+                    }
+                    
+                    Button {
+                        isPasswordVisible.toggle()
+                    } label: {
+                        Image(systemName: isPasswordVisible ? "eye.slash.fill" : "eye.fill")
+                            .font(.subheadline)
+                            .foregroundStyle(LOSTheme.textSecondary)
+                    }
+                    .buttonStyle(.plain)
+                }
+                .padding(LOSTheme.space12)
+                .background(LOSTheme.surfaceElevated)
+                .clipShape(.rect(cornerRadius: LOSTheme.radiusSmall, style: .continuous))
+                .overlay(
+                    RoundedRectangle(cornerRadius: LOSTheme.radiusSmall, style: .continuous)
+                        .stroke(LOSTheme.borderHairline, lineWidth: LOSTheme.hairline)
+                )
+            }
+            
+            // Confirm Password (Registration only)
+            if authMode == .register {
+                VStack(alignment: .leading, spacing: LOSTheme.space4) {
+                    HStack {
+                        Text("CONFIRM PASSWORD")
+                            .font(.caption2.weight(.bold))
+                            .foregroundStyle(LOSTheme.textSecondary)
+                            .tracking(0.6)
+                        Spacer()
+                        if !confirmPassword.isEmpty {
+                            Text(doPasswordsMatch ? "Match" : "No match")
+                                .font(.caption2)
+                                .foregroundStyle(doPasswordsMatch ? LOSTheme.positive : LOSTheme.critical)
+                        }
+                    }
+                    
+                    HStack(spacing: LOSTheme.space8) {
+                        Image(systemName: "lock.shield.fill")
+                            .font(.subheadline)
+                            .foregroundStyle(LOSTheme.accent)
+                            .frame(width: 22)
+                        
+                        if isConfirmPasswordVisible {
+                            TextField("Re-enter password", text: $confirmPassword)
+                                .textInputAutocapitalization(.never)
+                                .autocorrectionDisabled()
+                                .font(.subheadline)
+                        } else {
+                            SecureField("Re-enter password", text: $confirmPassword)
+                                .textInputAutocapitalization(.never)
+                                .autocorrectionDisabled()
+                                .font(.subheadline)
+                        }
+                        
+                        Button {
+                            isConfirmPasswordVisible.toggle()
+                        } label: {
+                            Image(systemName: isConfirmPasswordVisible ? "eye.slash.fill" : "eye.fill")
+                                .font(.subheadline)
+                                .foregroundStyle(LOSTheme.textSecondary)
+                        }
+                        .buttonStyle(.plain)
+                    }
+                    .padding(LOSTheme.space12)
+                    .background(LOSTheme.surfaceElevated)
+                    .clipShape(.rect(cornerRadius: LOSTheme.radiusSmall, style: .continuous))
+                    .overlay(
+                        RoundedRectangle(cornerRadius: LOSTheme.radiusSmall, style: .continuous)
+                            .stroke(LOSTheme.borderHairline, lineWidth: LOSTheme.hairline)
+                    )
+                }
+                .transition(.opacity.combined(with: .move(edge: .top)))
+            }
+            
+            // Submit Button
+            Button(action: handleAuthAction) {
+                HStack(spacing: LOSTheme.space8) {
+                    if isLoading {
+                        ProgressView()
+                            .tint(.white)
+                            .scaleEffect(0.85)
+                    } else {
+                        Text(authMode == .signIn ? "Sign In" : "Register Account")
+                            .font(.headline.weight(.bold))
+                        Image(systemName: authMode == .signIn ? "arrow.right" : "person.badge.plus")
+                            .font(.subheadline.weight(.bold))
+                    }
+                }
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, 14)
+                .background(LOSTheme.accent)
+                .foregroundStyle(Color.white)
+                .clipShape(.rect(cornerRadius: LOSTheme.radiusMedium, style: .continuous))
+                .shadow(color: LOSTheme.accent.opacity(0.35), radius: 8, y: 3)
+            }
+            .disabled(isLoading)
+            .padding(.top, LOSTheme.space4)
+            
+            // Switch Mode Prompt
+            HStack(spacing: 4) {
+                Text(authMode == .signIn ? "Don't have an account?" : "Already have an account?")
+                    .font(.footnote)
+                    .foregroundStyle(LOSTheme.textSecondary)
+                
+                Button(authMode == .signIn ? "Sign Up" : "Sign In") {
+                    withAnimation(.spring(response: 0.35, dampingFraction: 0.8)) {
+                        authMode = (authMode == .signIn) ? .register : .signIn
+                    }
+                }
+                .font(.footnote.weight(.bold))
+                .foregroundStyle(LOSTheme.accent)
+            }
+            .padding(.top, 2)
+        }
+        .padding(LOSTheme.space20)
+        .background(LOSTheme.surface)
+        .clipShape(.rect(cornerRadius: LOSTheme.radiusCard, style: .continuous))
+        .overlay(
+            RoundedRectangle(cornerRadius: LOSTheme.radiusCard, style: .continuous)
+                .stroke(LOSTheme.borderHairline, lineWidth: LOSTheme.hairline)
+        )
+        .shadow(color: Color.black.opacity(0.06), radius: 14, y: 4)
+    }
+    
+    private var demoAccountsStrip: some View {
+        VStack(spacing: LOSTheme.space8) {
+            HStack {
+                Image(systemName: "person.crop.circle.badge.checkmark")
+                    .font(.caption.weight(.bold))
+                    .foregroundStyle(LOSTheme.accent)
+                Text("DEMO ACCOUNTS")
+                    .font(.caption2.weight(.bold))
+                    .foregroundStyle(LOSTheme.textSecondary)
+                    .tracking(0.6)
+                Spacer()
+            }
+            
+            HStack(spacing: LOSTheme.space8) {
+                Button {
+                    fillDemoCredentials(email: Self.demoEmail, password: Self.demoPassword)
+                } label: {
+                    HStack {
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text("Investor")
+                                .font(.caption.weight(.bold))
+                                .foregroundStyle(LOSTheme.textPrimary)
+                            Text("user@gmail.com")
+                                .font(.caption2)
+                                .fontDesign(.monospaced)
+                                .foregroundStyle(LOSTheme.textSecondary)
+                        }
+                        Spacer()
+                        Image(systemName: "arrow.right.circle.fill")
+                            .font(.subheadline)
+                            .foregroundStyle(LOSTheme.accent)
+                    }
+                    .padding(LOSTheme.space12)
+                    .background(LOSTheme.surface)
+                    .clipShape(.rect(cornerRadius: LOSTheme.radiusSmall, style: .continuous))
+                    .overlay(
+                        RoundedRectangle(cornerRadius: LOSTheme.radiusSmall, style: .continuous)
+                            .stroke(LOSTheme.borderHairline, lineWidth: LOSTheme.hairline)
+                    )
+                }
+                .buttonStyle(.plain)
+                
+                Button {
+                    fillDemoCredentials(email: Self.adminEmail, password: Self.adminPassword)
+                } label: {
+                    HStack {
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text("Admin")
+                                .font(.caption.weight(.bold))
+                                .foregroundStyle(LOSTheme.textPrimary)
+                            Text("admin@gmail.com")
+                                .font(.caption2)
+                                .fontDesign(.monospaced)
+                                .foregroundStyle(LOSTheme.textSecondary)
+                        }
+                        Spacer()
+                        Image(systemName: "arrow.right.circle.fill")
+                            .font(.subheadline)
+                            .foregroundStyle(LOSTheme.accent)
+                    }
+                    .padding(LOSTheme.space12)
+                    .background(LOSTheme.surface)
+                    .clipShape(.rect(cornerRadius: LOSTheme.radiusSmall, style: .continuous))
+                    .overlay(
+                        RoundedRectangle(cornerRadius: LOSTheme.radiusSmall, style: .continuous)
+                            .stroke(LOSTheme.borderHairline, lineWidth: LOSTheme.hairline)
+                    )
+                }
+                .buttonStyle(.plain)
+            }
+        }
+        .padding(LOSTheme.space16)
+        .background(LOSTheme.surface.opacity(0.8))
+        .clipShape(.rect(cornerRadius: LOSTheme.radiusMedium, style: .continuous))
+        .overlay(
+            RoundedRectangle(cornerRadius: LOSTheme.radiusMedium, style: .continuous)
+                .stroke(LOSTheme.borderHairline, lineWidth: LOSTheme.hairline)
+        )
+    }
+    
+    // MARK: - Auth Actions
     
     private func handleAuthAction() {
         errorMessage = nil
@@ -475,17 +506,14 @@ struct LoginView: View {
         let cleanEmail = email.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
         let cleanPassword = password.trimmingCharacters(in: .whitespacesAndNewlines)
         
-        // 1. Email Format Validation
         guard !cleanEmail.isEmpty else {
             errorMessage = "Please enter your email address."
             return
         }
         guard isEmailValid else {
-            errorMessage = "Please enter a valid email address (e.g. user@gmail.com)."
+            errorMessage = "Please enter a valid email address."
             return
         }
-        
-        // 2. Password Length Validation
         guard !cleanPassword.isEmpty else {
             errorMessage = "Please enter your password."
             return
@@ -494,11 +522,9 @@ struct LoginView: View {
             errorMessage = "Password must be at least 6 characters long."
             return
         }
-        
-        // 3. Confirm Password Validation (Register mode)
         if authMode == .register {
             guard doPasswordsMatch else {
-                errorMessage = "Passwords do not match. Please re-enter to confirm."
+                errorMessage = "Passwords do not match."
                 return
             }
         }
@@ -548,4 +574,8 @@ struct LoginView: View {
         self.errorMessage = nil
         self.successNotice = "Demo credentials autofilled."
     }
+}
+
+#Preview("Login View") {
+    LoginView()
 }

@@ -2,9 +2,9 @@ import SwiftUI
 
 struct ContentView: View {
     @AppStorage("isLoggedIn") private var isLoggedIn: Bool = false
+    @AppStorage("selectedTab") private var selectedTab: AppTab = .overview
     @StateObject private var viewModel = ResilienceViewModel()
     @StateObject private var concallViewModel = ConcallViewModel()
-    @State private var selectedTab: AppTab = .overview
     
     var body: some View {
         Group {
