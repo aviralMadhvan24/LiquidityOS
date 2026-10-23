@@ -410,7 +410,10 @@ struct DashboardView: View {
                                 QuickHubPill(title: "Reverse Stress", icon: "gauge.with.needle.fill", color: LOSTheme.warning) {
                                     viewModel.isShowingReverseStressSheet = true
                                 }
-                                QuickHubPill(title: "AI Recovery", icon: "wand.and.stars", color: LOSTheme.positive) {
+                                QuickHubPill(title: "What-If Stocks", icon: "wand.and.stars", color: LOSTheme.accent) {
+                                    viewModel.isShowingWhatIfSheet = true
+                                }
+                                QuickHubPill(title: "AI Recovery", icon: "sparkles", color: LOSTheme.positive) {
                                     viewModel.isShowingRecoverySheet = true
                                 }
                             }
@@ -441,6 +444,9 @@ struct DashboardView: View {
             }
             .sheet(isPresented: $viewModel.isShowingRecoverySheet) {
                 RecoveryPlannerView(viewModel: viewModel)
+            }
+            .sheet(isPresented: $viewModel.isShowingWhatIfSheet) {
+                WhatIfStockSimulatorView(viewModel: viewModel)
             }
             .sheet(isPresented: $isShowingStressSheet) {
                 StressTestView(viewModel: viewModel)

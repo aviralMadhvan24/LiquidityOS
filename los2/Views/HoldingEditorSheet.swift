@@ -1,22 +1,48 @@
 import SwiftUI
 
-/// Modal sheet for adding a new holding or editing an existing holding with live stock search and valuation.
+/// Modal sheet for adding a new holding or editing an existing holding across NSE and BSE.
+/// Includes instant offline Indian stock directory, exchange filtering, custom ticker input,
+/// popular quick-picks, live quote lookups, and real-time position valuation.
 struct HoldingEditorSheet: View {
     @ObservedObject var viewModel: ResilienceViewModel
     var existingHolding: PortfolioHolding? = nil
     @Environment(\.dismiss) private var dismiss
     
     @State private var searchQuery: String = ""
-    @State private var searchResults: [StockSearchResult] = []
-    @State private var isSearching: Bool = false
+    @State private var selectedExchangeFilter: String = "ALL" // "ALL", "NSE", "BSE"
+    @State private var isSearchingAPI: Bool = false
+    @State private var apiSearchResults: [StockSearchResult] = []
     
+    // Form fields
     @State private var ticker: String = ""
+    @State private var exchange: String = "NSE"
     @State private var companyName: String = ""
     @State private var sector: String = "Equity"
     @State private var sharesText: String = "10"
     @State private var avgBuyPriceText: String = "1000"
     @State private var currentPrice: Double = 1000.0
     @State private var freshness: MarketDataFreshness = .demoData
+    @State private var isFetchingQuote: Bool = false
+    
+    private let availableSectors = [
+        "Banking",
+        "Information Technology",
+        "Automotive",
+        "Energy & Telecom",
+        "Consumer Goods",
+        "Pharmaceuticals",
+        "Infrastructure",
+        "Financial Services",
+        "Metals & Mining",
+        "Aerospace & Defense",
+        "Renewable Energy",
+        "Railways & Logistics",
+        "Capital Markets",
+        "Fintech",
+        "Retail",
+        "Power Utilities",
+        "Equity"
+    ]
     
     var shares: Int {
         Int(sharesText) ?? 1
@@ -43,86 +69,192 @@ struct HoldingEditorSheet: View {
         return (unrealizedPnL / investedValue) * 100.0
     }
     
+    // Directory search results
+    private var localSearchResults: [StockCatalogItem] {
+        IndianStockDirectory.shared.search(
+            query: searchQuery,
+            exchangeFilter: selectedExchangeFilter == "ALL" ? nil : selectedExchangeFilter
+        )
+    }
+    
     var body: some View {
         NavigationStack {
             Form {
-                // Section 1: Stock Search & Selection
+                // MARK: - Section 1: Stock Discovery & Search (Only for New Holdings)
                 if existingHolding == nil {
                     Section {
-                        HStack {
-                            Image(systemName: "magnifyingglass")
-                                .foregroundStyle(Color.secondary)
-                            TextField("Search stock (e.g. RELIANCE, TCS)", text: $searchQuery)
-                                .textInputAutocapitalization(.characters)
-                                .onChange(of: searchQuery) { _, q in
-                                    Task { await performSearch(q) }
-                                }
+                        // Exchange filter tabs
+                        Picker("Exchange Filter", selection: $selectedExchangeFilter) {
+                            Text("All Equities").tag("ALL")
+                            Text("NSE").tag("NSE")
+                            Text("BSE").tag("BSE")
                         }
+                        .pickerStyle(.segmented)
                         
-                        if isSearching {
-                            HStack {
-                                Spacer()
-                                ProgressView()
-                                Spacer()
-                            }
-                        } else if !searchResults.isEmpty {
-                            ForEach(searchResults) { result in
-                                Button {
-                                    selectSearchResult(result)
-                                } label: {
-                                    HStack {
-                                        VStack(alignment: .leading, spacing: 2) {
-                                            Text(result.symbol)
-                                                .font(.system(size: 14, weight: .bold, design: .monospaced))
-                                                .foregroundStyle(Color.primary)
-                                            Text(result.name)
-                                                .font(.system(size: 12))
-                                                .foregroundStyle(Color.secondary)
-                                                .lineLimit(1)
-                                        }
-                                        Spacer()
-                                        Text(result.exchange)
-                                            .font(.system(size: 11, weight: .semibold))
-                                            .padding(.horizontal, 6)
-                                            .padding(.vertical, 2)
-                                            .background(Color.primary.opacity(0.06))
+                        // Popular Stock Quick Chips
+                        VStack(alignment: .leading, spacing: 6) {
+                            Text("POPULAR PICKS")
+                                .font(.caption2.weight(.bold))
+                                .foregroundStyle(Color.secondary)
+                            
+                            ScrollView(.horizontal, showsIndicators: false) {
+                                HStack(spacing: 8) {
+                                    ForEach(IndianStockDirectory.shared.featuredPicks) { stock in
+                                        Button {
+                                            applyCatalogItem(stock)
+                                        } label: {
+                                            HStack(spacing: 4) {
+                                                Text(stock.symbol)
+                                                    .font(.caption.weight(.bold))
+                                                    .fontDesign(.monospaced)
+                                                Text("(\(stock.exchange))")
+                                                    .font(.caption2)
+                                                    .foregroundStyle(Color.secondary)
+                                            }
+                                            .padding(.horizontal, 10)
+                                            .padding(.vertical, 5)
+                                            .background(ticker == stock.symbol ? LOSTheme.accent.opacity(0.18) : Color.primary.opacity(0.06))
+                                            .foregroundStyle(ticker == stock.symbol ? LOSTheme.accent : Color.primary)
                                             .clipShape(Capsule())
+                                        }
+                                        .buttonStyle(.plain)
                                     }
                                 }
                             }
                         }
+                        .padding(.vertical, 4)
+                        
+                        // Search Field
+                        HStack {
+                            Image(systemName: "magnifyingglass")
+                                .foregroundStyle(Color.secondary)
+                            TextField("Search stock (e.g. RELIANCE, ZOMATO, TCS)", text: $searchQuery)
+                                .textInputAutocapitalization(.characters)
+                                .onChange(of: searchQuery) { _, q in
+                                    Task { await performAPISearch(q) }
+                                }
+                            if !searchQuery.isEmpty {
+                                Button {
+                                    searchQuery = ""
+                                } label: {
+                                    Image(systemName: "xmark.circle.fill")
+                                        .foregroundStyle(Color.secondary)
+                                }
+                                .buttonStyle(.plain)
+                            }
+                        }
+                        
+                        // Local + API Search Results List
+                        if !searchQuery.isEmpty {
+                            if !localSearchResults.isEmpty {
+                                ForEach(localSearchResults.prefix(8)) { item in
+                                    Button {
+                                        applyCatalogItem(item)
+                                    } label: {
+                                        HStack {
+                                            VStack(alignment: .leading, spacing: 2) {
+                                                HStack(spacing: 6) {
+                                                    Text(item.symbol)
+                                                        .font(.system(size: 14, weight: .bold, design: .monospaced))
+                                                        .foregroundStyle(Color.primary)
+                                                    Text(item.exchange)
+                                                        .font(.system(size: 10, weight: .bold))
+                                                        .padding(.horizontal, 5)
+                                                        .padding(.vertical, 1)
+                                                        .background(LOSTheme.accent.opacity(0.12))
+                                                        .foregroundStyle(LOSTheme.accent)
+                                                        .clipShape(Capsule())
+                                                }
+                                                Text(item.name)
+                                                    .font(.system(size: 12))
+                                                    .foregroundStyle(Color.secondary)
+                                                    .lineLimit(1)
+                                            }
+                                            Spacer()
+                                            VStack(alignment: .trailing, spacing: 2) {
+                                                Text(LOSTheme.formatRupee(item.defaultPrice))
+                                                    .font(.system(size: 13, weight: .semibold, design: .rounded))
+                                                    .foregroundStyle(Color.primary)
+                                                Text(item.sector)
+                                                    .font(.system(size: 10))
+                                                    .foregroundStyle(Color.secondary)
+                                            }
+                                        }
+                                    }
+                                    .buttonStyle(.plain)
+                                }
+                            } else if isSearchingAPI {
+                                HStack {
+                                    Spacer()
+                                    ProgressView("Searching NSE / BSE...")
+                                        .font(.caption)
+                                    Spacer()
+                                }
+                                .padding(.vertical, 4)
+                            }
+                        }
                     } header: {
-                        Text("Search Indian Stocks (NSE/BSE)")
+                        Text("Search Indian Stocks (NSE / BSE)")
                     }
                 }
                 
-                // Section 2: Selected Stock Details
+                // MARK: - Section 2: Stock Details & Custom Input
                 Section {
+                    // Ticker (Editable so user can type ANY custom or unlisted stock)
                     HStack {
-                        Text("Ticker")
-                            .font(.system(size: 14, weight: .medium))
+                        Label("Ticker Symbol", systemImage: "chart.line.uptrend.xyaxis")
                         Spacer()
-                        Text(ticker.isEmpty ? "Select a stock" : ticker)
+                        TextField("e.g. TATAPOWER", text: $ticker)
+                            .textInputAutocapitalization(.characters)
                             .font(.system(size: 14, weight: .bold, design: .monospaced))
+                            .multilineTextAlignment(.trailing)
                             .foregroundStyle(LOSTheme.primary)
                     }
                     
-                    HStack {
-                        Text("Company Name")
-                            .font(.system(size: 14, weight: .medium))
-                        Spacer()
-                        Text(companyName.isEmpty ? "—" : companyName)
-                            .font(.system(size: 13))
-                            .foregroundStyle(Color.secondary)
-                            .multilineTextAlignment(.trailing)
+                    // Exchange Selector (NSE / BSE)
+                    Picker("Exchange", selection: $exchange) {
+                        Text("NSE (National Stock Exchange)").tag("NSE")
+                        Text("BSE (Bombay Stock Exchange)").tag("BSE")
                     }
                     
+                    // Company Name
                     HStack {
-                        Text("Market Price")
-                            .font(.system(size: 14, weight: .medium))
+                        Label("Company Name", systemImage: "building.2")
+                        Spacer()
+                        TextField("e.g. Tata Power Ltd", text: $companyName)
+                            .multilineTextAlignment(.trailing)
+                            .foregroundStyle(Color.primary)
+                    }
+                    
+                    // Sector Picker
+                    Picker("Sector", selection: $sector) {
+                        ForEach(availableSectors, id: \.self) { s in
+                            Text(s).tag(s)
+                        }
+                    }
+                    
+                    // Market Price with Live Fetch
+                    HStack {
+                        Label("Market Price", systemImage: "indianrupeesign")
                         Spacer()
                         Text(LOSTheme.formatRupee(currentPrice))
                             .font(.system(size: 14, weight: .bold, design: .rounded))
+                            .monospacedDigit()
+                        
+                        Button {
+                            Task { await fetchCurrentQuote(ticker) }
+                        } label: {
+                            if isFetchingQuote {
+                                ProgressView()
+                                    .scaleEffect(0.7)
+                            } else {
+                                Image(systemName: "arrow.clockwise.circle.fill")
+                                    .foregroundStyle(LOSTheme.accent)
+                            }
+                        }
+                        .buttonStyle(.plain)
+                        .disabled(ticker.isEmpty || isFetchingQuote)
+                        
                         Text(freshness.displayName)
                             .font(.system(size: 9, weight: .bold))
                             .padding(.horizontal, 5)
@@ -132,10 +264,12 @@ struct HoldingEditorSheet: View {
                             .clipShape(Capsule())
                     }
                 } header: {
-                    Text("Stock Details")
+                    Text("Stock Identity & Quote")
+                } footer: {
+                    Text("You can select from the search list or type any custom NSE/BSE ticker.")
                 }
                 
-                // Section 3: Quantity & Average Purchase Price
+                // MARK: - Section 3: Quantity & Average Purchase Price
                 Section {
                     HStack {
                         Label("Quantity (Shares)", systemImage: "number")
@@ -144,6 +278,7 @@ struct HoldingEditorSheet: View {
                         TextField("Shares", text: $sharesText)
                             .keyboardType(.numberPad)
                             .multilineTextAlignment(.trailing)
+                            .font(.system(.body, design: .rounded).weight(.semibold))
                         #else
                         TextField("Shares", text: $sharesText)
                             .multilineTextAlignment(.trailing)
@@ -151,12 +286,13 @@ struct HoldingEditorSheet: View {
                     }
                     
                     HStack {
-                        Label("Avg Purchase Price", systemImage: "indianrupeesign")
+                        Label("Avg Purchase Price", systemImage: "tag")
                         Spacer()
                         #if os(iOS)
                         TextField("Price", text: $avgBuyPriceText)
                             .keyboardType(.decimalPad)
                             .multilineTextAlignment(.trailing)
+                            .font(.system(.body, design: .rounded).weight(.semibold))
                         #else
                         TextField("Price", text: $avgBuyPriceText)
                             .multilineTextAlignment(.trailing)
@@ -165,41 +301,36 @@ struct HoldingEditorSheet: View {
                 } header: {
                     Text("Your Investment")
                 } footer: {
-                    Text("Enter the number of shares owned and your average cost per share.")
+                    Text("Enter the number of shares owned and your average purchase cost.")
                 }
                 
-                // Section 4: Live Calculated Position Valuation
+                // MARK: - Section 4: Live Calculated Position Valuation
                 Section {
                     HStack {
                         Text("Invested Capital")
-                        Spacer(minLength: 8)
+                        Spacer()
                         Text(LOSTheme.formatRupee(investedValue))
                             .fontWeight(.semibold)
-                            .lineLimit(1)
-                            .minimumScaleFactor(0.8)
+                            .monospacedDigit()
                     }
                     
                     HStack {
                         Text("Current Market Value")
-                        Spacer(minLength: 8)
+                        Spacer()
                         Text(LOSTheme.formatRupee(marketValue))
                             .bold()
-                            .lineLimit(1)
-                            .minimumScaleFactor(0.8)
+                            .monospacedDigit()
                     }
                     
                     HStack {
                         Text("Unrealized Profit / Loss")
-                        Spacer(minLength: 8)
+                        Spacer()
                         HStack(spacing: 4) {
                             Text(LOSTheme.formatRupee(unrealizedPnL, showSign: true))
                                 .bold()
-                                .lineLimit(1)
-                                .minimumScaleFactor(0.8)
+                                .monospacedDigit()
                             Text("(\(String(format: "%+.1f%%", unrealizedPnLPercent)))")
                                 .font(.system(size: 12, weight: .semibold))
-                                .lineLimit(1)
-                                .minimumScaleFactor(0.85)
                         }
                         .foregroundStyle(unrealizedPnL >= 0 ? LOSTheme.safeGreen : LOSTheme.criticalRed)
                     }
@@ -207,7 +338,7 @@ struct HoldingEditorSheet: View {
                     Text("Valuation Summary")
                 }
             }
-            .navigationTitle(existingHolding == nil ? "Add Holding" : "Edit Holding")
+            .navigationTitle(existingHolding == nil ? "Add NSE / BSE Stock" : "Edit Holding")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
@@ -230,59 +361,63 @@ struct HoldingEditorSheet: View {
                     avgBuyPriceText = String(format: "%.2f", h.averageBuyPrice)
                     currentPrice = h.currentPrice
                     freshness = h.freshness
-                } else {
-                    // Preselect a default popular stock
-                    ticker = "RELIANCE"
-                    companyName = "Reliance Industries"
-                    sector = "Energy & Telecom"
-                    sharesText = "20"
-                    avgBuyPriceText = "2850"
-                    Task { await fetchCurrentQuote("RELIANCE") }
+                } else if ticker.isEmpty {
+                    // Default to Reliance Industries
+                    if let defaultStock = IndianStockDirectory.shared.find(symbol: "RELIANCE") {
+                        applyCatalogItem(defaultStock)
+                        sharesText = "20"
+                        avgBuyPriceText = "2850"
+                    }
                 }
             }
         }
     }
     
-    private func performSearch(_ query: String) async {
-        guard query.trimmingCharacters(in: .whitespacesAndNewlines).count >= 2 else {
-            searchResults = []
-            return
-        }
-        isSearching = true
-        do {
-            let res = try await MarketDataAPIService.shared.searchStocks(query: query)
-            searchResults = res
-            isSearching = false
-        } catch {
-            isSearching = false
-        }
+    private func applyCatalogItem(_ item: StockCatalogItem) {
+        ticker = item.symbol
+        exchange = item.exchange
+        companyName = item.name
+        sector = item.sector
+        currentPrice = item.defaultPrice
+        avgBuyPriceText = String(format: "%.0f", item.defaultPrice)
+        searchQuery = ""
+        Task { await fetchCurrentQuote(item.symbol) }
     }
     
-    private func selectSearchResult(_ result: StockSearchResult) {
-        ticker = result.symbol
-        companyName = result.name
-        sector = result.sector ?? "Equity"
-        searchQuery = ""
-        searchResults = []
-        Task { await fetchCurrentQuote(result.symbol) }
+    private func performAPISearch(_ query: String) async {
+        guard query.trimmingCharacters(in: .whitespacesAndNewlines).count >= 2 else {
+            apiSearchResults = []
+            return
+        }
+        isSearchingAPI = true
+        do {
+            let res = try await MarketDataAPIService.shared.searchStocks(query: query)
+            apiSearchResults = res
+            isSearchingAPI = false
+        } catch {
+            isSearchingAPI = false
+        }
     }
     
     private func fetchCurrentQuote(_ sym: String) async {
+        guard !sym.isEmpty else { return }
+        isFetchingQuote = true
         do {
             let quote = try await MarketDataAPIService.shared.fetchQuote(symbol: sym)
             currentPrice = quote.currentPrice
             if let f = MarketDataFreshness(rawValue: quote.freshness) {
                 freshness = f
             }
+            isFetchingQuote = false
         } catch {
-            // Keep default
+            isFetchingQuote = false
         }
     }
     
     private func saveHolding() {
         viewModel.addOrUpdateHolding(
             ticker: ticker,
-            companyName: companyName,
+            companyName: companyName.isEmpty ? ticker : companyName,
             shares: shares,
             averageBuyPrice: avgBuyPrice,
             sector: sector,

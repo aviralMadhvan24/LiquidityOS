@@ -49,6 +49,16 @@ final class ResilienceViewModel: ObservableObject {
     @Published var isShowingPortfolioSheet: Bool = false
     @Published var isShowingReverseStressSheet: Bool = false
     @Published var isShowingRecoverySheet: Bool = false
+    @Published var isShowingWhatIfSheet: Bool = false
+    
+    // MARK: - What-If Stock Simulator State
+    @Published var whatIfTicker: String = "TATAMOTORS"
+    @Published var whatIfCompanyName: String = "Tata Motors Limited"
+    @Published var whatIfExchange: String = "NSE"
+    @Published var whatIfSector: String = "Automotive"
+    @Published var whatIfShares: Int = 50
+    @Published var whatIfPrice: Double = 980.40
+    @Published var whatIfSimulatedDecline: Double = 25.0
     
     // Broker Sync State (Zerodha Kite)
     @Published var isZerodhaConnected: Bool = false
@@ -64,6 +74,10 @@ final class ResilienceViewModel: ObservableObject {
         
         loadZerodhaSession()
         recalculatePortfolioValueFromHoldings()
+        
+        if ProcessInfo.processInfo.arguments.contains("-showWhatIf") {
+            self.isShowingWhatIfSheet = true
+        }
     }
     
     // MARK: - Active Drawdown Percent (Mode A)
@@ -362,6 +376,93 @@ final class ResilienceViewModel: ObservableObject {
                 return updated
             }
         }
+    }
+    
+    // MARK: - What-If Stock Simulation Logic
+    var whatIfInvestmentAmount: Double {
+        Double(max(1, whatIfShares)) * max(1.0, whatIfPrice)
+    }
+    
+    var whatIfSimulationResult: WhatIfSimulationResult {
+        let currentHoldings = profile.activeHoldings
+        let currentPortVal = profile.portfolioValue
+        let simulatedStockVal = whatIfInvestmentAmount
+        let newPortVal = currentPortVal + simulatedStockVal
+        
+        let baselineLoss = currentPortVal * (whatIfSimulatedDecline / 100.0)
+        let newLoss = newPortVal * (whatIfSimulatedDecline / 100.0)
+        let lossDelta = newLoss - baselineLoss
+        
+        var simProfile = profile
+        simProfile.portfolioValue = newPortVal
+        
+        let newHolding = PortfolioHolding(
+            companyName: whatIfCompanyName,
+            ticker: whatIfTicker,
+            sector: whatIfSector,
+            shares: whatIfShares,
+            averageBuyPrice: whatIfPrice,
+            currentPrice: whatIfPrice
+        )
+        
+        var simHoldings = currentHoldings
+        if let idx = simHoldings.firstIndex(where: { $0.ticker.uppercased() == whatIfTicker.uppercased() }) {
+            var existing = simHoldings[idx]
+            existing.shares += whatIfShares
+            simHoldings[idx] = existing
+        } else {
+            simHoldings.append(newHolding)
+        }
+        simProfile.holdings = simHoldings
+        
+        let baselineReport = ResilienceEngine.analyze(
+            profile: profile,
+            declinePercent: whatIfSimulatedDecline
+        )
+        let simReport = ResilienceEngine.analyze(
+            profile: simProfile,
+            declinePercent: whatIfSimulatedDecline
+        )
+        
+        let newWeight = newPortVal > 0 ? (simulatedStockVal / newPortVal) * 100.0 : 0.0
+        
+        return WhatIfSimulationResult(
+            ticker: whatIfTicker,
+            companyName: whatIfCompanyName,
+            exchange: whatIfExchange,
+            sector: whatIfSector,
+            shares: whatIfShares,
+            price: whatIfPrice,
+            simulatedInvestment: simulatedStockVal,
+            baselinePortfolioValue: currentPortVal,
+            baselineResilienceScore: Double(baselineReport.resilienceScore),
+            baselineEstimatedLoss: baselineLoss,
+            newPortfolioValue: newPortVal,
+            newResilienceScore: Double(simReport.resilienceScore),
+            newEstimatedLoss: newLoss,
+            lossDelta: lossDelta,
+            scoreDelta: Double(simReport.resilienceScore - baselineReport.resilienceScore),
+            newHoldingWeight: newWeight
+        )
+    }
+    
+    func selectWhatIfStock(catalogItem: StockCatalogItem) {
+        whatIfTicker = catalogItem.symbol
+        whatIfCompanyName = catalogItem.name
+        whatIfExchange = catalogItem.exchange
+        whatIfSector = catalogItem.sector
+        whatIfPrice = catalogItem.defaultPrice
+    }
+    
+    func commitWhatIfHoldingToRealPortfolio() {
+        addOrUpdateHolding(
+            ticker: whatIfTicker,
+            companyName: whatIfCompanyName,
+            shares: whatIfShares,
+            averageBuyPrice: whatIfPrice,
+            sector: whatIfSector,
+            currentPrice: whatIfPrice
+        )
     }
     
     // MARK: - Live Market Data Refresh

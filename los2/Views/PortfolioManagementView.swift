@@ -104,50 +104,68 @@ struct PortfolioManagementView: View {
                     .padding(.horizontal)
                     
                     // MARK: - Action Buttons (Refresh & Add)
-                    HStack(spacing: 12) {
-                        Button {
-                            Task {
-                                await viewModel.refreshMarketPrices()
-                            }
-                        } label: {
-                            HStack(spacing: 6) {
-                                if viewModel.isRefreshingMarketData {
-                                    ProgressView()
-                                        .tint(LOSTheme.primary)
-                                        .scaleEffect(0.8)
-                                } else {
-                                    Image(systemName: "arrow.clockwise")
-                                        .font(.system(size: 13, weight: .semibold))
+                    VStack(spacing: 8) {
+                        HStack(spacing: 12) {
+                            Button {
+                                Task {
+                                    await viewModel.refreshMarketPrices()
                                 }
-                                Text(viewModel.isRefreshingMarketData ? "Refreshing..." : "Refresh Quotes")
-                                    .font(.system(size: 13, weight: .semibold, design: .rounded))
+                            } label: {
+                                HStack(spacing: 6) {
+                                    if viewModel.isRefreshingMarketData {
+                                        ProgressView()
+                                            .tint(LOSTheme.primary)
+                                            .scaleEffect(0.8)
+                                    } else {
+                                        Image(systemName: "arrow.clockwise")
+                                            .font(.system(size: 13, weight: .semibold))
+                                    }
+                                    Text(viewModel.isRefreshingMarketData ? "Refreshing..." : "Refresh Quotes")
+                                        .font(.system(size: 13, weight: .semibold, design: .rounded))
+                                }
+                                .frame(maxWidth: .infinity)
+                                .padding(.vertical, 11)
+                                .background(LOSTheme.cardBackground)
+                                .foregroundStyle(LOSTheme.primary)
+                                .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+                                .overlay(
+                                    RoundedRectangle(cornerRadius: 12, style: .continuous)
+                                        .stroke(LOSTheme.primary.opacity(0.3), lineWidth: 1)
+                                )
                             }
-                            .frame(maxWidth: .infinity)
-                            .padding(.vertical, 11)
-                            .background(LOSTheme.cardBackground)
-                            .foregroundStyle(LOSTheme.primary)
-                            .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
-                            .overlay(
-                                RoundedRectangle(cornerRadius: 12, style: .continuous)
-                                    .stroke(LOSTheme.primary.opacity(0.3), lineWidth: 1)
-                            )
+                            .disabled(viewModel.isRefreshingMarketData)
+                            
+                            Button {
+                                showingAddSheet = true
+                            } label: {
+                                HStack(spacing: 6) {
+                                    Image(systemName: "plus.circle.fill")
+                                        .font(.system(size: 13, weight: .semibold))
+                                    Text("Add Holding")
+                                        .font(.system(size: 13, weight: .semibold, design: .rounded))
+                                }
+                                .frame(maxWidth: .infinity)
+                                .padding(.vertical, 11)
+                                .background(LOSTheme.primary)
+                                .foregroundStyle(Color.black)
+                                .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+                            }
                         }
-                        .disabled(viewModel.isRefreshingMarketData)
                         
                         Button {
-                            showingAddSheet = true
+                            viewModel.isShowingWhatIfSheet = true
                         } label: {
                             HStack(spacing: 6) {
-                                Image(systemName: "plus.circle.fill")
-                                    .font(.system(size: 13, weight: .semibold))
-                                Text("Add Holding")
-                                    .font(.system(size: 13, weight: .semibold, design: .rounded))
+                                Image(systemName: "wand.and.stars")
+                                    .font(.system(size: 12, weight: .semibold))
+                                Text("What-If Simulator (Model Any NSE / BSE Stock)")
+                                    .font(.system(size: 12, weight: .semibold, design: .rounded))
                             }
                             .frame(maxWidth: .infinity)
-                            .padding(.vertical, 11)
-                            .background(LOSTheme.primary)
-                            .foregroundStyle(Color.black)
-                            .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+                            .padding(.vertical, 9)
+                            .background(LOSTheme.positive.opacity(0.12))
+                            .foregroundStyle(LOSTheme.positive)
+                            .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
                         }
                     }
                     .padding(.horizontal)
@@ -237,6 +255,9 @@ struct PortfolioManagementView: View {
             }
             .sheet(item: $editingHolding) { holding in
                 HoldingEditorSheet(viewModel: viewModel, existingHolding: holding)
+            }
+            .sheet(isPresented: $viewModel.isShowingWhatIfSheet) {
+                WhatIfStockSimulatorView(viewModel: viewModel)
             }
         }
     }

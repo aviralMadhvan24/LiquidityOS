@@ -225,11 +225,22 @@ struct StressTestView: View {
                                     .foregroundStyle(LOSTheme.textSecondary)
                                     .tracking(0.8)
                                 Spacer()
-                                Button("Reset All") {
+                                Button {
+                                    viewModel.isShowingWhatIfSheet = true
+                                } label: {
+                                    HStack(spacing: 4) {
+                                        Image(systemName: "plus.circle.fill")
+                                        Text("Simulate New Stock")
+                                    }
+                                    .font(.caption.weight(.bold))
+                                    .foregroundStyle(LOSTheme.positive)
+                                }
+                                
+                                Button("Reset") {
                                     viewModel.resetIndividualStockDeclines()
                                 }
-                                .font(.caption.weight(.bold))
-                                .foregroundStyle(LOSTheme.accent)
+                                .font(.caption.weight(.semibold))
+                                .foregroundStyle(LOSTheme.textSecondary)
                             }
                             
                             // Top Loss Contributor Highlight Card
@@ -336,24 +347,44 @@ struct StressTestView: View {
             .background(LOSTheme.backgroundGradient.ignoresSafeArea())
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
-                    Button {
-                        isShowingCompareSheet = true
-                    } label: {
-                        HStack(spacing: LOSTheme.space4) {
-                            Image(systemName: "rectangle.split.3x1")
-                            Text("Compare")
-                                .font(.caption.weight(.semibold))
+                    HStack(spacing: LOSTheme.space8) {
+                        Button {
+                            viewModel.isShowingWhatIfSheet = true
+                        } label: {
+                            HStack(spacing: LOSTheme.space4) {
+                                Image(systemName: "wand.and.stars")
+                                Text("Simulate Stock")
+                                    .font(.caption.weight(.semibold))
+                            }
+                            .padding(.horizontal, LOSTheme.space12)
+                            .padding(.vertical, LOSTheme.space6)
+                            .background(LOSTheme.positive.opacity(0.12))
+                            .foregroundStyle(LOSTheme.positive)
+                            .clipShape(Capsule())
                         }
-                        .padding(.horizontal, LOSTheme.space12)
-                        .padding(.vertical, LOSTheme.space6)
-                        .background(LOSTheme.accent.opacity(0.12))
-                        .foregroundStyle(LOSTheme.accent)
-                        .clipShape(Capsule())
+                        
+                        Button {
+                            isShowingCompareSheet = true
+                        } label: {
+                            HStack(spacing: LOSTheme.space4) {
+                                Image(systemName: "rectangle.split.3x1")
+                                Text("Compare")
+                                    .font(.caption.weight(.semibold))
+                            }
+                            .padding(.horizontal, LOSTheme.space12)
+                            .padding(.vertical, LOSTheme.space6)
+                            .background(LOSTheme.accent.opacity(0.12))
+                            .foregroundStyle(LOSTheme.accent)
+                            .clipShape(Capsule())
+                        }
                     }
                 }
             }
             .sheet(isPresented: $isShowingCompareSheet) {
                 ScenarioCompareView(viewModel: viewModel)
+            }
+            .sheet(isPresented: $viewModel.isShowingWhatIfSheet) {
+                WhatIfStockSimulatorView(viewModel: viewModel)
             }
             .onAppear {
                 sliderDecline = viewModel.currentDeclinePercentage

@@ -1,0 +1,451 @@
+import SwiftUI
+
+/// Feature: What-If NSE & BSE Stock Simulator.
+/// Allows users to model adding any NSE or BSE stock to evaluate portfolio drawdown,
+/// concentration risk, and resilience score impact before committing real capital.
+struct WhatIfStockSimulatorView: View {
+    @ObservedObject var viewModel: ResilienceViewModel
+    @Environment(\.dismiss) private var dismiss
+    
+    @State private var searchQuery: String = ""
+    @State private var selectedExchange: String = "ALL" // "ALL", "NSE", "BSE"
+    @State private var isShowingCustomEntry: Bool = false
+    
+    private var result: WhatIfSimulationResult {
+        viewModel.whatIfSimulationResult
+    }
+    
+    private var searchResults: [StockCatalogItem] {
+        IndianStockDirectory.shared.search(
+            query: searchQuery,
+            exchangeFilter: selectedExchange == "ALL" ? nil : selectedExchange
+        )
+    }
+    
+    var body: some View {
+        NavigationStack {
+            ScrollView {
+                VStack(spacing: LOSTheme.space20) {
+                    
+                    // MARK: - Hero Explanation Banner
+                    VStack(alignment: .leading, spacing: LOSTheme.space8) {
+                        HStack {
+                            Image(systemName: "wand.and.stars")
+                                .font(.title3)
+                                .foregroundStyle(LOSTheme.accent)
+                            Text("WHAT-IF STOCK SIMULATOR")
+                                .font(.footnote.weight(.bold))
+                                .foregroundStyle(LOSTheme.accent)
+                                .tracking(0.8)
+                            Spacer()
+                            Text("Hypothetical")
+                                .font(.caption2.weight(.bold))
+                                .padding(.horizontal, 8)
+                                .padding(.vertical, 3)
+                                .background(LOSTheme.accent.opacity(0.15))
+                                .foregroundStyle(LOSTheme.accent)
+                                .clipShape(Capsule())
+                        }
+                        
+                        Text("Simulate how buying any NSE or BSE stock impacts your portfolio drawdown, diversification, and resilience score during a crash.")
+                            .font(.subheadline)
+                            .foregroundStyle(LOSTheme.textSecondary)
+                    }
+                    .padding(LOSTheme.space16)
+                    .background(LOSTheme.surface)
+                    .clipShape(.rect(cornerRadius: LOSTheme.radiusCard, style: .continuous))
+                    .overlay(
+                        RoundedRectangle(cornerRadius: LOSTheme.radiusCard, style: .continuous)
+                            .stroke(LOSTheme.borderHairline, lineWidth: LOSTheme.hairline)
+                    )
+                    .padding(.horizontal)
+                    
+                    // MARK: - Stock Picker & Search Section
+                    VStack(alignment: .leading, spacing: LOSTheme.space12) {
+                        Text("1. CHOOSE AN NSE / BSE STOCK")
+                            .font(.footnote.weight(.semibold))
+                            .foregroundStyle(LOSTheme.textSecondary)
+                            .tracking(0.8)
+                        
+                        // Exchange Filter Tabs
+                        Picker("Exchange", selection: $selectedExchange) {
+                            Text("All Indian Equities").tag("ALL")
+                            Text("NSE").tag("NSE")
+                            Text("BSE").tag("BSE")
+                        }
+                        .pickerStyle(.segmented)
+                        
+                        // Quick Featured Chips
+                        ScrollView(.horizontal, showsIndicators: false) {
+                            HStack(spacing: LOSTheme.space8) {
+                                ForEach(IndianStockDirectory.shared.featuredPicks) { stock in
+                                    Button {
+                                        viewModel.selectWhatIfStock(catalogItem: stock)
+                                    } label: {
+                                        HStack(spacing: 4) {
+                                            Text(stock.symbol)
+                                                .font(.caption.weight(.bold))
+                                                .fontDesign(.monospaced)
+                                            Text("(\(stock.exchange))")
+                                                .font(.caption2)
+                                                .foregroundStyle(LOSTheme.textSecondary)
+                                        }
+                                        .padding(.horizontal, 10)
+                                        .padding(.vertical, 6)
+                                        .background(viewModel.whatIfTicker == stock.symbol ? LOSTheme.accent.opacity(0.2) : LOSTheme.surfaceElevated)
+                                        .foregroundStyle(viewModel.whatIfTicker == stock.symbol ? LOSTheme.accent : LOSTheme.textPrimary)
+                                        .clipShape(Capsule())
+                                        .overlay(
+                                            Capsule()
+                                                .stroke(viewModel.whatIfTicker == stock.symbol ? LOSTheme.accent : LOSTheme.borderHairline, lineWidth: 1)
+                                        )
+                                    }
+                                }
+                            }
+                        }
+                        
+                        // Search Field
+                        HStack {
+                            Image(systemName: "magnifyingglass")
+                                .foregroundStyle(LOSTheme.textSecondary)
+                            TextField("Search symbol or company (e.g. ZOMATO, TCS)", text: $searchQuery)
+                                .textInputAutocapitalization(.characters)
+                            if !searchQuery.isEmpty {
+                                Button {
+                                    searchQuery = ""
+                                } label: {
+                                    Image(systemName: "xmark.circle.fill")
+                                        .foregroundStyle(LOSTheme.textSecondary)
+                                }
+                            }
+                        }
+                        .padding(LOSTheme.space12)
+                        .background(LOSTheme.surfaceElevated)
+                        .clipShape(.rect(cornerRadius: LOSTheme.radiusMedium, style: .continuous))
+                        
+                        // Search Results Dropdown (if searching)
+                        if !searchQuery.isEmpty {
+                            VStack(spacing: 0) {
+                                ForEach(searchResults.prefix(6)) { stock in
+                                    Button {
+                                        viewModel.selectWhatIfStock(catalogItem: stock)
+                                        searchQuery = ""
+                                    } label: {
+                                        HStack {
+                                            VStack(alignment: .leading, spacing: 2) {
+                                                HStack(spacing: 6) {
+                                                    Text(stock.symbol)
+                                                        .font(.subheadline.weight(.bold))
+                                                        .fontDesign(.monospaced)
+                                                        .foregroundStyle(LOSTheme.textPrimary)
+                                                    Text(stock.exchange)
+                                                        .font(.caption2.weight(.bold))
+                                                        .padding(.horizontal, 5)
+                                                        .padding(.vertical, 1)
+                                                        .background(LOSTheme.accent.opacity(0.12))
+                                                        .foregroundStyle(LOSTheme.accent)
+                                                        .clipShape(Capsule())
+                                                }
+                                                Text(stock.name)
+                                                    .font(.caption)
+                                                    .foregroundStyle(LOSTheme.textSecondary)
+                                                    .lineLimit(1)
+                                            }
+                                            Spacer()
+                                            VStack(alignment: .trailing, spacing: 2) {
+                                                Text(LOSTheme.formatRupee(stock.defaultPrice))
+                                                    .font(.subheadline.weight(.semibold))
+                                                    .fontDesign(.rounded)
+                                                    .foregroundStyle(LOSTheme.textPrimary)
+                                                Text(stock.sector)
+                                                    .font(.caption2)
+                                                    .foregroundStyle(LOSTheme.textSecondary)
+                                            }
+                                        }
+                                        .padding(.vertical, 10)
+                                        .padding(.horizontal, 12)
+                                    }
+                                    Divider().overlay(LOSTheme.borderHairline)
+                                }
+                            }
+                            .background(LOSTheme.surfaceElevated)
+                            .clipShape(.rect(cornerRadius: LOSTheme.radiusMedium, style: .continuous))
+                        }
+                        
+                        // Active Selected Stock Card
+                        HStack(spacing: LOSTheme.space12) {
+                            ZStack {
+                                Circle()
+                                    .fill(LOSTheme.accent.opacity(0.15))
+                                    .frame(width: 44, height: 44)
+                                Text(String(viewModel.whatIfTicker.prefix(2)))
+                                    .font(.subheadline.weight(.bold))
+                                    .foregroundStyle(LOSTheme.accent)
+                            }
+                            
+                            VStack(alignment: .leading, spacing: 2) {
+                                HStack(spacing: 6) {
+                                    Text(viewModel.whatIfTicker)
+                                        .font(.headline.weight(.bold))
+                                        .fontDesign(.monospaced)
+                                        .foregroundStyle(LOSTheme.textPrimary)
+                                    Text(viewModel.whatIfExchange)
+                                        .font(.caption2.weight(.bold))
+                                        .padding(.horizontal, 6)
+                                        .padding(.vertical, 2)
+                                        .background(LOSTheme.positive.opacity(0.14))
+                                        .foregroundStyle(LOSTheme.positive)
+                                        .clipShape(Capsule())
+                                }
+                                Text(viewModel.whatIfCompanyName)
+                                    .font(.caption)
+                                    .foregroundStyle(LOSTheme.textSecondary)
+                                    .lineLimit(1)
+                            }
+                            Spacer()
+                            VStack(alignment: .trailing, spacing: 2) {
+                                Text(LOSTheme.formatRupee(viewModel.whatIfPrice))
+                                    .font(.headline.weight(.bold))
+                                    .fontDesign(.rounded)
+                                    .foregroundStyle(LOSTheme.textPrimary)
+                                Text(viewModel.whatIfSector)
+                                    .font(.caption2)
+                                    .foregroundStyle(LOSTheme.textSecondary)
+                            }
+                        }
+                        .padding(LOSTheme.space12)
+                        .background(LOSTheme.surfaceElevated)
+                        .clipShape(.rect(cornerRadius: LOSTheme.radiusMedium, style: .continuous))
+                    }
+                    .padding(LOSTheme.space16)
+                    .background(LOSTheme.surface)
+                    .clipShape(.rect(cornerRadius: LOSTheme.radiusCard, style: .continuous))
+                    .overlay(
+                        RoundedRectangle(cornerRadius: LOSTheme.radiusCard, style: .continuous)
+                            .stroke(LOSTheme.borderHairline, lineWidth: LOSTheme.hairline)
+                    )
+                    .padding(.horizontal)
+                    
+                    // MARK: - Simulation Inputs (Shares & Crash Scenario)
+                    VStack(alignment: .leading, spacing: LOSTheme.space16) {
+                        Text("2. SIMULATION PARAMETERS")
+                            .font(.footnote.weight(.semibold))
+                            .foregroundStyle(LOSTheme.textSecondary)
+                            .tracking(0.8)
+                        
+                        // Shares Count Stepper & Slider
+                        VStack(alignment: .leading, spacing: LOSTheme.space8) {
+                            HStack {
+                                Text("Hypothetical Position")
+                                    .font(.subheadline)
+                                    .foregroundStyle(LOSTheme.textSecondary)
+                                Spacer()
+                                Text("\(viewModel.whatIfShares) Shares")
+                                    .font(.headline.weight(.bold))
+                                    .fontDesign(.rounded)
+                                    .foregroundStyle(LOSTheme.textPrimary)
+                            }
+                            
+                            Slider(value: Binding(
+                                get: { Double(viewModel.whatIfShares) },
+                                set: { viewModel.whatIfShares = Int($0) }
+                            ), in: 1...500, step: 5)
+                            .tint(LOSTheme.accent)
+                            
+                            HStack {
+                                Text("Simulated Outlay:")
+                                    .font(.caption)
+                                    .foregroundStyle(LOSTheme.textSecondary)
+                                Text(LOSTheme.formatRupee(viewModel.whatIfInvestmentAmount))
+                                    .font(.caption.weight(.bold))
+                                    .fontDesign(.rounded)
+                                    .foregroundStyle(LOSTheme.accent)
+                                Spacer()
+                                Text("Weight: \(String(format: "%.1f%%", result.newHoldingWeight))")
+                                    .font(.caption.weight(.semibold))
+                                    .foregroundStyle(result.isConcentrationHeavy ? LOSTheme.warning : LOSTheme.textSecondary)
+                            }
+                        }
+                        
+                        Divider().overlay(LOSTheme.borderHairline)
+                        
+                        // Market Crash Scenario
+                        VStack(alignment: .leading, spacing: LOSTheme.space8) {
+                            HStack {
+                                Text("Simulated Market Shock")
+                                    .font(.subheadline)
+                                    .foregroundStyle(LOSTheme.textSecondary)
+                                Spacer()
+                                StatusPill(
+                                    text: "−\(String(format: "%.0f%%", viewModel.whatIfSimulatedDecline)) Drawdown",
+                                    icon: "arrow.down.right",
+                                    color: LOSTheme.critical,
+                                    isProminent: true
+                                )
+                            }
+                            
+                            Picker("Shock Scenario", selection: $viewModel.whatIfSimulatedDecline) {
+                                Text("Mild (-10%)").tag(10.0)
+                                Text("Stress (-25%)").tag(25.0)
+                                Text("Severe (-40%)").tag(40.0)
+                            }
+                            .pickerStyle(.segmented)
+                        }
+                    }
+                    .padding(LOSTheme.space16)
+                    .background(LOSTheme.surface)
+                    .clipShape(.rect(cornerRadius: LOSTheme.radiusCard, style: .continuous))
+                    .overlay(
+                        RoundedRectangle(cornerRadius: LOSTheme.radiusCard, style: .continuous)
+                            .stroke(LOSTheme.borderHairline, lineWidth: LOSTheme.hairline)
+                    )
+                    .padding(.horizontal)
+                    
+                    // MARK: - Simulation Results (Before vs After)
+                    VStack(alignment: .leading, spacing: LOSTheme.space16) {
+                        Text("3. SIMULATED IMPACT ON RESILIENCE")
+                            .font(.footnote.weight(.semibold))
+                            .foregroundStyle(LOSTheme.textSecondary)
+                            .tracking(0.8)
+                        
+                        // Score Comparison Card
+                        HStack(spacing: LOSTheme.space12) {
+                            VStack(alignment: .leading, spacing: 4) {
+                                Text("CURRENT SCORE")
+                                    .font(.caption2.weight(.bold))
+                                    .foregroundStyle(LOSTheme.textSecondary)
+                                Text("\(Int(result.baselineResilienceScore))/100")
+                                    .font(.title2.weight(.bold))
+                                    .fontDesign(.rounded)
+                                    .foregroundStyle(LOSTheme.textPrimary)
+                            }
+                            
+                            Spacer()
+                            Image(systemName: "arrow.right")
+                                .font(.headline)
+                                .foregroundStyle(LOSTheme.textSecondary)
+                            Spacer()
+                            
+                            VStack(alignment: .trailing, spacing: 4) {
+                                Text("SIMULATED SCORE")
+                                    .font(.caption2.weight(.bold))
+                                    .foregroundStyle(LOSTheme.textSecondary)
+                                HStack(spacing: 4) {
+                                    Text("\(Int(result.newResilienceScore))/100")
+                                        .font(.title2.weight(.bold))
+                                        .fontDesign(.rounded)
+                                        .foregroundStyle(result.scoreDelta >= 0 ? LOSTheme.positive : LOSTheme.critical)
+                                    Text("(\(String(format: "%+.1f", result.scoreDelta)))")
+                                        .font(.caption.weight(.bold))
+                                        .foregroundStyle(result.scoreDelta >= 0 ? LOSTheme.positive : LOSTheme.critical)
+                                }
+                            }
+                        }
+                        .padding(LOSTheme.space12)
+                        .background(LOSTheme.surfaceElevated)
+                        .clipShape(.rect(cornerRadius: LOSTheme.radiusMedium, style: .continuous))
+                        
+                        // Drawdown Breakdown
+                        HStack(spacing: LOSTheme.space12) {
+                            VStack(alignment: .leading, spacing: 4) {
+                                Text("BASELINE DRAWDOWN")
+                                    .font(.caption2.weight(.bold))
+                                    .foregroundStyle(LOSTheme.textSecondary)
+                                Text("−\(LOSTheme.formatRupee(result.baselineEstimatedLoss))")
+                                    .font(.headline.weight(.bold))
+                                    .fontDesign(.rounded)
+                                    .foregroundStyle(LOSTheme.textPrimary)
+                            }
+                            
+                            Spacer()
+                            
+                            VStack(alignment: .trailing, spacing: 4) {
+                                Text("SIMULATED DRAWDOWN")
+                                    .font(.caption2.weight(.bold))
+                                    .foregroundStyle(LOSTheme.textSecondary)
+                                Text("−\(LOSTheme.formatRupee(result.newEstimatedLoss))")
+                                    .font(.headline.weight(.bold))
+                                    .fontDesign(.rounded)
+                                    .foregroundStyle(LOSTheme.critical)
+                            }
+                        }
+                        .padding(LOSTheme.space12)
+                        .background(LOSTheme.surfaceElevated)
+                        .clipShape(.rect(cornerRadius: LOSTheme.radiusMedium, style: .continuous))
+                        
+                        // Impact summary text
+                        HStack(alignment: .top, spacing: 8) {
+                            Image(systemName: result.isConcentrationHeavy ? "exclamationmark.triangle.fill" : "info.circle.fill")
+                                .font(.caption)
+                                .foregroundStyle(result.isConcentrationHeavy ? LOSTheme.warning : LOSTheme.accent)
+                                .padding(.top, 2)
+                            
+                            VStack(alignment: .leading, spacing: 2) {
+                                Text(result.scoreImpactDescription)
+                                    .font(.caption)
+                                    .foregroundStyle(LOSTheme.textPrimary)
+                                if result.isConcentrationHeavy {
+                                    Text("Warning: This position would represent \(String(format: "%.1f%%", result.newHoldingWeight)) of your portfolio, exceeding safe concentration thresholds.")
+                                        .font(.caption2)
+                                        .foregroundStyle(LOSTheme.warning)
+                                }
+                            }
+                        }
+                        .padding(LOSTheme.space10)
+                        .background(result.isConcentrationHeavy ? LOSTheme.warning.opacity(0.10) : LOSTheme.accent.opacity(0.08))
+                        .clipShape(.rect(cornerRadius: LOSTheme.radiusMedium, style: .continuous))
+                    }
+                    .padding(LOSTheme.space16)
+                    .background(LOSTheme.surface)
+                    .clipShape(.rect(cornerRadius: LOSTheme.radiusCard, style: .continuous))
+                    .overlay(
+                        RoundedRectangle(cornerRadius: LOSTheme.radiusCard, style: .continuous)
+                            .stroke(LOSTheme.borderHairline, lineWidth: LOSTheme.hairline)
+                    )
+                    .padding(.horizontal)
+                    
+                    // MARK: - Action Buttons
+                    VStack(spacing: LOSTheme.space12) {
+                        Button {
+                            viewModel.commitWhatIfHoldingToRealPortfolio()
+                            dismiss()
+                        } label: {
+                            HStack {
+                                Image(systemName: "plus.circle.fill")
+                                Text("Add to Active Portfolio")
+                            }
+                            .font(.headline.weight(.bold))
+                            .foregroundStyle(Color.black)
+                            .frame(maxWidth: .infinity)
+                            .padding(.vertical, LOSTheme.space14)
+                            .background(LOSTheme.primary)
+                            .clipShape(Capsule())
+                        }
+                        
+                        Button {
+                            dismiss()
+                        } label: {
+                            Text("Done Simulating")
+                                .font(.subheadline.weight(.semibold))
+                                .foregroundStyle(LOSTheme.textSecondary)
+                        }
+                        .padding(.top, 4)
+                    }
+                    .padding(.horizontal)
+                    .padding(.bottom, LOSTheme.space24)
+                }
+                .padding(.top, LOSTheme.space8)
+            }
+            .background(LOSTheme.background.ignoresSafeArea())
+            .navigationTitle("What-If Stock Simulator")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button("Close") {
+                        dismiss()
+                    }
+                }
+            }
+        }
+    }
+}

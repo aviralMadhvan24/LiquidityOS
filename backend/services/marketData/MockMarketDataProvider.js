@@ -84,6 +84,111 @@ class MockMarketDataProvider extends MarketDataAdapter {
         price: 478.90,
         prevClose: 476.20,
         sector: 'Consumer Goods'
+      },
+      'TATAPOWER': {
+        name: 'Tata Power Company Limited',
+        exchange: 'NSE',
+        price: 438.50,
+        prevClose: 432.10,
+        sector: 'Power & Utilities'
+      },
+      'SUZLON': {
+        name: 'Suzlon Energy Limited',
+        exchange: 'NSE',
+        price: 72.80,
+        prevClose: 70.90,
+        sector: 'Renewable Energy'
+      },
+      'JIOFIN': {
+        name: 'Jio Financial Services Limited',
+        exchange: 'NSE',
+        price: 332.50,
+        prevClose: 328.00,
+        sector: 'Financial Services'
+      },
+      'IRFC': {
+        name: 'Indian Railway Finance Corporation',
+        exchange: 'NSE',
+        price: 168.20,
+        prevClose: 165.40,
+        sector: 'Railways & Finance'
+      },
+      'HAL': {
+        name: 'Hindustan Aeronautics Limited',
+        exchange: 'NSE',
+        price: 4560.00,
+        prevClose: 4510.00,
+        sector: 'Aerospace & Defense'
+      },
+      'BEL': {
+        name: 'Bharat Electronics Limited',
+        exchange: 'NSE',
+        price: 284.00,
+        prevClose: 281.50,
+        sector: 'Defense Electronics'
+      },
+      'CDSL': {
+        name: 'Central Depository Services Limited',
+        exchange: 'BSE',
+        price: 1480.00,
+        prevClose: 1465.00,
+        sector: 'Capital Markets'
+      },
+      'BSE': {
+        name: 'BSE Limited',
+        exchange: 'BSE',
+        price: 4620.00,
+        prevClose: 4550.00,
+        sector: 'Stock Exchange'
+      },
+      'KOTAKBANK': {
+        name: 'Kotak Mahindra Bank Limited',
+        exchange: 'NSE',
+        price: 1756.20,
+        prevClose: 1748.00,
+        sector: 'Banking'
+      },
+      'AXISBANK': {
+        name: 'Axis Bank Limited',
+        exchange: 'NSE',
+        price: 1184.00,
+        prevClose: 1176.50,
+        sector: 'Banking'
+      },
+      'MARUTI': {
+        name: 'Maruti Suzuki India Limited',
+        exchange: 'NSE',
+        price: 12150.00,
+        prevClose: 12050.00,
+        sector: 'Automotive'
+      },
+      'TITAN': {
+        name: 'Titan Company Limited',
+        exchange: 'NSE',
+        price: 3420.00,
+        prevClose: 3390.00,
+        sector: 'Consumer Discretionary'
+      },
+      'BAJFINANCE': {
+        name: 'Bajaj Finance Limited',
+        exchange: 'NSE',
+        price: 7120.00,
+        prevClose: 7060.00,
+        sector: 'Financial Services'
+      },
+      'TRENT': {
+        name: 'Trent Limited (Westside/Zudio)',
+        exchange: 'NSE',
+        price: 7450.00,
+        prevClose: 7380.00,
+        sector: 'Retail'
+      },
+      'WIPRO': {
+        name: 'Wipro Limited',
+        exchange: 'NSE',
+        price: 538.00,
+        prevClose: 534.20,
+        sector: 'Information Technology'
       }
     };
   }
