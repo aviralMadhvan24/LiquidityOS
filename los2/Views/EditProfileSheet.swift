@@ -5,6 +5,8 @@ import SwiftUI
 /// income, living expenses, debt/EMI commitments, liquid cash, desired safety reserve, and equity assets.
 struct EditProfileSheet: View {
     @ObservedObject var viewModel: ResilienceViewModel
+    @AppStorage("isLoggedIn") private var isLoggedIn: Bool = false
+    @AppStorage("loggedInUserEmail") private var loggedInUserEmail: String = "user@gmail.com"
     @Environment(\.dismiss) private var dismiss
     
     @State private var portfolioText: String = ""
@@ -144,6 +146,23 @@ struct EditProfileSheet: View {
                             Text("Reset to Demo Profile")
                         }
                         .foregroundStyle(LOSTheme.primary)
+                    }
+                }
+                
+                // Section 6: Account & Session
+                Section {
+                    Button(role: .destructive) {
+                        dismiss()
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                            withAnimation {
+                                isLoggedIn = false
+                            }
+                        }
+                    } label: {
+                        HStack {
+                            Image(systemName: "rectangle.portrait.and.arrow.right")
+                            Text("Sign Out (\(loggedInUserEmail))")
+                        }
                     }
                 }
             }

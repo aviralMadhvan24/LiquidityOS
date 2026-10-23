@@ -7,11 +7,14 @@ import Charts
 /// and quick-action module hubs.
 struct DashboardView: View {
     @ObservedObject var viewModel: ResilienceViewModel
+    @AppStorage("isLoggedIn") private var isLoggedIn: Bool = false
+    @AppStorage("loggedInUserEmail") private var loggedInUserEmail: String = "user@gmail.com"
     
     @State private var isPreviewingShock: Bool = false
     @State private var isShowingStressSheet: Bool = false
     @State private var isShowingEmergencySheet: Bool = false
     @State private var isShowingRunwaySheet: Bool = false
+    @State private var isShowingSignOutAlert: Bool = false
     
     var baselineReport: ExplainableResilienceReport {
         viewModel.baselineScoreReport
@@ -63,6 +66,26 @@ struct DashboardView: View {
                                 .padding(8)
                                 .background(Color(red: 1.0, green: 0.34, blue: 0.13).opacity(0.12))
                                 .foregroundStyle(Color(red: 1.0, green: 0.34, blue: 0.13))
+                                .clipShape(Circle())
+                        }
+                        
+                        // Profile & Sign Out Menu
+                        Menu {
+                            Section {
+                                Label(loggedInUserEmail, systemImage: "person.fill")
+                            }
+                            
+                            Button(role: .destructive) {
+                                isShowingSignOutAlert = true
+                            } label: {
+                                Label("Sign Out", systemImage: "rectangle.portrait.and.arrow.right")
+                            }
+                        } label: {
+                            Image(systemName: "person.crop.circle")
+                                .font(.system(size: 14, weight: .bold))
+                                .padding(8)
+                                .background(Color.primary.opacity(0.06))
+                                .foregroundStyle(Color.primary)
                                 .clipShape(Circle())
                         }
                     }
@@ -428,6 +451,16 @@ struct DashboardView: View {
             }
             .sheet(isPresented: $isShowingRunwaySheet) {
                 RunwayView(viewModel: viewModel)
+            }
+            .alert("Sign Out", isPresented: $isShowingSignOutAlert) {
+                Button("Cancel", role: .cancel) { }
+                Button("Sign Out", role: .destructive) {
+                    withAnimation(.easeInOut(duration: 0.25)) {
+                        isLoggedIn = false
+                    }
+                }
+            } message: {
+                Text("Are you sure you want to sign out of LiquidityOS?")
             }
         }
     }
