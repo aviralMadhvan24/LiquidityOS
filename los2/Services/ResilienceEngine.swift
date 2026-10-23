@@ -323,4 +323,154 @@ struct ResilienceEngine {
             disclaimer: "Illustrative internal resilience index based on deterministic math. Not an official credit rating or investment guarantee."
         )
     }
+    
+    // MARK: - Baseline Resilience Score (Without Scenario Precondition)
+    /// Calculates the user's permanent baseline resilience score under normal conditions (0% market shock).
+    static func calculateBaselineScore(profile: FinancialProfile) -> ExplainableResilienceReport {
+        return calculateExplainableScore(profile: profile, declinePercent: 0.0)
+    }
+    
+    // MARK: - Emergency Shock Simulation Engine
+    /// Computes full before-and-after liquidity, shortfall, reserve breach, and runway dynamics for emergency shocks.
+    static func calculateEmergencySimulation(
+        profile: FinancialProfile,
+        scenario: EmergencyScenario
+    ) -> EmergencySimulationResult {
+        let preCash = max(0, profile.liquidCash)
+        let totalDrain = scenario.totalEmergencyDrain
+        let rawRemaining = preCash - totalDrain
+        let postCash = max(0, rawRemaining)
+        let shortfall = rawRemaining < 0 ? abs(rawRemaining) : 0.0
+        let isShortfall = shortfall > 0
+        
+        let reserveTarget = max(0, profile.minimumCashReserve)
+        let isBreached = rawRemaining < reserveTarget
+        let breachAmount = isBreached ? max(0, reserveTarget - rawRemaining) : 0.0
+        
+        let preBurn = max(0, profile.totalMonthlyOutflows - profile.monthlyIncome)
+        let additionalMonthly = scenario.expenseType == .recurring ? scenario.amount : 0.0
+        let postBurn = max(0, (profile.totalMonthlyOutflows + additionalMonthly) - profile.monthlyIncome)
+        
+        let preRunway = preBurn > 0 ? (preCash / preBurn) : 99.0
+        let postRunway: Double
+        if isShortfall || postCash == 0 {
+            postRunway = 0.0
+        } else if postBurn > 0 {
+            postRunway = postCash / postBurn
+        } else {
+            postRunway = 99.0
+        }
+        
+        let runwayReduction = max(0, preRunway - postRunway)
+        let cashDrainedPercent = preCash > 0 ? min(100.0, (totalDrain / preCash) * 100.0) : 100.0
+        
+        let severity: String
+        let color: Color
+        let headline: String
+        
+        if isShortfall {
+            severity = "Critical Shortfall"
+            color = LOSTheme.criticalRed
+            headline = "Funding Deficit of \(LOSTheme.formatRupee(shortfall)). Liquid cash exhausted."
+        } else if isBreached {
+            severity = "Reserve Breached"
+            color = LOSTheme.warningAmber
+            headline = "Safety floor of \(LOSTheme.formatRupee(reserveTarget)) breached by \(LOSTheme.formatRupee(breachAmount))."
+        } else if cashDrainedPercent > 50 {
+            severity = "High Absorption"
+            color = LOSTheme.warningAmber
+            headline = "Absorbed, but drains \(Int(cashDrainedPercent))% of your liquid safety reserve."
+        } else {
+            severity = "Manageable"
+            color = LOSTheme.safeGreen
+            headline = "Emergency fully absorbed within cash reserves without breaching safety floor."
+        }
+        
+        return EmergencySimulationResult(
+            preShockCash: preCash,
+            totalEmergencyDrain: totalDrain,
+            postShockCash: postCash,
+            fundingShortfall: shortfall,
+            isShortfall: isShortfall,
+            minimumReserveTarget: reserveTarget,
+            isReserveBreached: isBreached,
+            reserveBreachAmount: breachAmount,
+            preShockMonthlyBurn: preBurn,
+            postShockMonthlyBurn: postBurn,
+            preShockRunwayMonths: Double(round(preRunway * 10) / 10),
+            postShockRunwayMonths: Double(round(postRunway * 10) / 10),
+            runwayReductionMonths: Double(round(runwayReduction * 10) / 10),
+            cashDrainedPercentage: cashDrainedPercent,
+            summaryHeadline: headline,
+            severityRating: severity,
+            statusColor: color
+        )
+    }
+    
+    // MARK: - Stress Chart Data Calculators
+    struct DeclineCurvePoint: Identifiable, Equatable {
+        var id: Double { declinePercent }
+        let declinePercent: Double
+        let remainingPortfolio: Double
+        let estimatedLoss: Double
+    }
+    
+    static func calculateDeclineCurve(portfolioValue: Double) -> [DeclineCurvePoint] {
+        let percentages = [0.0, 5.0, 10.0, 15.0, 20.0, 25.0, 30.0, 40.0, 50.0, 60.0]
+        return percentages.map { pct in
+            let loss = portfolioValue * (pct / 100.0)
+            let remaining = max(0, portfolioValue - loss)
+            return DeclineCurvePoint(
+                declinePercent: pct,
+                remainingPortfolio: remaining,
+                estimatedLoss: loss
+            )
+        }
+    }
+    
+    struct ScenarioComparisonPoint: Identifiable, Equatable {
+        var id: String { scenarioName }
+        let scenarioName: String
+        let declinePercent: Double
+        let remainingPortfolio: Double
+        let loss: Double
+        let isSelected: Bool
+    }
+    
+    static func calculateScenarioComparisons(portfolioValue: Double, activeDecline: Double) -> [ScenarioComparisonPoint] {
+        let scenarios: [(name: String, pct: Double)] = [
+            ("Mild", 5.0),
+            ("Stress", 15.0),
+            ("Severe", 30.0),
+            ("Crisis", 50.0)
+        ]
+        
+        var points = scenarios.map { item in
+            let loss = portfolioValue * (item.pct / 100.0)
+            let remaining = max(0, portfolioValue - loss)
+            let selected = abs(item.pct - activeDecline) < 0.5
+            return ScenarioComparisonPoint(
+                scenarioName: item.name,
+                declinePercent: item.pct,
+                remainingPortfolio: remaining,
+                loss: loss,
+                isSelected: selected
+            )
+        }
+        
+        // If activeDecline is a custom value not matching standard presets, append Custom
+        if !scenarios.contains(where: { abs($0.pct - activeDecline) < 0.5 }) {
+            let customLoss = portfolioValue * (activeDecline / 100.0)
+            let customRemaining = max(0, portfolioValue - customLoss)
+            points.append(ScenarioComparisonPoint(
+                scenarioName: "Custom (\(Int(activeDecline))%)",
+                declinePercent: activeDecline,
+                remainingPortfolio: customRemaining,
+                loss: customLoss,
+                isSelected: true
+            ))
+        }
+        
+        return points
+    }
 }

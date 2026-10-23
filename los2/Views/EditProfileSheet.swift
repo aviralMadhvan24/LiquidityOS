@@ -1,6 +1,8 @@
 import SwiftUI
 
-/// Sheet allowing users to input and tweak their real financial numbers.
+/// Feature 05: Enhanced Financial Profile Editor Sheet.
+/// Allows users to view, validate, and update all dimensions of their real financial reality:
+/// income, living expenses, debt/EMI commitments, liquid cash, desired safety reserve, and equity assets.
 struct EditProfileSheet: View {
     @ObservedObject var viewModel: ResilienceViewModel
     @Environment(\.dismiss) private var dismiss
@@ -9,94 +11,106 @@ struct EditProfileSheet: View {
     @State private var cashText: String = ""
     @State private var incomeText: String = ""
     @State private var expensesText: String = ""
+    @State private var debtText: String = ""
+    @State private var reserveFloorText: String = ""
     @State private var billText: String = ""
+    
+    @State private var validationError: String? = nil
     
     var body: some View {
         NavigationStack {
             Form {
+                // Validation error callout
+                if let err = validationError {
+                    Section {
+                        HStack(spacing: 8) {
+                            Image(systemName: "exclamationmark.triangle.fill")
+                                .foregroundStyle(LOSTheme.criticalRed)
+                            Text(err)
+                                .font(.system(size: 13, weight: .medium))
+                                .foregroundStyle(LOSTheme.criticalRed)
+                        }
+                    }
+                }
+                
+                // Section 1: Assets & Liquid Cash
                 Section {
                     HStack {
-                        Label("Portfolio Value", systemImage: "chart.pie.fill")
+                        Label("Liquid Cash & Savings", systemImage: "banknote.fill")
                         Spacer()
-                        #if os(iOS)
-                        TextField("₹", text: $portfolioText)
-                            .keyboardType(.numberPad)
-                            .multilineTextAlignment(.trailing)
-                        #else
-                        TextField("₹", text: $portfolioText)
-                            .multilineTextAlignment(.trailing)
-                        #endif
-                    }
-                    
-                    HStack {
-                        Label("Liquid Cash", systemImage: "banknote.fill")
-                        Spacer()
-                        #if os(iOS)
                         TextField("₹", text: $cashText)
                             .keyboardType(.numberPad)
                             .multilineTextAlignment(.trailing)
-                        #else
-                        TextField("₹", text: $cashText)
-                            .multilineTextAlignment(.trailing)
-                        #endif
-                    }
-                } header: {
-                    Text("Assets & Liquidity")
-                } footer: {
-                    Text("Portfolio includes stocks and mutual funds. Liquid cash includes savings accounts and emergency funds.")
-                }
-                
-                Section {
-                    HStack {
-                        Label("Monthly Income", systemImage: "arrow.down.left.circle.fill")
-                        Spacer()
-                        #if os(iOS)
-                        TextField("₹", text: $incomeText)
-                            .keyboardType(.numberPad)
-                            .multilineTextAlignment(.trailing)
-                        #else
-                        TextField("₹", text: $incomeText)
-                            .multilineTextAlignment(.trailing)
-                        #endif
                     }
                     
                     HStack {
-                        Label("Monthly Expenses", systemImage: "arrow.up.right.circle.fill")
+                        Label("Desired Safety Reserve Floor", systemImage: "shield.fill")
                         Spacer()
-                        #if os(iOS)
+                        TextField("₹", text: $reserveFloorText)
+                            .keyboardType(.numberPad)
+                            .multilineTextAlignment(.trailing)
+                    }
+                    
+                    HStack {
+                        Label("Portfolio Equity Value", systemImage: "chart.pie.fill")
+                        Spacer()
+                        TextField("₹", text: $portfolioText)
+                            .keyboardType(.numberPad)
+                            .multilineTextAlignment(.trailing)
+                    }
+                } header: {
+                    Text("Assets & Reserves")
+                } footer: {
+                    Text("Liquid cash includes savings and instant bank deposits. The safety reserve floor is the minimum cash balance you want to protect.")
+                }
+                
+                // Section 2: Cash Flow (Earnings & Outflows)
+                Section {
+                    HStack {
+                        Label("Monthly Take-Home Income", systemImage: "arrow.down.left.circle.fill")
+                        Spacer()
+                        TextField("₹", text: $incomeText)
+                            .keyboardType(.numberPad)
+                            .multilineTextAlignment(.trailing)
+                    }
+                    
+                    HStack {
+                        Label("Monthly Living Expenses", systemImage: "arrow.up.right.circle.fill")
+                        Spacer()
                         TextField("₹", text: $expensesText)
                             .keyboardType(.numberPad)
                             .multilineTextAlignment(.trailing)
-                        #else
-                        TextField("₹", text: $expensesText)
+                    }
+                    
+                    HStack {
+                        Label("Monthly Debt & EMI Payments", systemImage: "creditcard.fill")
+                        Spacer()
+                        TextField("₹", text: $debtText)
+                            .keyboardType(.numberPad)
                             .multilineTextAlignment(.trailing)
-                        #endif
                     }
                 } header: {
-                    Text("Monthly Cash Flow")
+                    Text("Monthly Cash Flow & Commitments")
                 } footer: {
-                    Text("Used to calculate your net cash burn rate (Expenses − Income).")
+                    Text("Living expenses plus debt commitments determine your total monthly burn rate.")
                 }
                 
+                // Section 3: Stress Testing Emergency Bill
                 Section {
                     HStack {
                         Label("Sample Emergency Bill", systemImage: "bolt.shield.fill")
                         Spacer()
-                        #if os(iOS)
                         TextField("₹", text: $billText)
                             .keyboardType(.numberPad)
                             .multilineTextAlignment(.trailing)
-                        #else
-                        TextField("₹", text: $billText)
-                            .multilineTextAlignment(.trailing)
-                        #endif
                     }
                 } header: {
-                    Text("Stress Test Shock")
+                    Text("Stress Shock Baseline")
                 } footer: {
-                    Text("A sudden one-time expense such as medical care, car repair, or emergency travel.")
+                    Text("Default emergency bill applied to simulate liquidity shock waves.")
                 }
                 
+                // Section 4: Broker Integration Shortcut
                 Section {
                     Button {
                         dismiss()
@@ -124,9 +138,10 @@ struct EditProfileSheet: View {
                 } header: {
                     Text("Broker Integration")
                 } footer: {
-                    Text("Sync real-time equity holdings and cash margins from your Zerodha trading account.")
+                    Text("Sync real-time equity holdings and cash margins directly from your Zerodha account.")
                 }
                 
+                // Section 5: Reset Actions
                 Section {
                     Button(role: .none) {
                         viewModel.resetToDefaults()
@@ -141,9 +156,7 @@ struct EditProfileSheet: View {
                 }
             }
             .navigationTitle("Edit Finances")
-            #if os(iOS)
             .navigationBarTitleDisplayMode(.inline)
-            #endif
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
                     Button("Cancel") {
@@ -151,10 +164,11 @@ struct EditProfileSheet: View {
                     }
                 }
                 ToolbarItem(placement: .confirmationAction) {
-                    Button("Done") {
-                        saveAndDismiss()
+                    Button("Save") {
+                        validateAndSave()
                     }
-                    .fontWeight(.semibold)
+                    .fontWeight(.bold)
+                    .foregroundStyle(LOSTheme.primary)
                 }
             }
             .onAppear {
@@ -168,15 +182,50 @@ struct EditProfileSheet: View {
         cashText = String(format: "%.0f", viewModel.profile.liquidCash)
         incomeText = String(format: "%.0f", viewModel.profile.monthlyIncome)
         expensesText = String(format: "%.0f", viewModel.profile.monthlyExpenses)
+        debtText = String(format: "%.0f", viewModel.profile.monthlyDebtPayments)
+        reserveFloorText = String(format: "%.0f", viewModel.profile.minimumCashReserve)
         billText = String(format: "%.0f", viewModel.profile.unexpectedExpense)
     }
     
-    private func saveAndDismiss() {
-        if let p = Double(portfolioText) { viewModel.profile.portfolioValue = max(0, p) }
-        if let c = Double(cashText) { viewModel.profile.liquidCash = max(0, c) }
-        if let i = Double(incomeText) { viewModel.profile.monthlyIncome = max(0, i) }
-        if let e = Double(expensesText) { viewModel.profile.monthlyExpenses = max(0, e) }
-        if let b = Double(billText) { viewModel.profile.unexpectedExpense = max(0, b) }
+    private func validateAndSave() {
+        guard let p = Double(portfolioText.trimmingCharacters(in: .whitespacesAndNewlines)), p >= 0 else {
+            validationError = "Please enter a valid positive number for Portfolio Value."
+            return
+        }
+        guard let c = Double(cashText.trimmingCharacters(in: .whitespacesAndNewlines)), c >= 0 else {
+            validationError = "Please enter a valid positive number for Liquid Cash."
+            return
+        }
+        guard let i = Double(incomeText.trimmingCharacters(in: .whitespacesAndNewlines)), i >= 0 else {
+            validationError = "Please enter a valid positive number for Monthly Income."
+            return
+        }
+        guard let e = Double(expensesText.trimmingCharacters(in: .whitespacesAndNewlines)), e >= 0 else {
+            validationError = "Please enter a valid positive number for Monthly Expenses."
+            return
+        }
+        guard let d = Double(debtText.trimmingCharacters(in: .whitespacesAndNewlines)), d >= 0 else {
+            validationError = "Please enter a valid positive number for Debt/EMI Payments."
+            return
+        }
+        guard let rf = Double(reserveFloorText.trimmingCharacters(in: .whitespacesAndNewlines)), rf >= 0 else {
+            validationError = "Please enter a valid positive number for Safety Reserve Floor."
+            return
+        }
+        guard let b = Double(billText.trimmingCharacters(in: .whitespacesAndNewlines)), b >= 0 else {
+            validationError = "Please enter a valid positive number for Emergency Bill."
+            return
+        }
+        
+        // Update profile
+        viewModel.profile.portfolioValue = p
+        viewModel.profile.liquidCash = c
+        viewModel.profile.monthlyIncome = i
+        viewModel.profile.monthlyExpenses = e
+        viewModel.profile.monthlyDebtPayments = d
+        viewModel.profile.minimumCashReserve = rf
+        viewModel.profile.unexpectedExpense = b
+        
         dismiss()
     }
 }

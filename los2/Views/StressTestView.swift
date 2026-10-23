@@ -1,11 +1,13 @@
 import SwiftUI
+import Charts
 
-/// Feature 01 & 04: Upgraded Stress Test Screen.
-/// Supports Mode A (Portfolio-Wide shock) and Mode B (Granular Individual Stock shock),
-/// calculating loss contributions, top contributors, and cascading impact on cash runway.
+/// Feature 01 & 04: Advanced Stress Testing Screen with Native Interactive Swift Charts.
+/// Includes Graph A (Before vs After), Graph B (Loss by Scenario), Graph C (Stock Loss Contribution),
+/// and Graph D (Continuous Portfolio Decline Curve).
 struct StressTestView: View {
     @ObservedObject var viewModel: ResilienceViewModel
     @State private var sliderDecline: Double = 15.0
+    @State private var selectedGraphTab: Int = 0 // 0 = Before/After, 1 = Scenarios, 2 = Stock Breakdown, 3 = Decline Curve
     
     var report: ResilienceReport {
         viewModel.currentReport
@@ -15,7 +17,7 @@ struct StressTestView: View {
         NavigationStack {
             ScrollView {
                 VStack(spacing: 20) {
-                    // MARK: - Mode A vs Mode B Segmented Switcher
+                    // MARK: - Stress Test Engine Mode Picker (Mode A vs Mode B)
                     VStack(alignment: .leading, spacing: 8) {
                         Text("STRESS TEST ENGINE")
                             .font(.system(size: 11, weight: .bold, design: .rounded))
@@ -32,20 +34,20 @@ struct StressTestView: View {
                     .padding(.top, 4)
                     
                     // MARK: - Hero Portfolio Overview Card
-                    VStack(alignment: .leading, spacing: 10) {
+                    VStack(alignment: .leading, spacing: 12) {
                         HStack {
-                            VStack(alignment: .leading, spacing: 4) {
-                                Text("TOTAL PORTFOLIO VALUE")
+                            VStack(alignment: .leading, spacing: 3) {
+                                Text("PORTFOLIO EXPOSURE")
                                     .font(.system(size: 11, weight: .bold, design: .rounded))
                                     .foregroundStyle(Color.secondary)
                                     .tracking(0.8)
                                 Text(LOSTheme.formatRupee(viewModel.profile.portfolioValue))
-                                    .font(.system(size: 32, weight: .bold, design: .rounded))
+                                    .font(.system(size: 30, weight: .bold, design: .rounded))
                             }
                             Spacer()
                             
-                            VStack(alignment: .trailing, spacing: 4) {
-                                Text(viewModel.stressTestMode == 0 ? "SHOCK LEVEL" : "EFFECTIVE SHOCK")
+                            VStack(alignment: .trailing, spacing: 3) {
+                                Text(viewModel.stressTestMode == 0 ? "ASSUMED SHOCK" : "EFFECTIVE SHOCK")
                                     .font(.system(size: 10, weight: .bold, design: .rounded))
                                     .foregroundStyle(Color.secondary)
                                 Text("−\(String(format: "%.1f%%", report.marketDeclinePercent))")
@@ -54,28 +56,23 @@ struct StressTestView: View {
                             }
                         }
                         
-                        // Retained Progress Bar
-                        VStack(alignment: .leading, spacing: 6) {
-                            GeometryReader { geo in
-                                ZStack(alignment: .leading) {
-                                    RoundedRectangle(cornerRadius: 7)
-                                        .fill(LOSTheme.criticalRed.opacity(0.25))
-                                        .frame(height: 12)
-                                    
-                                    RoundedRectangle(cornerRadius: 7)
-                                        .fill(LOSTheme.safeGreen)
-                                        .frame(width: max(0, geo.size.width * CGFloat(report.portfolioRetentionPercent / 100.0)), height: 12)
-                                }
-                            }
-                            .frame(height: 12)
-                            
-                            HStack {
-                                Text("\(String(format: "%.1f%%", report.portfolioRetentionPercent)) retained")
-                                    .font(.system(size: 11, weight: .bold, design: .rounded))
+                        // Retained vs Loss Split
+                        HStack(spacing: 16) {
+                            VStack(alignment: .leading, spacing: 2) {
+                                Text("RETAINED VALUE")
+                                    .font(.system(size: 10, weight: .bold, design: .rounded))
+                                    .foregroundStyle(Color.secondary)
+                                Text(LOSTheme.formatRupee(report.remainingPortfolioValue))
+                                    .font(.system(size: 16, weight: .bold, design: .rounded))
                                     .foregroundStyle(LOSTheme.safeGreen)
-                                Spacer()
-                                Text("Loss: −\(LOSTheme.formatRupee(report.estimatedPortfolioLoss))")
-                                    .font(.system(size: 11, weight: .bold, design: .rounded))
+                            }
+                            Spacer()
+                            VStack(alignment: .trailing, spacing: 2) {
+                                Text("SIMULATED LOSS")
+                                    .font(.system(size: 10, weight: .bold, design: .rounded))
+                                    .foregroundStyle(Color.secondary)
+                                Text("−\(LOSTheme.formatRupee(report.estimatedPortfolioLoss))")
+                                    .font(.system(size: 16, weight: .bold, design: .rounded))
                                     .foregroundStyle(LOSTheme.criticalRed)
                             }
                         }
@@ -89,10 +86,85 @@ struct StressTestView: View {
                     )
                     .padding(.horizontal)
                     
-                    // MARK: - Mode A Controls (Portfolio-Wide)
+                    // MARK: - Interactive Swift Charts Visualizer
+                    VStack(alignment: .leading, spacing: 14) {
+                        HStack {
+                            Text("INTERACTIVE VISUALIZATION")
+                                .font(.system(size: 11, weight: .bold, design: .rounded))
+                                .foregroundStyle(Color.secondary)
+                                .tracking(0.8)
+                            Spacer()
+                            Text("Swift Charts")
+                                .font(.system(size: 10, weight: .semibold, design: .rounded))
+                                .foregroundStyle(LOSTheme.primary)
+                        }
+                        
+                        // Chart Selector Tabs
+                        Picker("Chart View", selection: $selectedGraphTab) {
+                            Text("Before / After").tag(0)
+                            Text("By Scenario").tag(1)
+                            Text("Stock Loss").tag(2)
+                            Text("Decline Curve").tag(3)
+                        }
+                        .pickerStyle(.segmented)
+                        
+                        // Active Chart Container
+                        Group {
+                            switch selectedGraphTab {
+                            case 0:
+                                GraphABeforeAfterView(
+                                    portfolioValue: viewModel.profile.portfolioValue,
+                                    remainingValue: report.remainingPortfolioValue,
+                                    loss: report.estimatedPortfolioLoss
+                                )
+                            case 1:
+                                GraphBScenarioComparisonView(
+                                    portfolioValue: viewModel.profile.portfolioValue,
+                                    activeDecline: report.marketDeclinePercent
+                                ) { selectedDecline in
+                                    viewModel.setCustomDecline(selectedDecline)
+                                    sliderDecline = selectedDecline
+                                }
+                            case 2:
+                                GraphCStockContributionView(
+                                    items: viewModel.individualLossBreakdown,
+                                    totalLoss: viewModel.totalIndividualStockLoss
+                                )
+                            default:
+                                GraphDDeclineCurveView(
+                                    portfolioValue: viewModel.profile.portfolioValue,
+                                    currentDecline: report.marketDeclinePercent
+                                )
+                            }
+                        }
+                        .frame(height: 220)
+                        .padding(.top, 4)
+                        
+                        // Hypothetical Simulation Notice
+                        HStack(spacing: 6) {
+                            Image(systemName: "chart.line.uptrend.xyaxis.circle")
+                                .font(.system(size: 11))
+                                .foregroundStyle(Color.secondary)
+                            Text("Hypothetical stress-test simulation based on mathematical drawdown. Not a price forecast.")
+                                .font(.system(size: 10))
+                                .foregroundStyle(Color.secondary)
+                                .lineLimit(1)
+                        }
+                        .padding(.top, 2)
+                    }
+                    .padding(18)
+                    .background(LOSTheme.cardBackground)
+                    .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 18, style: .continuous)
+                            .stroke(LOSTheme.cardBorder, lineWidth: 1)
+                    )
+                    .padding(.horizontal)
+                    
+                    // MARK: - Mode A Shock Controls (Portfolio-Wide)
                     if viewModel.stressTestMode == 0 {
                         VStack(alignment: .leading, spacing: 14) {
-                            Text("PORTFOLIO-WIDE DRAWDOWN SCENARIO")
+                            Text("MARKET DECLINE SCENARIO")
                                 .font(.system(size: 11, weight: .bold, design: .rounded))
                                 .foregroundStyle(Color.secondary)
                                 .tracking(0.8)
@@ -109,8 +181,8 @@ struct StressTestView: View {
                                         .font(.system(size: 12, weight: .medium))
                                         .foregroundStyle(Color.secondary)
                                     Spacer()
-                                    Text("\(Int(sliderDecline))%")
-                                        .font(.system(size: 13, weight: .bold, design: .monospaced))
+                                    Text("−\(Int(sliderDecline))%")
+                                        .font(.system(size: 14, weight: .bold, design: .monospaced))
                                         .foregroundStyle(LOSTheme.criticalRed)
                                 }
                                 
@@ -122,7 +194,6 @@ struct StressTestView: View {
                                     viewModel.setCustomDecline(val)
                                 }
                             }
-                            .padding(.top, 4)
                         }
                         .padding(18)
                         .background(LOSTheme.cardBackground)
@@ -134,7 +205,7 @@ struct StressTestView: View {
                         .padding(.horizontal)
                     }
                     
-                    // MARK: - Mode B Controls (Individual Stock Shocks)
+                    // MARK: - Mode B Shock Controls (Individual Stock Shocks)
                     if viewModel.stressTestMode == 1 {
                         VStack(alignment: .leading, spacing: 14) {
                             HStack {
@@ -172,7 +243,6 @@ struct StressTestView: View {
                                 .clipShape(RoundedRectangle(cornerRadius: 12))
                             }
                             
-                            // Holdings List with Per-Stock Sliders
                             if viewModel.profile.activeHoldings.isEmpty {
                                 Text("No holdings available. Add stocks in Portfolio Management to run individual stress tests.")
                                     .font(.system(size: 13))
@@ -199,7 +269,7 @@ struct StressTestView: View {
                         .padding(.horizontal)
                     }
                     
-                    // MARK: - Cascading Liquidity Impact Card
+                    // MARK: - Cascading Liquidity & Runway Impact Card
                     VStack(alignment: .leading, spacing: 14) {
                         Text("CASCADING LIQUIDITY & RUNWAY IMPACT")
                             .font(.system(size: 11, weight: .bold, design: .rounded))
@@ -244,23 +314,6 @@ struct StressTestView: View {
                             .stroke(LOSTheme.cardBorder, lineWidth: 1)
                     )
                     .padding(.horizontal)
-                    
-                    // MARK: - Educational Insight Note
-                    HStack(spacing: 12) {
-                        Image(systemName: "info.circle.fill")
-                            .font(.title3)
-                            .foregroundStyle(LOSTheme.primary)
-                        Text(viewModel.stressTestMode == 0
-                             ? "Mode A shocks the entire portfolio uniformly. Use this for broad macroeconomic downturns."
-                             : "Mode B allows applying asymmetric shocks to individual holdings, reflecting earnings misses or sector headwinds.")
-                            .font(.system(size: 12))
-                            .foregroundStyle(Color.secondary)
-                            .lineSpacing(2)
-                    }
-                    .padding(14)
-                    .background(LOSTheme.primary.opacity(0.08))
-                    .clipShape(RoundedRectangle(cornerRadius: 14))
-                    .padding(.horizontal)
                     .padding(.bottom, 24)
                 }
             }
@@ -268,6 +321,244 @@ struct StressTestView: View {
             .background(LOSTheme.background.ignoresSafeArea())
             .onAppear {
                 sliderDecline = viewModel.currentDeclinePercentage
+            }
+        }
+    }
+}
+
+// MARK: - Graph A: Before vs After Bar Chart
+private struct GraphABeforeAfterView: View {
+    let portfolioValue: Double
+    let remainingValue: Double
+    let loss: Double
+    
+    struct ValueBarItem: Identifiable {
+        let id: String
+        let category: String
+        let amount: Double
+        let color: Color
+    }
+    
+    var items: [ValueBarItem] {
+        [
+            ValueBarItem(id: "pre", category: "Pre-Shock", amount: portfolioValue, color: LOSTheme.primary),
+            ValueBarItem(id: "rem", category: "Remaining", amount: remainingValue, color: LOSTheme.safeGreen),
+            ValueBarItem(id: "loss", category: "Drawdown Loss", amount: loss, color: LOSTheme.criticalRed)
+        ]
+    }
+    
+    var body: some View {
+        Chart(items) { item in
+            BarMark(
+                x: .value("Stage", item.category),
+                y: .value("Rupees", item.amount)
+            )
+            .foregroundStyle(item.color)
+            .cornerRadius(6)
+            .annotation(position: .top) {
+                Text(LOSTheme.formatRupeeCompact(item.amount))
+                    .font(.system(size: 10, weight: .bold, design: .rounded))
+                    .foregroundStyle(item.color)
+            }
+        }
+        .chartYAxis {
+            AxisMarks(position: .leading) { value in
+                AxisGridLine().foregroundStyle(Color.primary.opacity(0.06))
+                if let num = value.as(Double.self) {
+                    AxisValueLabel {
+                        Text(LOSTheme.formatRupeeCompact(num))
+                            .font(.system(size: 9))
+                    }
+                }
+            }
+        }
+        .chartXAxis {
+            AxisMarks { _ in
+                AxisValueLabel()
+                    .font(.system(size: 10, weight: .semibold))
+            }
+        }
+    }
+}
+
+// MARK: - Graph B: Loss by Scenario Comparison Bar Chart
+private struct GraphBScenarioComparisonView: View {
+    let portfolioValue: Double
+    let activeDecline: Double
+    let onSelectScenario: (Double) -> Void
+    
+    var points: [ResilienceEngine.ScenarioComparisonPoint] {
+        ResilienceEngine.calculateScenarioComparisons(portfolioValue: portfolioValue, activeDecline: activeDecline)
+    }
+    
+    var body: some View {
+        Chart(points) { point in
+            BarMark(
+                x: .value("Scenario", point.scenarioName),
+                y: .value("Loss", point.loss)
+            )
+            .foregroundStyle(point.isSelected ? LOSTheme.criticalRed : LOSTheme.criticalRed.opacity(0.35))
+            .cornerRadius(6)
+            .annotation(position: .top) {
+                Text("−\(LOSTheme.formatRupeeCompact(point.loss))")
+                    .font(.system(size: 9, weight: .bold, design: .rounded))
+                    .foregroundStyle(point.isSelected ? LOSTheme.criticalRed : Color.secondary)
+            }
+        }
+        .chartYAxis {
+            AxisMarks(position: .leading) { value in
+                AxisGridLine().foregroundStyle(Color.primary.opacity(0.06))
+                if let num = value.as(Double.self) {
+                    AxisValueLabel {
+                        Text(LOSTheme.formatRupeeCompact(num))
+                            .font(.system(size: 9))
+                    }
+                }
+            }
+        }
+        .chartXAxis {
+            AxisMarks { _ in
+                AxisValueLabel()
+                    .font(.system(size: 10, weight: .semibold))
+            }
+        }
+    }
+}
+
+// MARK: - Graph C: Individual Stock Loss Contribution Chart
+private struct GraphCStockContributionView: View {
+    let items: [ResilienceViewModel.IndividualStockLossItem]
+    let totalLoss: Double
+    
+    var body: some View {
+        if items.isEmpty {
+            VStack(spacing: 8) {
+                Image(systemName: "chart.pie")
+                    .font(.title2)
+                    .foregroundStyle(Color.secondary)
+                Text("No stock holdings to display.")
+                    .font(.system(size: 12))
+                    .foregroundStyle(Color.secondary)
+            }
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+        } else {
+            Chart(items) { item in
+                BarMark(
+                    x: .value("Simulated Loss", item.simulatedLoss),
+                    y: .value("Stock", item.holding.ticker)
+                )
+                .foregroundStyle(LOSTheme.criticalRed.opacity(0.85))
+                .cornerRadius(4)
+                .annotation(position: .trailing) {
+                    Text("\(String(format: "%.1f%%", item.lossContributionPercent))")
+                        .font(.system(size: 9, weight: .bold, design: .rounded))
+                        .foregroundStyle(LOSTheme.criticalRed)
+                }
+            }
+            .chartXAxis {
+                AxisMarks(position: .bottom) { value in
+                    AxisGridLine().foregroundStyle(Color.primary.opacity(0.06))
+                    if let num = value.as(Double.self) {
+                        AxisValueLabel {
+                            Text(LOSTheme.formatRupeeCompact(num))
+                                .font(.system(size: 9))
+                        }
+                    }
+                }
+            }
+            .chartYAxis {
+                AxisMarks { _ in
+                    AxisValueLabel()
+                        .font(.system(size: 10, weight: .bold, design: .monospaced))
+                }
+            }
+        }
+    }
+}
+
+// MARK: - Graph D: Continuous Portfolio Decline Curve Area Chart
+private struct GraphDDeclineCurveView: View {
+    let portfolioValue: Double
+    let currentDecline: Double
+    
+    var curvePoints: [ResilienceEngine.DeclineCurvePoint] {
+        ResilienceEngine.calculateDeclineCurve(portfolioValue: portfolioValue)
+    }
+    
+    var activeRemaining: Double {
+        max(0, portfolioValue * (1.0 - (currentDecline / 100.0)))
+    }
+    
+    var body: some View {
+        Chart {
+            // Area Under Curve
+            ForEach(curvePoints) { point in
+                AreaMark(
+                    x: .value("Shock %", point.declinePercent),
+                    y: .value("Remaining Value", point.remainingPortfolio)
+                )
+                .foregroundStyle(
+                    LinearGradient(
+                        colors: [LOSTheme.safeGreen.opacity(0.35), LOSTheme.safeGreen.opacity(0.05)],
+                        startPoint: .top,
+                        endPoint: .bottom
+                    )
+                )
+            }
+            
+            // Continuous Curve Line
+            ForEach(curvePoints) { point in
+                LineMark(
+                    x: .value("Shock %", point.declinePercent),
+                    y: .value("Remaining Value", point.remainingPortfolio)
+                )
+                .foregroundStyle(LOSTheme.safeGreen)
+                .lineStyle(StrokeStyle(lineWidth: 2.5))
+            }
+            
+            // Active Shock Vertical Marker Rule
+            RuleMark(x: .value("Current Shock", currentDecline))
+                .foregroundStyle(LOSTheme.criticalRed)
+                .lineStyle(StrokeStyle(lineWidth: 1.5, dash: [4, 4]))
+                .annotation(position: .topLeading) {
+                    Text("\(Int(currentDecline))% Shock: \(LOSTheme.formatRupeeCompact(activeRemaining))")
+                        .font(.system(size: 9, weight: .bold, design: .monospaced))
+                        .foregroundStyle(LOSTheme.criticalRed)
+                        .padding(4)
+                        .background(LOSTheme.cardBackground)
+                        .clipShape(RoundedRectangle(cornerRadius: 6))
+                        .overlay(RoundedRectangle(cornerRadius: 6).stroke(LOSTheme.criticalRed.opacity(0.4), lineWidth: 1))
+                }
+            
+            // Active Point Marker
+            PointMark(
+                x: .value("Current Shock", currentDecline),
+                y: .value("Current Remaining", activeRemaining)
+            )
+            .foregroundStyle(LOSTheme.criticalRed)
+            .symbolSize(45)
+        }
+        .chartXScale(domain: 0...60)
+        .chartXAxis {
+            AxisMarks(values: [0, 15, 30, 45, 60]) { val in
+                AxisGridLine().foregroundStyle(Color.primary.opacity(0.06))
+                if let num = val.as(Int.self) {
+                    AxisValueLabel {
+                        Text("\(num)%")
+                            .font(.system(size: 9))
+                    }
+                }
+            }
+        }
+        .chartYAxis {
+            AxisMarks(position: .leading) { val in
+                AxisGridLine().foregroundStyle(Color.primary.opacity(0.06))
+                if let num = val.as(Double.self) {
+                    AxisValueLabel {
+                        Text(LOSTheme.formatRupeeCompact(num))
+                            .font(.system(size: 9))
+                    }
+                }
             }
         }
     }

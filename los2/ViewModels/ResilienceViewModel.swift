@@ -25,6 +25,9 @@ final class ResilienceViewModel: ObservableObject {
     @Published var isUsingCustomDecline: Bool = false
     @Published var stockDeclineOverrides: [String: Double] = [:] // ticker -> decline %
     
+    // MARK: - Emergency Shock Simulator State
+    @Published var emergencyScenario = EmergencyScenario()
+    
     // MARK: - Reverse Stress Testing State
     @Published var reverseStressAssumption = ReverseStressAssumption()
     
@@ -80,6 +83,131 @@ final class ResilienceViewModel: ObservableObject {
             return ResilienceEngine.analyze(profile: profile, declinePercent: effectiveDecline)
         }
         return ResilienceEngine.analyze(profile: profile, declinePercent: currentDeclinePercentage)
+    }
+    
+    // MARK: - Baseline Financial Resilience Score (Permanent, Independent of Scenarios)
+    var baselineScoreReport: ExplainableResilienceReport {
+        return ResilienceEngine.calculateBaselineScore(profile: profile)
+    }
+    
+    var isProfileIncomplete: Bool {
+        return profile.monthlyIncome <= 0 || profile.monthlyExpenses <= 0 || profile.liquidCash <= 0
+    }
+    
+    var provisionalScoreNotice: String? {
+        if profile.monthlyIncome <= 0 && profile.monthlyExpenses <= 0 {
+            return "Provisional Score: Enter monthly income & expenses to unlock cash flow scoring."
+        } else if profile.monthlyIncome <= 0 {
+            return "Provisional Score: Monthly earnings set to ₹0."
+        } else if profile.liquidCash <= 0 {
+            return "Provisional Score: Liquid savings set to ₹0."
+        }
+        return nil
+    }
+    
+    // MARK: - Emergency Simulation Result
+    var emergencySimulationResult: EmergencySimulationResult {
+        return ResilienceEngine.calculateEmergencySimulation(profile: profile, scenario: emergencyScenario)
+    }
+    
+    func resetEmergencyScenario() {
+        emergencyScenario = EmergencyScenario()
+    }
+    
+    // MARK: - "What Needs Attention?" Engine
+    struct AttentionItem: Identifiable, Equatable {
+        let id: String
+        let title: String
+        let message: String
+        let severityColor: Color
+        let iconName: String
+        let actionLabel: String
+        let targetAction: AttentionActionTarget
+    }
+    
+    enum AttentionActionTarget: Equatable {
+        case editFinances
+        case emergencySimulator
+        case stressTest
+        case portfolioHoldings
+        case runway
+    }
+    
+    var attentionItems: [AttentionItem] {
+        var items: [AttentionItem] = []
+        let totalOutflows = profile.monthlyExpenses + profile.monthlyDebtPayments
+        
+        // 1. Incomplete Profile
+        if profile.monthlyIncome == 0 {
+            items.append(AttentionItem(
+                id: "missing_income",
+                title: "Income Data Missing",
+                message: "Enter your regular monthly take-home income to calculate true runway and cash burn.",
+                severityColor: LOSTheme.warningAmber,
+                iconName: "questionmark.circle.fill",
+                actionLabel: "Edit Income",
+                targetAction: .editFinances
+            ))
+        }
+        
+        // 2. Net Cash Burn / Deficit
+        let netBurn = totalOutflows - profile.monthlyIncome
+        if netBurn > 0 {
+            items.append(AttentionItem(
+                id: "monthly_deficit",
+                title: "Negative Monthly Cash Flow",
+                message: "Fixed outflows (\(LOSTheme.formatRupee(totalOutflows))) exceed income by \(LOSTheme.formatRupee(netBurn))/mo.",
+                severityColor: LOSTheme.criticalRed,
+                iconName: "flame.fill",
+                actionLabel: "Inspect Runway",
+                targetAction: .runway
+            ))
+        }
+        
+        // 3. Low Emergency Cash Buffer
+        let postEmergencyCash = profile.liquidCash - profile.unexpectedExpense
+        let coverageMonths = totalOutflows > 0 ? max(0, postEmergencyCash) / totalOutflows : 6.0
+        if coverageMonths < 2.0 {
+            items.append(AttentionItem(
+                id: "low_cash_buffer",
+                title: "Low Emergency Coverage",
+                message: "Liquid cash covers only \(String(format: "%.1f", coverageMonths)) months of living expenses after the configured emergency.",
+                severityColor: LOSTheme.criticalRed,
+                iconName: "cross.case.fill",
+                actionLabel: "Simulate Shock",
+                targetAction: .emergencySimulator
+            ))
+        }
+        
+        // 4. Minimum Safety Reserve Breached
+        if postEmergencyCash < profile.minimumCashReserve {
+            let breach = max(0, profile.minimumCashReserve - postEmergencyCash)
+            items.append(AttentionItem(
+                id: "reserve_floor_breached",
+                title: "Safety Floor Breached",
+                message: "Emergency expense breaches your desired \(LOSTheme.formatRupee(profile.minimumCashReserve)) minimum reserve by \(LOSTheme.formatRupee(breach)).",
+                severityColor: LOSTheme.warningAmber,
+                iconName: "shield.slash.fill",
+                actionLabel: "Adjust Reserve",
+                targetAction: .emergencySimulator
+            ))
+        }
+        
+        // 5. Portfolio Concentration Risk
+        let maxWeight = profile.activeHoldings.map { $0.portfolioWeightPercent }.max() ?? 0.0
+        if maxWeight > 40.0, let topStock = profile.activeHoldings.max(by: { $0.portfolioWeightPercent < $1.portfolioWeightPercent }) {
+            items.append(AttentionItem(
+                id: "high_concentration",
+                title: "Portfolio Concentration Risk",
+                message: "\(topStock.ticker) represents \(Int(maxWeight))% of total equities, leaving you vulnerable to single-stock shocks.",
+                severityColor: LOSTheme.warningAmber,
+                iconName: "chart.pie.fill",
+                actionLabel: "Stress Stock",
+                targetAction: .stressTest
+            ))
+        }
+        
+        return items
     }
     
     // MARK: - Explainable 5-Pillar Score
