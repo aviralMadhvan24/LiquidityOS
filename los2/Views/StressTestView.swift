@@ -184,16 +184,18 @@ struct StressTestView: View {
                                     Text("Market Decline")
                                 }
                                 .tint(LOSTheme.criticalRed)
-                                .onChange(of: sliderDecline) { val in
+                                .accessibilityLabel("Market Shock Decline Percentage")
+                                .accessibilityValue("\(Int(sliderDecline)) percent")
+                                .onChange(of: sliderDecline) { _, val in
                                     viewModel.setCustomDecline(val)
                                 }
                             }
                         }
                         .padding(18)
                         .background(LOSTheme.cardBackground)
-                        .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
+                        .clipShape(.rect(cornerRadius: LOSTheme.radiusLarge))
                         .overlay(
-                            RoundedRectangle(cornerRadius: 18, style: .continuous)
+                            RoundedRectangle(cornerRadius: LOSTheme.radiusLarge)
                                 .stroke(LOSTheme.cardBorder, lineWidth: 1)
                         )
                         .padding(.horizontal)
@@ -349,7 +351,7 @@ private struct GraphABeforeAfterView: View {
                 y: .value("Rupees", item.amount)
             )
             .foregroundStyle(item.color)
-            .cornerRadius(6)
+            .clipShape(.rect(cornerRadius: 6))
             .annotation(position: .top) {
                 Text(LOSTheme.formatRupeeCompact(item.amount))
                     .font(.system(size: 10, weight: .bold, design: .rounded))
@@ -393,7 +395,7 @@ private struct GraphBScenarioComparisonView: View {
                 y: .value("Loss", point.loss)
             )
             .foregroundStyle(point.isSelected ? LOSTheme.criticalRed : LOSTheme.criticalRed.opacity(0.35))
-            .cornerRadius(6)
+            .clipShape(.rect(cornerRadius: 6))
             .annotation(position: .top) {
                 Text("−\(LOSTheme.formatRupeeCompact(point.loss))")
                     .font(.system(size: 9, weight: .bold, design: .rounded))
@@ -427,13 +429,10 @@ private struct GraphCStockContributionView: View {
     
     var body: some View {
         if items.isEmpty {
-            VStack(spacing: 8) {
-                Image(systemName: "chart.pie")
-                    .font(.title2)
-                    .foregroundStyle(Color.secondary)
-                Text("No stock holdings to display.")
-                    .font(.system(size: 12))
-                    .foregroundStyle(Color.secondary)
+            ContentUnavailableView {
+                Label("No Stock Holdings", systemImage: "chart.pie")
+            } description: {
+                Text("Add stock holdings to view simulated individual loss contributions.")
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
         } else {
@@ -443,7 +442,7 @@ private struct GraphCStockContributionView: View {
                     y: .value("Stock", item.holding.ticker)
                 )
                 .foregroundStyle(LOSTheme.criticalRed.opacity(0.85))
-                .cornerRadius(4)
+                .clipShape(.rect(cornerRadius: 4))
                 .annotation(position: .trailing) {
                     Text("\(String(format: "%.1f%%", item.lossContributionPercent))")
                         .font(.system(size: 9, weight: .bold, design: .rounded))
@@ -613,7 +612,9 @@ private struct IndividualStockShockCard: View {
                 
                 Slider(value: $localDecline, in: 0...60, step: 5)
                     .tint(LOSTheme.criticalRed)
-                    .onChange(of: localDecline) { val in
+                    .accessibilityLabel("\(item.holding.ticker) assumed shock")
+                    .accessibilityValue("\(Int(localDecline)) percent")
+                    .onChange(of: localDecline) { _, val in
                         onShockChange(val)
                     }
             }

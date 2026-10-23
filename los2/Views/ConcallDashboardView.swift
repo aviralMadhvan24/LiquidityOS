@@ -51,14 +51,14 @@ struct ConcallDashboardView: View {
                                 HStack {
                                     Image(systemName: "plus.circle.fill")
                                     Text("New Transcript")
-                                        .fontWeight(.bold)
+                                        .bold()
                                 }
                                 .font(.system(size: 14))
                                 .frame(maxWidth: .infinity)
                                 .padding(.vertical, 12)
                                 .background(LOSTheme.primary)
                                 .foregroundStyle(Color.white)
-                                .clipShape(RoundedRectangle(cornerRadius: 12))
+                                .clipShape(.rect(cornerRadius: LOSTheme.radiusSmall))
                             }
                             
                             Button {
@@ -74,15 +74,15 @@ struct ConcallDashboardView: View {
                                 .padding(.vertical, 12)
                                 .background(Color.primary.opacity(0.06))
                                 .foregroundStyle(Color.primary)
-                                .clipShape(RoundedRectangle(cornerRadius: 12))
+                                .clipShape(.rect(cornerRadius: LOSTheme.radiusSmall))
                             }
                         }
                     }
                     .padding(18)
                     .background(LOSTheme.cardBackground)
-                    .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
+                    .clipShape(.rect(cornerRadius: LOSTheme.radiusLarge))
                     .overlay(
-                        RoundedRectangle(cornerRadius: 18, style: .continuous)
+                        RoundedRectangle(cornerRadius: LOSTheme.radiusLarge)
                             .stroke(LOSTheme.cardBorder, lineWidth: 1)
                     )
                     .padding(.horizontal)
@@ -100,7 +100,7 @@ struct ConcallDashboardView: View {
                                 .foregroundStyle(Color.secondary)
                         }
                         
-                        ScrollView(.horizontal, showsIndicators: false) {
+                        ScrollView(.horizontal) {
                             HStack(spacing: 10) {
                                 ForEach(resilienceViewModel.profile.activeHoldings) { holding in
                                     let isSelected = viewModel.selectedHolding?.id == holding.id || viewModel.tickerInput == holding.ticker
@@ -146,6 +146,7 @@ struct ConcallDashboardView: View {
                                 }
                             }
                         }
+                        .scrollIndicators(.hidden)
                     }
                     .padding(18)
                     .background(LOSTheme.cardBackground)

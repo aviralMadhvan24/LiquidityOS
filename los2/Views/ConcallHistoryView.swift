@@ -18,83 +18,80 @@ struct ConcallHistoryView: View {
     
     var body: some View {
         NavigationStack {
-            List {
+            Group {
                 if filteredList.isEmpty {
-                    VStack(spacing: 8) {
-                        Image(systemName: "doc.text.magnifyingglass")
-                            .font(.largeTitle)
-                            .foregroundStyle(Color.secondary)
-                        Text("No Concall Analyses Found")
-                            .font(.system(size: 16, weight: .semibold))
-                        Text("Upload or paste an earnings call transcript to generate intelligence reports.")
-                            .font(.system(size: 13))
-                            .foregroundStyle(Color.secondary)
-                            .multilineTextAlignment(.center)
+                    if filterQuery.isEmpty {
+                        ContentUnavailableView(
+                            "No Concall Analyses",
+                            systemImage: "doc.text.magnifyingglass",
+                            description: Text("Upload or paste an earnings call transcript to generate intelligence reports.")
+                        )
+                    } else {
+                        ContentUnavailableView.search
                     }
-                    .frame(maxWidth: .infinity, alignment: .center)
-                    .padding(.vertical, 30)
-                    .listRowBackground(Color.clear)
                 } else {
-                    ForEach(filteredList) { item in
-                        NavigationLink {
-                            ConcallDetailView(
-                                analysis: item,
-                                resilienceViewModel: resilienceViewModel
-                            )
-                        } label: {
-                            VStack(alignment: .leading, spacing: 6) {
-                                HStack {
-                                    Text(item.metadata.companyName)
-                                        .font(.system(size: 15, weight: .bold, design: .rounded))
-                                    Spacer()
-                                    Text("\(item.metadata.quarter) \(item.metadata.fiscalYear)")
-                                        .font(.system(size: 11, weight: .semibold, design: .monospaced))
-                                        .padding(.horizontal, 6)
-                                        .padding(.vertical, 2)
-                                        .background(LOSTheme.primary.opacity(0.12))
-                                        .foregroundStyle(LOSTheme.primary)
-                                        .clipShape(Capsule())
-                                }
-                                
-                                Text(item.executiveSummary)
-                                    .font(.system(size: 12))
-                                    .foregroundStyle(Color.secondary)
-                                    .lineLimit(2)
-                                
-                                HStack(spacing: 12) {
-                                    HStack(spacing: 4) {
-                                        Image(systemName: "exclamationmark.triangle.fill")
-                                            .font(.system(size: 10))
-                                            .foregroundStyle(LOSTheme.criticalRed)
-                                        Text("\(item.risks.count) Risks")
-                                            .font(.system(size: 11, weight: .medium))
-                                            .foregroundStyle(Color.secondary)
+                    List {
+                        ForEach(filteredList) { item in
+                            NavigationLink {
+                                ConcallDetailView(
+                                    analysis: item,
+                                    resilienceViewModel: resilienceViewModel
+                                )
+                            } label: {
+                                VStack(alignment: .leading, spacing: 6) {
+                                    HStack {
+                                        Text(item.metadata.companyName)
+                                            .font(.system(size: 15, weight: .bold, design: .rounded))
+                                        Spacer()
+                                        Text("\(item.metadata.quarter) \(item.metadata.fiscalYear)")
+                                            .font(.system(size: 11, weight: .semibold, design: .monospaced))
+                                            .padding(.horizontal, 6)
+                                            .padding(.vertical, 2)
+                                            .background(LOSTheme.primary.opacity(0.12))
+                                            .foregroundStyle(LOSTheme.primary)
+                                            .clipShape(Capsule())
                                     }
                                     
-                                    HStack(spacing: 4) {
-                                        Image(systemName: "arrow.up.right.circle.fill")
-                                            .font(.system(size: 10))
-                                            .foregroundStyle(LOSTheme.safeGreen)
-                                        Text("\(item.positives.count) Positives")
-                                            .font(.system(size: 11, weight: .medium))
-                                            .foregroundStyle(Color.secondary)
-                                    }
-                                    
-                                    Spacer()
-                                    
-                                    Text(item.metadata.ticker)
-                                        .font(.system(size: 11, weight: .bold, design: .monospaced))
+                                    Text(item.executiveSummary)
+                                        .font(.system(size: 12))
                                         .foregroundStyle(Color.secondary)
+                                        .lineLimit(2)
+                                    
+                                    HStack(spacing: 12) {
+                                        HStack(spacing: 4) {
+                                            Image(systemName: "exclamationmark.triangle.fill")
+                                                .font(.system(size: 10))
+                                                .foregroundStyle(LOSTheme.criticalRed)
+                                            Text("\(item.risks.count) Risks")
+                                                .font(.system(size: 11, weight: .medium))
+                                                .foregroundStyle(Color.secondary)
+                                        }
+                                        
+                                        HStack(spacing: 4) {
+                                            Image(systemName: "arrow.up.right.circle.fill")
+                                                .font(.system(size: 10))
+                                                .foregroundStyle(LOSTheme.safeGreen)
+                                            Text("\(item.positives.count) Positives")
+                                                .font(.system(size: 11, weight: .medium))
+                                                .foregroundStyle(Color.secondary)
+                                        }
+                                        
+                                        Spacer()
+                                        
+                                        Text(item.metadata.ticker)
+                                            .font(.system(size: 11, weight: .bold, design: .monospaced))
+                                            .foregroundStyle(Color.secondary)
+                                    }
+                                    .padding(.top, 2)
                                 }
-                                .padding(.top, 2)
+                                .padding(.vertical, 4)
                             }
-                            .padding(.vertical, 4)
                         }
-                    }
-                    .onDelete { indexSet in
-                        for index in indexSet {
-                            let item = filteredList[index]
-                            viewModel.deleteAnalysis(id: item.id)
+                        .onDelete { indexSet in
+                            for index in indexSet {
+                                let item = filteredList[index]
+                                viewModel.deleteAnalysis(id: item.id)
+                            }
                         }
                     }
                 }

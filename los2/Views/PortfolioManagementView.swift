@@ -96,9 +96,9 @@ struct PortfolioManagementView: View {
                     }
                     .padding(18)
                     .background(LOSTheme.cardBackground)
-                    .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
+                    .clipShape(.rect(cornerRadius: LOSTheme.radiusLarge))
                     .overlay(
-                        RoundedRectangle(cornerRadius: 18, style: .continuous)
+                        RoundedRectangle(cornerRadius: LOSTheme.radiusLarge)
                             .stroke(LOSTheme.cardBorder, lineWidth: 1)
                     )
                     .padding(.horizontal)
@@ -182,33 +182,26 @@ struct PortfolioManagementView: View {
                     .padding(.top, 4)
                     
                     if viewModel.profile.activeHoldings.isEmpty {
-                        VStack(spacing: 12) {
-                            Image(systemName: "chart.pie")
-                                .font(.system(size: 40))
-                                .foregroundStyle(Color.secondary.opacity(0.5))
-                            Text("No Holdings in Portfolio")
-                                .font(.system(size: 16, weight: .bold, design: .rounded))
+                        ContentUnavailableView {
+                            Label("No Holdings in Portfolio", systemImage: "chart.pie")
+                        } description: {
                             Text("Add your Indian stock holdings to model portfolio drawdown and evaluate liquidity risk.")
-                                .font(.system(size: 13))
-                                .foregroundStyle(Color.secondary)
-                                .multilineTextAlignment(.center)
-                                .padding(.horizontal, 20)
-                            Button {
+                        } actions: {
+                            Button("Add First Holding") {
                                 showingAddSheet = true
-                            } label: {
-                                Text("Add First Holding")
-                                    .font(.system(size: 14, weight: .bold, design: .rounded))
-                                    .padding(.horizontal, 20)
-                                    .padding(.vertical, 10)
-                                    .background(LOSTheme.primary)
-                                    .foregroundStyle(Color.black)
-                                    .clipShape(Capsule())
                             }
+                            .buttonStyle(.borderedProminent)
+                            .tint(LOSTheme.primary)
+                            .foregroundStyle(Color.black)
+                            .clipShape(Capsule())
                         }
-                        .padding(28)
-                        .frame(maxWidth: .infinity)
+                        .padding(20)
                         .background(LOSTheme.cardBackground)
-                        .clipShape(RoundedRectangle(cornerRadius: 18))
+                        .clipShape(.rect(cornerRadius: LOSTheme.radiusLarge))
+                        .overlay(
+                            RoundedRectangle(cornerRadius: LOSTheme.radiusLarge)
+                                .stroke(LOSTheme.cardBorder, lineWidth: 1)
+                        )
                         .padding(.horizontal)
                     } else {
                         VStack(spacing: 10) {

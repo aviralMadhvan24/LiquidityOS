@@ -35,6 +35,18 @@ enum LOSTheme {
     
     static let cardBorder = Color.primary.opacity(0.08)
     
+    // MARK: - Design System Tokens
+    static let radiusSmall: CGFloat = 10
+    static let radiusMedium: CGFloat = 14
+    static let radiusLarge: CGFloat = 18
+    
+    static let paddingSmall: CGFloat = 8
+    static let paddingMedium: CGFloat = 14
+    static let paddingLarge: CGFloat = 18
+    
+    static let shadowRadius: CGFloat = 8
+    static let shadowY: CGFloat = 4
+    
     // Currency Formatter
     static func formatRupee(_ value: Double, showSign: Bool = false) -> String {
         let absValue = abs(value)

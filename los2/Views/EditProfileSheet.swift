@@ -178,7 +178,7 @@ struct EditProfileSheet: View {
                     Button("Save") {
                         validateAndSave()
                     }
-                    .fontWeight(.bold)
+                    .bold()
                     .foregroundStyle(LOSTheme.primary)
                 }
             }

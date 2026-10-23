@@ -151,7 +151,7 @@ struct ReverseStressTestView: View {
                             .tracking(0.8)
                             .padding(.horizontal)
                         
-                        ScrollView(.horizontal, showsIndicators: false) {
+                        ScrollView(.horizontal) {
                             HStack(spacing: 10) {
                                 PresetPill(title: "Baseline Setup", icon: "shield") {
                                     viewModel.reverseStressAssumption = ReverseStressAssumption()
@@ -172,6 +172,7 @@ struct ReverseStressTestView: View {
                             }
                             .padding(.horizontal)
                         }
+                        .scrollIndicators(.hidden)
                     }
                     
                     // MARK: - Safety Limit Definition
@@ -320,7 +321,7 @@ struct ReverseStressTestView: View {
                                     .clipShape(Capsule())
                                 }
                                 
-                                ScrollView(.horizontal, showsIndicators: false) {
+                                ScrollView(.horizontal) {
                                     HStack(spacing: 8) {
                                         ForEach(viewModel.profile.activeHoldings) { holding in
                                             let isSelected = viewModel.reverseStressAssumption.targetStockTicker?.uppercased() == holding.ticker.uppercased()
@@ -338,13 +339,14 @@ struct ReverseStressTestView: View {
                                         }
                                     }
                                 }
+                                .scrollIndicators(.hidden)
                             }
                         }
                         .padding(18)
                         .background(LOSTheme.cardBackground)
-                        .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
+                        .clipShape(.rect(cornerRadius: LOSTheme.radiusLarge))
                         .overlay(
-                            RoundedRectangle(cornerRadius: 18, style: .continuous)
+                            RoundedRectangle(cornerRadius: LOSTheme.radiusLarge)
                                 .stroke(LOSTheme.cardBorder, lineWidth: 1)
                         )
                         .padding(.horizontal)

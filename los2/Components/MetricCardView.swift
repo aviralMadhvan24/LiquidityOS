@@ -25,7 +25,7 @@ struct MetricCardView: View {
                 }
                 
                 Text(title)
-                    .font(.system(size: 10, weight: .bold, design: .rounded))
+                    .font(.caption2.bold())
                     .foregroundStyle(Color.secondary)
                     .tracking(0.6)
                     .lineLimit(2)
@@ -35,7 +35,7 @@ struct MetricCardView: View {
                 
                 if let badge = badgeText {
                     Text(badge)
-                        .font(.system(size: 9, weight: .bold, design: .rounded))
+                        .font(.caption2.bold())
                         .padding(.horizontal, 6)
                         .padding(.vertical, 3)
                         .background(badgeColor.opacity(0.15))
@@ -47,7 +47,7 @@ struct MetricCardView: View {
             
             // Value
             Text(value)
-                .font(.system(size: 20, weight: .bold, design: .rounded))
+                .font(.system(.title3, design: .rounded).bold())
                 .foregroundStyle(isNegative ? LOSTheme.criticalRed : Color.primary)
                 .minimumScaleFactor(0.65)
                 .lineLimit(1)
@@ -55,19 +55,21 @@ struct MetricCardView: View {
             // Subtitle
             if let subtitle = subtitle {
                 Text(subtitle)
-                    .font(.system(size: 11, weight: .medium, design: .rounded))
+                    .font(.caption)
                     .foregroundStyle(isNegative ? LOSTheme.criticalRed.opacity(0.85) : Color.secondary)
                     .lineLimit(2)
                     .fixedSize(horizontal: false, vertical: true)
             }
         }
-        .padding(14)
+        .padding(LOSTheme.paddingMedium)
         .frame(maxWidth: .infinity, alignment: .leading)
         .background(LOSTheme.cardBackground)
-        .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
+        .clipShape(.rect(cornerRadius: LOSTheme.radiusMedium))
         .overlay(
-            RoundedRectangle(cornerRadius: 16, style: .continuous)
+            RoundedRectangle(cornerRadius: LOSTheme.radiusMedium)
                 .stroke(LOSTheme.cardBorder, lineWidth: 1)
         )
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel("\(title): \(value)\(subtitle != nil ? ", " + (subtitle ?? "") : "")")
     }
 }

@@ -153,7 +153,7 @@ struct ZerodhaConnectSheet: View {
                     HStack {
                         Image(systemName: "link.badge.plus")
                         Text("Login with Kite (Official OAuth)")
-                            .fontWeight(.bold)
+                            .bold()
                     }
                     .font(.system(size: 15))
                     .frame(maxWidth: .infinity)
@@ -176,7 +176,7 @@ struct ZerodhaConnectSheet: View {
                     } else {
                         Image(systemName: "sparkles")
                         Text(isConfigured ? "Or Test with Demo Zerodha Sandbox" : "Connect Demo Zerodha Account (Sandbox)")
-                            .fontWeight(.bold)
+                            .bold()
                     }
                 }
                 .font(.system(size: 15))
@@ -293,7 +293,7 @@ struct ZerodhaConnectSheet: View {
                 HStack {
                     Image(systemName: "arrow.triangle.2.circlepath")
                     Text("Apply to LiquidityOS Dashboard")
-                        .fontWeight(.bold)
+                        .bold()
                 }
                 .font(.system(size: 15))
                 .frame(maxWidth: .infinity)

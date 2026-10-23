@@ -188,11 +188,11 @@ struct ConcallUploadSheet: View {
                                 ProgressView()
                                     .padding(.trailing, 6)
                                 Text("Analyzing Concall...")
-                                    .fontWeight(.bold)
+                                    .bold()
                             } else {
                                 Image(systemName: "sparkles")
                                 Text("Analyze Concall with AI")
-                                    .fontWeight(.bold)
+                                    .bold()
                             }
                             Spacer()
                         }

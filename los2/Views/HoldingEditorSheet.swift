@@ -54,7 +54,7 @@ struct HoldingEditorSheet: View {
                                 .foregroundStyle(Color.secondary)
                             TextField("Search stock (e.g. RELIANCE, TCS)", text: $searchQuery)
                                 .textInputAutocapitalization(.characters)
-                                .onChange(of: searchQuery) { q in
+                                .onChange(of: searchQuery) { _, q in
                                     Task { await performSearch(q) }
                                 }
                         }
@@ -183,7 +183,7 @@ struct HoldingEditorSheet: View {
                         Text("Current Market Value")
                         Spacer(minLength: 8)
                         Text(LOSTheme.formatRupee(marketValue))
-                            .fontWeight(.bold)
+                            .bold()
                             .lineLimit(1)
                             .minimumScaleFactor(0.8)
                     }
@@ -193,7 +193,7 @@ struct HoldingEditorSheet: View {
                         Spacer(minLength: 8)
                         HStack(spacing: 4) {
                             Text(LOSTheme.formatRupee(unrealizedPnL, showSign: true))
-                                .fontWeight(.bold)
+                                .bold()
                                 .lineLimit(1)
                                 .minimumScaleFactor(0.8)
                             Text("(\(String(format: "%+.1f%%", unrealizedPnLPercent)))")
@@ -217,7 +217,7 @@ struct HoldingEditorSheet: View {
                     Button("Save") {
                         saveHolding()
                     }
-                    .fontWeight(.bold)
+                    .bold()
                     .disabled(ticker.isEmpty || shares <= 0 || avgBuyPrice <= 0)
                 }
             }

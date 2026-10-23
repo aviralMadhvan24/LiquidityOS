@@ -61,13 +61,15 @@ struct DashboardView: View {
                         Button {
                             viewModel.isShowingZerodhaSheet = true
                         } label: {
-                            Image(systemName: viewModel.isZerodhaConnected ? "checkmark.circle.fill" : "link")
-                                .font(.system(size: 14, weight: .bold))
-                                .padding(8)
-                                .background(Color(red: 1.0, green: 0.34, blue: 0.13).opacity(0.12))
-                                .foregroundStyle(Color(red: 1.0, green: 0.34, blue: 0.13))
-                                .clipShape(Circle())
+                            Label("Zerodha Account", systemImage: viewModel.isZerodhaConnected ? "checkmark.circle.fill" : "link")
                         }
+                        .labelStyle(.iconOnly)
+                        .font(.system(size: 14).bold())
+                        .padding(8)
+                        .background(Color(red: 1.0, green: 0.34, blue: 0.13).opacity(0.12))
+                        .foregroundStyle(Color(red: 1.0, green: 0.34, blue: 0.13))
+                        .clipShape(Circle())
+                        .accessibilityLabel(viewModel.isZerodhaConnected ? "Zerodha Connected" : "Connect Zerodha Account")
                         
                         // Profile & Sign Out Menu
                         Menu {
@@ -81,46 +83,41 @@ struct DashboardView: View {
                                 Label("Sign Out", systemImage: "rectangle.portrait.and.arrow.right")
                             }
                         } label: {
-                            Image(systemName: "person.crop.circle")
-                                .font(.system(size: 14, weight: .bold))
-                                .padding(8)
-                                .background(Color.primary.opacity(0.06))
-                                .foregroundStyle(Color.primary)
-                                .clipShape(Circle())
+                            Label("User Profile", systemImage: "person.crop.circle")
                         }
+                        .labelStyle(.iconOnly)
+                        .font(.system(size: 14).bold())
+                        .padding(8)
+                        .background(Color.primary.opacity(0.06))
+                        .foregroundStyle(Color.primary)
+                        .clipShape(Circle())
+                        .accessibilityLabel("User Account Profile")
                     }
                     .padding(.horizontal)
                     .padding(.top, 4)
                     
                     // MARK: - Empty State (If Profile Unconfigured)
                     if viewModel.isProfileIncomplete && viewModel.profile.portfolioValue == 0 && viewModel.profile.liquidCash == 0 {
-                        VStack(spacing: 12) {
-                            Image(systemName: "wallet.pass.fill")
-                                .font(.system(size: 38))
-                                .foregroundStyle(LOSTheme.primary)
-                            Text("Setup Your Financial Snapshot")
-                                .font(.system(size: 17, weight: .bold, design: .rounded))
+                        ContentUnavailableView {
+                            Label("Setup Financial Snapshot", systemImage: "wallet.pass.fill")
+                        } description: {
                             Text("Add your bank cash, expenses, and investments to calculate your personalized Resilience Score.")
-                                .font(.system(size: 12))
-                                .foregroundStyle(Color.secondary)
-                                .multilineTextAlignment(.center)
-                                .padding(.horizontal, 16)
-                            Button {
+                        } actions: {
+                            Button("Enter Finances") {
                                 viewModel.isShowingEditSheet = true
-                            } label: {
-                                Text("Enter Finances")
-                                    .font(.system(size: 13, weight: .bold, design: .rounded))
-                                    .padding(.horizontal, 20)
-                                    .padding(.vertical, 9)
-                                    .background(LOSTheme.primary)
-                                    .foregroundStyle(Color.black)
-                                    .clipShape(Capsule())
                             }
+                            .buttonStyle(.borderedProminent)
+                            .tint(LOSTheme.primary)
+                            .foregroundStyle(Color.black)
+                            .clipShape(Capsule())
                         }
-                        .padding(22)
-                        .frame(maxWidth: .infinity)
+                        .padding(18)
                         .background(LOSTheme.cardBackground)
-                        .clipShape(RoundedRectangle(cornerRadius: 18))
+                        .clipShape(.rect(cornerRadius: LOSTheme.radiusLarge))
+                        .overlay(
+                            RoundedRectangle(cornerRadius: LOSTheme.radiusLarge)
+                                .stroke(LOSTheme.cardBorder, lineWidth: 1)
+                        )
                         .padding(.horizontal)
                     }
                     
@@ -214,9 +211,9 @@ struct DashboardView: View {
                     }
                     .padding(18)
                     .background(LOSTheme.cardBackground)
-                    .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
+                    .clipShape(.rect(cornerRadius: LOSTheme.radiusLarge))
                     .overlay(
-                        RoundedRectangle(cornerRadius: 20, style: .continuous)
+                        RoundedRectangle(cornerRadius: LOSTheme.radiusLarge)
                             .stroke(LOSTheme.cardBorder, lineWidth: 1)
                     )
                     .padding(.horizontal)
@@ -393,7 +390,7 @@ struct DashboardView: View {
                         }
                         .padding(.horizontal)
                         
-                        ScrollView(.horizontal, showsIndicators: false) {
+                        ScrollView(.horizontal) {
                             HStack(spacing: 10) {
                                 CommandHubPill(title: "Edit Finances", icon: "pencil.line", color: LOSTheme.primary) {
                                     viewModel.isShowingEditSheet = true
@@ -419,11 +416,13 @@ struct DashboardView: View {
                             }
                             .padding(.horizontal)
                         }
+                        .scrollIndicators(.hidden)
                     }
                     .padding(.bottom, 24)
                 }
             }
             .background(LOSTheme.background.ignoresSafeArea())
+            .sensoryFeedback(.impact(weight: .light), trigger: isPreviewingShock)
             // Sheet presentations
             .sheet(isPresented: $viewModel.isShowingEditSheet) {
                 EditProfileSheet(viewModel: viewModel)

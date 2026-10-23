@@ -93,17 +93,18 @@ struct LoginView: View {
                                         Button {
                                             email = ""
                                         } label: {
-                                            Image(systemName: "xmark.circle.fill")
-                                                .font(.system(size: 14))
-                                                .foregroundStyle(Color.secondary)
+                                            Label("Clear email", systemImage: "xmark.circle.fill")
                                         }
+                                        .labelStyle(.iconOnly)
+                                        .font(.system(size: 14))
+                                        .foregroundStyle(Color.secondary)
                                     }
                                 }
                                 .padding(12)
                                 .background(LOSTheme.background)
-                                .clipShape(RoundedRectangle(cornerRadius: 12))
+                                .clipShape(.rect(cornerRadius: LOSTheme.radiusSmall))
                                 .overlay(
-                                    RoundedRectangle(cornerRadius: 12)
+                                    RoundedRectangle(cornerRadius: LOSTheme.radiusSmall)
                                         .stroke(LOSTheme.cardBorder, lineWidth: 1)
                                 )
                             }
@@ -136,13 +137,19 @@ struct LoginView: View {
                                     Button {
                                         isPasswordVisible.toggle()
                                     } label: {
-                                        Image(systemName: isPasswordVisible ? "eye.slash.fill" : "eye.fill")
-                                            .font(.system(size: 14))
-                                            .foregroundStyle(Color.secondary)
+                                        Label(isPasswordVisible ? "Hide password" : "Show password", systemImage: isPasswordVisible ? "eye.slash.fill" : "eye.fill")
                                     }
+                                    .labelStyle(.iconOnly)
+                                    .font(.system(size: 14))
+                                    .foregroundStyle(Color.secondary)
                                 }
                                 .padding(12)
                                 .background(LOSTheme.background)
+                                .clipShape(.rect(cornerRadius: LOSTheme.radiusSmall))
+                                .overlay(
+                                    RoundedRectangle(cornerRadius: LOSTheme.radiusSmall)
+                                        .stroke(LOSTheme.cardBorder, lineWidth: 1)
+                                )
                                 .clipShape(RoundedRectangle(cornerRadius: 12))
                                 .overlay(
                                     RoundedRectangle(cornerRadius: 12)
@@ -257,6 +264,7 @@ struct LoginView: View {
                 }
             }
         }
+        .sensoryFeedback(.success, trigger: isLoggedIn)
         .onAppear {
             if email.isEmpty {
                 email = Self.demoEmail

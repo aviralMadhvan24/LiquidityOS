@@ -75,7 +75,7 @@ struct ConcallDetailView: View {
                         HStack {
                             Image(systemName: "chart.line.downtrend.xyaxis")
                             Text("Stress Test Portfolio Under Risks")
-                                .fontWeight(.bold)
+                                .bold()
                             Spacer()
                             Image(systemName: "arrow.right")
                         }
@@ -148,7 +148,7 @@ struct ConcallDetailView: View {
                     }
                     
                     // Filter Chips
-                    ScrollView(.horizontal, showsIndicators: false) {
+                    ScrollView(.horizontal) {
                         HStack(spacing: 8) {
                             filterChip(title: "All (\(analysis.findings.count))", isSelected: selectedFilter == nil) {
                                 selectedFilter = nil
@@ -163,6 +163,7 @@ struct ConcallDetailView: View {
                             }
                         }
                     }
+                    .scrollIndicators(.hidden)
                     
                     // Filtered Finding Cards
                     let filtered = analysis.findings.filter { item in

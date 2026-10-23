@@ -4,7 +4,7 @@ struct ContentView: View {
     @AppStorage("isLoggedIn") private var isLoggedIn: Bool = false
     @StateObject private var viewModel = ResilienceViewModel()
     @StateObject private var concallViewModel = ConcallViewModel()
-    @State private var selectedTab: Int = 0
+    @State private var selectedTab: AppTab = .overview
     
     var body: some View {
         Group {
@@ -12,42 +12,42 @@ struct ContentView: View {
                 TabView(selection: $selectedTab) {
                     DashboardView(viewModel: viewModel)
                         .tabItem {
-                            Label("Overview", systemImage: "chart.bar.xaxis")
+                            Label(AppTab.overview.rawValue, systemImage: AppTab.overview.iconName)
                         }
-                        .tag(0)
+                        .tag(AppTab.overview)
                     
                     StressTestView(viewModel: viewModel)
                         .tabItem {
-                            Label("Stress Test", systemImage: "chart.line.downtrend.xyaxis")
+                            Label(AppTab.stressTest.rawValue, systemImage: AppTab.stressTest.iconName)
                         }
-                        .tag(1)
+                        .tag(AppTab.stressTest)
                     
                     EmergencySimulatorView(viewModel: viewModel)
                         .tabItem {
-                            Label("Emergency", systemImage: "bolt.shield.fill")
+                            Label(AppTab.emergency.rawValue, systemImage: AppTab.emergency.iconName)
                         }
-                        .tag(2)
+                        .tag(AppTab.emergency)
                     
                     RunwayView(viewModel: viewModel)
                         .tabItem {
-                            Label("Runway", systemImage: "hourglass")
+                            Label(AppTab.runway.rawValue, systemImage: AppTab.runway.iconName)
                         }
-                        .tag(3)
+                        .tag(AppTab.runway)
                     
                     ScenarioCompareView(viewModel: viewModel)
                         .tabItem {
-                            Label("Compare", systemImage: "rectangle.split.3x1")
+                            Label(AppTab.compare.rawValue, systemImage: AppTab.compare.iconName)
                         }
-                        .tag(4)
+                        .tag(AppTab.compare)
                     
                     ConcallDashboardView(
                         viewModel: concallViewModel,
                         resilienceViewModel: viewModel
                     )
                     .tabItem {
-                        Label("Concall", systemImage: "waveform.badge.magnifyingglass")
+                        Label(AppTab.concall.rawValue, systemImage: AppTab.concall.iconName)
                     }
-                    .tag(5)
+                    .tag(AppTab.concall)
                 }
                 .tint(LOSTheme.primary)
                 .transition(.opacity)
@@ -56,5 +56,6 @@ struct ContentView: View {
                     .transition(.opacity)
             }
         }
+        .animation(.default, value: isLoggedIn)
     }
 }

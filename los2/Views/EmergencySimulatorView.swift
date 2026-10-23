@@ -204,7 +204,7 @@ struct EmergencySimulatorView: View {
                             .tracking(0.8)
                             .padding(.horizontal)
                         
-                        ScrollView(.horizontal, showsIndicators: false) {
+                        ScrollView(.horizontal) {
                             HStack(spacing: 10) {
                                 ForEach(EmergencyCategory.allCases) { cat in
                                     let isSelected = viewModel.emergencyScenario.category == cat
@@ -216,7 +216,7 @@ struct EmergencySimulatorView: View {
                                         VStack(alignment: .leading, spacing: 6) {
                                             HStack {
                                                 Image(systemName: cat.iconName)
-                                                    .font(.system(size: 14, weight: .bold))
+                                                    .font(.system(size: 14).bold())
                                                 Spacer()
                                                 if isSelected {
                                                     Image(systemName: "checkmark.circle.fill")
@@ -225,12 +225,12 @@ struct EmergencySimulatorView: View {
                                             }
                                             
                                             Text(cat.rawValue)
-                                                .font(.system(size: 12, weight: .bold, design: .rounded))
+                                                .font(.caption.bold())
                                                 .lineLimit(2)
                                                 .fixedSize(horizontal: false, vertical: true)
                                             
                                             Text(LOSTheme.formatRupeeCompact(cat.defaultAmount))
-                                                .font(.system(size: 11, weight: .semibold, design: .rounded))
+                                                .font(.caption2.bold())
                                                 .foregroundStyle(isSelected ? Color.black : Color.secondary)
                                                 .lineLimit(1)
                                         }
@@ -238,16 +238,18 @@ struct EmergencySimulatorView: View {
                                         .padding(12)
                                         .background(isSelected ? LOSTheme.primary : LOSTheme.cardBackground)
                                         .foregroundStyle(isSelected ? Color.black : Color.primary)
-                                        .clipShape(RoundedRectangle(cornerRadius: 14))
+                                        .clipShape(.rect(cornerRadius: LOSTheme.radiusMedium))
                                         .overlay(
-                                            RoundedRectangle(cornerRadius: 14)
+                                            RoundedRectangle(cornerRadius: LOSTheme.radiusMedium)
                                                 .stroke(isSelected ? Color.clear : LOSTheme.cardBorder, lineWidth: 1)
                                         )
                                     }
+                                    .accessibilityLabel("\(cat.rawValue), standard estimate \(LOSTheme.formatRupee(cat.defaultAmount))")
                                 }
                             }
                             .padding(.horizontal)
                         }
+                        .scrollIndicators(.hidden)
                     }
                     
                     // MARK: - Expense Frequency & Configuration
@@ -263,7 +265,7 @@ struct EmergencySimulatorView: View {
                             }
                         }
                         .pickerStyle(.segmented)
-                        .onChange(of: viewModel.emergencyScenario.expenseType) { _ in
+                        .onChange(of: viewModel.emergencyScenario.expenseType) { _, _ in
                             viewModel.profile.unexpectedExpense = viewModel.emergencyScenario.totalEmergencyDrain
                         }
                         
@@ -286,7 +288,7 @@ struct EmergencySimulatorView: View {
                                     Text("Duration: \(viewModel.emergencyScenario.recurringMonths) months")
                                         .font(.system(size: 12))
                                 }
-                                .onChange(of: viewModel.emergencyScenario.recurringMonths) { _ in
+                                .onChange(of: viewModel.emergencyScenario.recurringMonths) { _, _ in
                                     viewModel.profile.unexpectedExpense = viewModel.emergencyScenario.totalEmergencyDrain
                                 }
                             }
@@ -294,9 +296,9 @@ struct EmergencySimulatorView: View {
                     }
                     .padding(18)
                     .background(LOSTheme.cardBackground)
-                    .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
+                    .clipShape(.rect(cornerRadius: LOSTheme.radiusLarge))
                     .overlay(
-                        RoundedRectangle(cornerRadius: 18, style: .continuous)
+                        RoundedRectangle(cornerRadius: LOSTheme.radiusLarge)
                             .stroke(LOSTheme.cardBorder, lineWidth: 1)
                     )
                     .padding(.horizontal)
@@ -328,7 +330,7 @@ struct EmergencySimulatorView: View {
                                         .padding(.vertical, 8)
                                         .background(isSel ? LOSTheme.criticalRed.opacity(0.18) : Color.primary.opacity(0.04))
                                         .foregroundStyle(isSel ? LOSTheme.criticalRed : Color.secondary)
-                                        .clipShape(RoundedRectangle(cornerRadius: 10))
+                                        .clipShape(.rect(cornerRadius: LOSTheme.radiusSmall))
                                 }
                                 .buttonStyle(.plain)
                             }
@@ -341,15 +343,17 @@ struct EmergencySimulatorView: View {
                             step: 5_000
                         )
                         .tint(LOSTheme.criticalRed)
-                        .onChange(of: viewModel.emergencyScenario.amount) { _ in
+                        .accessibilityLabel("Emergency Expense Amount")
+                        .accessibilityValue(LOSTheme.formatRupee(viewModel.emergencyScenario.amount))
+                        .onChange(of: viewModel.emergencyScenario.amount) { _, _ in
                             viewModel.profile.unexpectedExpense = viewModel.emergencyScenario.totalEmergencyDrain
                         }
                     }
                     .padding(18)
                     .background(LOSTheme.cardBackground)
-                    .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
+                    .clipShape(.rect(cornerRadius: LOSTheme.radiusLarge))
                     .overlay(
-                        RoundedRectangle(cornerRadius: 18, style: .continuous)
+                        RoundedRectangle(cornerRadius: LOSTheme.radiusLarge)
                             .stroke(LOSTheme.cardBorder, lineWidth: 1)
                     )
                     .padding(.horizontal)

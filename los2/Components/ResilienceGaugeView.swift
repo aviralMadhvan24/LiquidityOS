@@ -7,6 +7,7 @@ struct ResilienceGaugeView: View {
     let band: ResilienceBand
     let headline: String
     
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @State private var animatedScore: Double = 0
     
     var body: some View {
@@ -29,13 +30,13 @@ struct ResilienceGaugeView: View {
                         style: StrokeStyle(lineWidth: 16, lineCap: .round)
                     )
                     .rotationEffect(.degrees(90))
-                    .animation(.spring(response: 0.8, dampingFraction: 0.75), value: animatedScore)
+                    .animation(reduceMotion ? nil : .spring(response: 0.8, dampingFraction: 0.75), value: animatedScore)
                 
                 // Score Labels
                 VStack(spacing: 3) {
                     HStack(alignment: .firstTextBaseline, spacing: 2) {
                         Text("\(Int(animatedScore))")
-                            .font(.system(size: 48, weight: .bold, design: .rounded))
+                            .font(.system(size: 48, design: .rounded).bold())
                             .contentTransition(.numericText())
                             .minimumScaleFactor(0.8)
                         
@@ -46,7 +47,7 @@ struct ResilienceGaugeView: View {
                     
                     // Band Status Pill
                     Text(band.rawValue)
-                        .font(.system(size: 11, weight: .bold, design: .rounded))
+                        .font(.caption2.bold())
                         .padding(.horizontal, 10)
                         .padding(.vertical, 3)
                         .background(band.color.opacity(0.15))
@@ -67,10 +68,12 @@ struct ResilienceGaugeView: View {
                 .padding(.horizontal, 12)
         }
         .padding(.vertical, 4)
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel("Financial Resilience Score \(score) out of 100, \(band.rawValue). \(headline)")
         .onAppear {
             animatedScore = Double(score)
         }
-        .onChange(of: score) { newScore in
+        .onChange(of: score) { _, newScore in
             animatedScore = Double(newScore)
         }
     }
