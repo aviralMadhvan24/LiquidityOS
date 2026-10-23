@@ -35,7 +35,7 @@ struct ZerodhaConnectSheet: View {
                         Text("Kite by Zerodha")
                             .font(.system(size: 24, weight: .bold, design: .rounded))
                         
-                        Text("Connect your Zerodha account to sync real-time portfolio holdings and cash balances into LiquidityOS.")
+                        Text("Connect your Zerodha account to sync real-time portfolio holdings and cash balances into FinSight.")
                             .font(.system(size: 13))
                             .foregroundStyle(Color.secondary)
                             .multilineTextAlignment(.center)
@@ -114,7 +114,7 @@ struct ZerodhaConnectSheet: View {
                             .font(.system(size: 12, weight: .bold))
                             .foregroundStyle(LOSTheme.safeGreen)
                         
-                        Text("• We only read your current holdings and cash balance.\n• LiquidityOS never places trades or accesses your funds.\n• Credentials stay encrypted via Zerodha's official OAuth.")
+                        Text("• We only read your current holdings and cash balance.\n• FinSight never places trades or accesses your funds.\n• Credentials stay encrypted via Zerodha's official OAuth.")
                             .font(.system(size: 12))
                             .foregroundStyle(Color.secondary)
                             .lineSpacing(3)
@@ -292,7 +292,7 @@ struct ZerodhaConnectSheet: View {
             } label: {
                 HStack {
                     Image(systemName: "arrow.triangle.2.circlepath")
-                    Text("Apply to LiquidityOS Dashboard")
+                    Text("Apply to FinSight Dashboard")
                         .bold()
                 }
                 .font(.system(size: 15))

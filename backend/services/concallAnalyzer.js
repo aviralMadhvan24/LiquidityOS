@@ -47,7 +47,7 @@ function prepareTranscriptText(text, maxChars = 120000) {
  * System prompt enforcing strict anti-hallucination and evidence requirements.
  */
 function buildAnalysisPrompt({ companyName, ticker, quarter, fiscalYear, transcriptText, priorTranscriptText, holdingInfo }) {
-  return `You are an expert financial analyst assistant analyzing an earnings conference call (concall) transcript for LiquidityOS.
+  return `You are an expert financial analyst assistant analyzing an earnings conference call (concall) transcript for FinSight.
 Target Company: ${companyName} (${ticker})
 Call Period: ${quarter} ${fiscalYear}
 ${holdingInfo ? `User Portfolio Context: ${holdingInfo}` : 'User Portfolio Context: Standalone analysis (no holdings data supplied).'}

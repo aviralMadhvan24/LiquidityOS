@@ -1,7 +1,7 @@
 {
-  "name": "liquidityos-backend",
+  "name": "finsight-backend",
   "version": "1.0.0",
-  "description": "Backend API for LiquidityOS AI Concall Intelligence",
+  "description": "Backend API for FinSight AI Concall & Financial Resilience Intelligence",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",

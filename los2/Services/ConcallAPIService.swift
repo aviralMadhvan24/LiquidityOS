@@ -37,7 +37,7 @@ final class ConcallAPIService {
         var errorDescription: String? {
             switch self {
             case .offline(let url):
-                return "Cannot reach LiquidityOS Backend at \(url). Please ensure the backend server is running ('cd backend && npm start')."
+                return "Cannot reach FinSight Backend at \(url). Please ensure the backend server is running ('cd backend && npm start')."
             case .llmNotConfigured(let message, _):
                 return message
             case .validationFailed(let message):

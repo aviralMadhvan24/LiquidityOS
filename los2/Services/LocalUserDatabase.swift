@@ -19,9 +19,16 @@ final class LocalUserDatabase {
     
     private var fileURL: URL {
         let paths = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask)
-        let directory = paths[0].appendingPathComponent("LiquidityOS", isDirectory: true)
+        let directory = paths[0].appendingPathComponent("FinSight", isDirectory: true)
         if !FileManager.default.fileExists(atPath: directory.path) {
             try? FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
+            // Migrate legacy database if exists
+            let legacyDir = paths[0].appendingPathComponent("LiquidityOS", isDirectory: true)
+            let legacyFile = legacyDir.appendingPathComponent(databaseFileName)
+            let newFile = directory.appendingPathComponent(databaseFileName)
+            if FileManager.default.fileExists(atPath: legacyFile.path) && !FileManager.default.fileExists(atPath: newFile.path) {
+                try? FileManager.default.copyItem(at: legacyFile, to: newFile)
+            }
         }
         return directory.appendingPathComponent(databaseFileName)
     }

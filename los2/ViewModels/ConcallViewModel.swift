@@ -130,7 +130,7 @@ final class ConcallViewModel: ObservableObject {
         }
         
         do {
-            analysisProgressMessage = "Sending to LiquidityOS AI Engine for multi-dimensional concall intelligence..."
+            analysisProgressMessage = "Sending to FinSight AI Engine for multi-dimensional concall intelligence..."
             
             let result = try await ConcallAPIService.shared.analyzeTranscript(
                 companyName: companyNameInput,

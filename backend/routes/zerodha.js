@@ -57,7 +57,7 @@ router.get('/callback', async (req, res) => {
         <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; text-align: center; padding: 50px;">
           <h2 style="color: #e53935;">Zerodha Authentication Failed</h2>
           <p>Request token was missing or status was unsuccessful.</p>
-          <a href="liquidityos://zerodha-failed" style="display: inline-block; padding: 12px 24px; background: #2196f3; color: white; text-decoration: none; border-radius: 8px;">Return to LiquidityOS</a>
+          <a href="finsight://zerodha-failed" style="display: inline-block; padding: 12px 24px; background: #2196f3; color: white; text-decoration: none; border-radius: 8px;">Return to FinSight</a>
         </body>
       </html>
     `);
@@ -73,9 +73,9 @@ router.get('/callback', async (req, res) => {
             <div style="font-size: 48px; margin-bottom: 12px;">✅</div>
             <h2 style="color: #0f172a; margin-bottom: 8px;">Zerodha Kite Connected!</h2>
             <p style="color: #64748b; margin-bottom: 24px;">Authenticated as <strong>${user.userName} (${user.userId})</strong>.</p>
-            <p style="color: #334155; font-size: 14px;">Your portfolio holdings are now ready to sync with LiquidityOS.</p>
+            <p style="color: #334155; font-size: 14px;">Your portfolio holdings are now ready to sync with FinSight.</p>
             <div style="margin-top: 30px;">
-              <a href="liquidityos://zerodha-success" style="display: inline-block; padding: 12px 28px; background: #ff5722; color: white; text-decoration: none; border-radius: 10px; font-weight: bold;">Return to App</a>
+              <a href="finsight://zerodha-success" style="display: inline-block; padding: 12px 28px; background: #ff5722; color: white; text-decoration: none; border-radius: 10px; font-weight: bold;">Return to App</a>
             </div>
           </div>
         </body>

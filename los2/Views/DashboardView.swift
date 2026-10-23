@@ -32,10 +32,7 @@ struct DashboardView: View {
                     // MARK: - Top Header with Greeting & Action Hub
                     HStack(alignment: .center) {
                         VStack(alignment: .leading, spacing: LOSTheme.space4) {
-                            Text("LIQUIDITYOS")
-                                .font(.caption.weight(.bold))
-                                .foregroundStyle(LOSTheme.accent)
-                                .tracking(1.0)
+                            FinSightHorizontalLogo(showTagline: false, iconSize: 20)
                             Text("Financial Command")
                                 .font(.title2.weight(.bold))
                                 .foregroundStyle(LOSTheme.textPrimary)
@@ -462,7 +459,7 @@ struct DashboardView: View {
                     }
                 }
             } message: {
-                Text("Are you sure you want to sign out of LiquidityOS?")
+                Text("Are you sure you want to sign out of FinSight?")
             }
         }
     }

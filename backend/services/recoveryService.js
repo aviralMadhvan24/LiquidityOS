@@ -145,7 +145,7 @@ async function generateRecoveryNarrative(plansData, userGoals) {
     };
   }
 
-  const prompt = `You are an expert financial risk advisor for LiquidityOS.
+  const prompt = `You are an expert financial risk advisor for FinSight.
 Review the following deterministic financial recovery plans calculated for a user:
 Baseline Cash: ₹${plansData.baseline.initialCash}
 Emergency Expense: ₹${plansData.baseline.emergencyExpense}

@@ -22,8 +22,10 @@ extension Color {
     }
 }
 
-/// Design system constants and modern fintech styling tokens for LiquidityOS.
+/// Design system constants and modern fintech styling tokens for FinSight (formerly LiquidityOS).
 /// Dark-first with high-contrast WCAG AA compliance in both light and dark appearances.
+typealias FinSightTheme = LOSTheme
+
 enum LOSTheme {
     // MARK: - Semantic Color Tokens
     

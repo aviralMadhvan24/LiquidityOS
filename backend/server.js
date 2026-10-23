@@ -30,7 +30,7 @@ app.get('/api/health', (req, res) => {
 
   res.status(200).json({
     status: 'healthy',
-    service: 'LiquidityOS Backend API',
+    service: 'FinSight Backend API',
     version: '1.0.0',
     llmConfigured: isLLMConfigured,
     activeProvider: activeProvider,
@@ -56,7 +56,7 @@ app.use('/api/auth', authRouter);
 
 // Root informative endpoint
 app.get('/', (req, res) => {
-  res.send('LiquidityOS Backend API is running. Check /api/health for system status.');
+  res.send('FinSight Backend API is running. Check /api/health for system status.');
 });
 
 // Error handling middleware
@@ -71,7 +71,7 @@ app.use((err, req, res, next) => {
 // Start listening if run directly
 if (require.main === module) {
   app.listen(PORT, '0.0.0.0', () => {
-    console.log(`LiquidityOS API Server listening on http://localhost:${PORT}`);
+    console.log(`FinSight API Server listening on http://localhost:${PORT}`);
     console.log(`Health check: http://localhost:${PORT}/api/health`);
   });
 }

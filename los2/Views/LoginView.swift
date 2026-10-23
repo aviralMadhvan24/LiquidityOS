@@ -88,24 +88,25 @@ struct LoginView: View {
     
     private var brandingHeader: some View {
         VStack(spacing: LOSTheme.space12) {
-            ZStack {
-                RoundedRectangle(cornerRadius: 24, style: .continuous)
-                    .fill(LOSTheme.accent.gradient)
-                    .frame(width: 72, height: 72)
-                    .heroGlow(color: LOSTheme.accent)
-                
-                Image(systemName: "shield.lefthalf.filled")
-                    .font(.system(.largeTitle, design: .rounded).weight(.semibold))
-                    .foregroundStyle(Color.white)
-            }
+            FinSightAppIconView(size: 76)
             
             VStack(spacing: LOSTheme.space4) {
-                Text("LiquidityOS")
-                    .font(.title.weight(.bold))
-                    .fontDesign(.rounded)
-                    .foregroundStyle(LOSTheme.textPrimary)
+                HStack(spacing: 0) {
+                    Text("Fin")
+                        .font(.system(.title, design: .rounded).weight(.bold))
+                        .foregroundStyle(LOSTheme.textPrimary)
+                    Text("Sight")
+                        .font(.system(.title, design: .rounded).weight(.bold))
+                        .foregroundStyle(
+                            LinearGradient(
+                                colors: [Color(hex: "06B6D4"), Color(hex: "10B981")],
+                                startPoint: .leading,
+                                endPoint: .trailing
+                            )
+                        )
+                }
                 
-                Text("Financial Resilience Operating System")
+                Text("Portfolio Risk & Financial Resilience")
                     .font(.subheadline)
                     .foregroundStyle(LOSTheme.textSecondary)
             }
