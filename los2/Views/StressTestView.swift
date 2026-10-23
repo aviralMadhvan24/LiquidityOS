@@ -8,6 +8,7 @@ struct StressTestView: View {
     @ObservedObject var viewModel: ResilienceViewModel
     @State private var sliderDecline: Double = 15.0
     @State private var selectedGraphTab: Int = 0 // 0 = Before/After, 1 = Scenarios, 2 = Stock Breakdown, 3 = Decline Curve
+    @State private var isShowingCompareSheet: Bool = false
     
     var report: ResilienceReport {
         viewModel.currentReport
@@ -305,17 +306,38 @@ struct StressTestView: View {
                     }
                     .padding(18)
                     .background(LOSTheme.cardBackground)
-                    .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
+                    .clipShape(.rect(cornerRadius: LOSTheme.radiusLarge))
                     .overlay(
-                        RoundedRectangle(cornerRadius: 18, style: .continuous)
+                        RoundedRectangle(cornerRadius: LOSTheme.radiusLarge)
                             .stroke(LOSTheme.cardBorder, lineWidth: 1)
                     )
                     .padding(.horizontal)
-                    .padding(.bottom, 24)
+                    .padding(.bottom, 64)
                 }
             }
             .navigationTitle("Stress Test")
             .background(LOSTheme.background.ignoresSafeArea())
+            .toolbar {
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button {
+                        isShowingCompareSheet = true
+                    } label: {
+                        HStack(spacing: 4) {
+                            Image(systemName: "rectangle.split.3x1")
+                            Text("Compare")
+                                .font(.caption.bold())
+                        }
+                        .padding(.horizontal, 10)
+                        .padding(.vertical, 5)
+                        .background(LOSTheme.primary.opacity(0.12))
+                        .foregroundStyle(LOSTheme.primary)
+                        .clipShape(Capsule())
+                    }
+                }
+            }
+            .sheet(isPresented: $isShowingCompareSheet) {
+                ScenarioCompareView(viewModel: viewModel)
+            }
             .onAppear {
                 sliderDecline = viewModel.currentDeclinePercentage
             }

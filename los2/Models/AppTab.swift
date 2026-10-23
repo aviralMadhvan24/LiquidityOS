@@ -6,7 +6,6 @@ enum AppTab: String, CaseIterable, Identifiable, Hashable {
     case stressTest = "Stress Test"
     case emergency = "Emergency"
     case runway = "Runway"
-    case compare = "Compare"
     case concall = "Concall"
     
     var id: String { rawValue }
@@ -21,8 +20,6 @@ enum AppTab: String, CaseIterable, Identifiable, Hashable {
             return "bolt.shield.fill"
         case .runway:
             return "hourglass"
-        case .compare:
-            return "rectangle.split.3x1"
         case .concall:
             return "waveform.badge.magnifyingglass"
         }

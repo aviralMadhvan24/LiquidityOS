@@ -119,7 +119,7 @@ struct RunwayView: View {
                             .stroke(LOSTheme.cardBorder, lineWidth: 1)
                     )
                     .padding(.horizontal)
-                    .padding(.bottom, 24)
+                    .padding(.bottom, 64)
                 }
             }
             .navigationTitle("Cash Runway")

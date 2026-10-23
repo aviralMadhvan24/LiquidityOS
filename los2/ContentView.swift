@@ -34,12 +34,6 @@ struct ContentView: View {
                         }
                         .tag(AppTab.runway)
                     
-                    ScenarioCompareView(viewModel: viewModel)
-                        .tabItem {
-                            Label(AppTab.compare.rawValue, systemImage: AppTab.compare.iconName)
-                        }
-                        .tag(AppTab.compare)
-                    
                     ConcallDashboardView(
                         viewModel: concallViewModel,
                         resilienceViewModel: viewModel

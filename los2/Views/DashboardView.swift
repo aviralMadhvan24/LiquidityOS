@@ -28,70 +28,71 @@ struct DashboardView: View {
         NavigationStack {
             ScrollView {
                 VStack(spacing: 20) {
-                    // MARK: - Top Header with Greeting & Prominent "Edit Finances" Button
+                    // MARK: - Top Header with Greeting & Action Hub
                     HStack(alignment: .center) {
-                        VStack(alignment: .leading, spacing: 3) {
-                            Text("Good morning")
-                                .font(.system(size: 13, weight: .medium, design: .rounded))
-                                .foregroundStyle(Color.secondary)
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text("LIQUIDITYOS")
+                                .font(.system(size: 11, weight: .bold, design: .rounded))
+                                .foregroundStyle(LOSTheme.primary)
+                                .tracking(1.0)
                             Text("Financial Command")
-                                .font(.system(size: 24, weight: .bold, design: .rounded))
+                                .font(.system(size: 26, weight: .bold, design: .rounded))
                         }
                         Spacer()
                         
-                        // Prominent "Edit Finances" Action Button
-                        Button {
-                            viewModel.isShowingEditSheet = true
-                        } label: {
-                            HStack(spacing: 5) {
-                                Image(systemName: "pencil.line")
-                                    .font(.system(size: 12, weight: .bold))
-                                Text("Edit Finances")
-                                    .font(.system(size: 13, weight: .bold, design: .rounded))
-                            }
-                            .padding(.horizontal, 12)
-                            .padding(.vertical, 8)
-                            .background(LOSTheme.primary)
-                            .foregroundStyle(Color.black)
-                            .clipShape(Capsule())
-                            .shadow(color: LOSTheme.primary.opacity(0.3), radius: 4, y: 2)
-                        }
-                        
-                        // Zerodha Kite Connection Icon Button
-                        Button {
-                            viewModel.isShowingZerodhaSheet = true
-                        } label: {
-                            Label("Zerodha Account", systemImage: viewModel.isZerodhaConnected ? "checkmark.circle.fill" : "link")
-                        }
-                        .labelStyle(.iconOnly)
-                        .font(.system(size: 14).bold())
-                        .padding(8)
-                        .background(Color(red: 1.0, green: 0.34, blue: 0.13).opacity(0.12))
-                        .foregroundStyle(Color(red: 1.0, green: 0.34, blue: 0.13))
-                        .clipShape(Circle())
-                        .accessibilityLabel(viewModel.isZerodhaConnected ? "Zerodha Connected" : "Connect Zerodha Account")
-                        
-                        // Profile & Sign Out Menu
-                        Menu {
-                            Section {
-                                Label(loggedInUserEmail, systemImage: "person.fill")
+                        HStack(spacing: 8) {
+                            // Prominent "Edit Finances" Action Button
+                            Button {
+                                viewModel.isShowingEditSheet = true
+                            } label: {
+                                HStack(spacing: 5) {
+                                    Image(systemName: "pencil.line")
+                                        .font(.system(size: 12, weight: .bold))
+                                    Text("Edit")
+                                        .font(.system(size: 13, weight: .bold, design: .rounded))
+                                }
+                                .padding(.horizontal, 12)
+                                .padding(.vertical, 8)
+                                .background(LOSTheme.primary)
+                                .foregroundStyle(.white)
+                                .clipShape(Capsule())
+                                .shadow(color: LOSTheme.primary.opacity(0.3), radius: 6, y: 3)
                             }
                             
-                            Button(role: .destructive) {
-                                isShowingSignOutAlert = true
+                            // Zerodha Kite Connection Icon Button
+                            Button {
+                                viewModel.isShowingZerodhaSheet = true
                             } label: {
-                                Label("Sign Out", systemImage: "rectangle.portrait.and.arrow.right")
+                                Image(systemName: viewModel.isZerodhaConnected ? "checkmark.circle.fill" : "link")
+                                    .font(.system(size: 13, weight: .bold))
+                                    .frame(width: 34, height: 34)
+                                    .background(Color(red: 1.0, green: 0.34, blue: 0.13).opacity(0.12))
+                                    .foregroundStyle(Color(red: 1.0, green: 0.34, blue: 0.13))
+                                    .clipShape(Circle())
                             }
-                        } label: {
-                            Label("User Profile", systemImage: "person.crop.circle")
+                            .accessibilityLabel(viewModel.isZerodhaConnected ? "Zerodha Connected" : "Connect Zerodha Account")
+                            
+                            // Profile & Sign Out Menu
+                            Menu {
+                                Section {
+                                    Label(loggedInUserEmail, systemImage: "person.fill")
+                                }
+                                
+                                Button(role: .destructive) {
+                                    isShowingSignOutAlert = true
+                                } label: {
+                                    Label("Sign Out", systemImage: "rectangle.portrait.and.arrow.right")
+                                }
+                            } label: {
+                                Image(systemName: "person.fill")
+                                    .font(.system(size: 13, weight: .semibold))
+                                    .frame(width: 34, height: 34)
+                                    .background(Color.primary.opacity(0.06))
+                                    .foregroundStyle(Color.primary)
+                                    .clipShape(Circle())
+                            }
+                            .accessibilityLabel("User Account Profile")
                         }
-                        .labelStyle(.iconOnly)
-                        .font(.system(size: 14).bold())
-                        .padding(8)
-                        .background(Color.primary.opacity(0.06))
-                        .foregroundStyle(Color.primary)
-                        .clipShape(Circle())
-                        .accessibilityLabel("User Account Profile")
                     }
                     .padding(.horizontal)
                     .padding(.top, 4)
@@ -141,16 +142,16 @@ struct DashboardView: View {
                                     isPreviewingShock.toggle()
                                 }
                             } label: {
-                                HStack(spacing: 4) {
-                                    Image(systemName: isPreviewingShock ? "waveform.path.badge.minus" : "shield.fill")
-                                        .font(.system(size: 10, weight: .bold))
-                                    Text(isPreviewingShock ? "Viewing Shock" : "Test Shock")
+                                HStack(spacing: 5) {
+                                    Image(systemName: isPreviewingShock ? "waveform.path.badge.minus" : "shield.lefthalf.filled")
+                                        .font(.system(size: 11, weight: .bold))
+                                    Text(isPreviewingShock ? "Shock Active" : "Simulate Shock")
                                         .font(.system(size: 11, weight: .bold, design: .rounded))
                                 }
-                                .padding(.horizontal, 9)
-                                .padding(.vertical, 5)
-                                .background(isPreviewingShock ? LOSTheme.criticalRed.opacity(0.15) : Color.primary.opacity(0.06))
-                                .foregroundStyle(isPreviewingShock ? LOSTheme.criticalRed : Color.secondary)
+                                .padding(.horizontal, 10)
+                                .padding(.vertical, 6)
+                                .background(isPreviewingShock ? LOSTheme.criticalRed : LOSTheme.primary.opacity(0.12))
+                                .foregroundStyle(isPreviewingShock ? .white : LOSTheme.primary)
                                 .clipShape(Capsule())
                             }
                         }
@@ -209,13 +210,14 @@ struct DashboardView: View {
                             }
                         }
                     }
-                    .padding(18)
+                    .padding(20)
                     .background(LOSTheme.cardBackground)
                     .clipShape(.rect(cornerRadius: LOSTheme.radiusLarge))
                     .overlay(
                         RoundedRectangle(cornerRadius: LOSTheme.radiusLarge)
                             .stroke(LOSTheme.cardBorder, lineWidth: 1)
                     )
+                    .shadow(color: Color.black.opacity(0.04), radius: 12, y: 5)
                     .padding(.horizontal)
                     
                     // MARK: - "What Needs Attention?" Actionable Section
@@ -418,7 +420,7 @@ struct DashboardView: View {
                         }
                         .scrollIndicators(.hidden)
                     }
-                    .padding(.bottom, 24)
+                    .padding(.bottom, 64)
                 }
             }
             .background(LOSTheme.background.ignoresSafeArea())
@@ -486,21 +488,26 @@ private struct AttentionCard: View {
     let onAction: () -> Void
     
     var body: some View {
-        HStack(alignment: .top, spacing: 10) {
-            Image(systemName: item.iconName)
-                .font(.system(size: 15, weight: .bold))
-                .foregroundStyle(item.severityColor)
-                .padding(.top, 2)
+        HStack(alignment: .center, spacing: 12) {
+            ZStack {
+                Circle()
+                    .fill(item.severityColor.opacity(0.12))
+                    .frame(width: 36, height: 36)
+                Image(systemName: item.iconName)
+                    .font(.system(size: 15, weight: .bold))
+                    .foregroundStyle(item.severityColor)
+            }
             
-            VStack(alignment: .leading, spacing: 2) {
+            VStack(alignment: .leading, spacing: 3) {
                 Text(item.title)
                     .font(.system(size: 13, weight: .bold, design: .rounded))
                     .foregroundStyle(Color.primary)
                     .lineLimit(2)
+                    .fixedSize(horizontal: false, vertical: true)
                 Text(item.message)
                     .font(.system(size: 11))
                     .foregroundStyle(Color.secondary)
-                    .lineSpacing(2)
+                    .lineLimit(2)
                     .fixedSize(horizontal: false, vertical: true)
             }
             
@@ -509,21 +516,23 @@ private struct AttentionCard: View {
             Button(action: onAction) {
                 Text(item.actionLabel)
                     .font(.system(size: 11, weight: .bold, design: .rounded))
-                    .padding(.horizontal, 9)
-                    .padding(.vertical, 5)
-                    .background(item.severityColor.opacity(0.15))
-                    .foregroundStyle(item.severityColor)
+                    .padding(.horizontal, 10)
+                    .padding(.vertical, 6)
+                    .background(item.severityColor)
+                    .foregroundStyle(.white)
                     .clipShape(Capsule())
+                    .shadow(color: item.severityColor.opacity(0.25), radius: 4, y: 2)
             }
             .layoutPriority(1)
         }
-        .padding(12)
+        .padding(14)
         .background(LOSTheme.cardBackground)
-        .clipShape(RoundedRectangle(cornerRadius: 14))
+        .clipShape(.rect(cornerRadius: LOSTheme.radiusMedium))
         .overlay(
-            RoundedRectangle(cornerRadius: 14)
-                .stroke(item.severityColor.opacity(0.25), lineWidth: 1)
+            RoundedRectangle(cornerRadius: LOSTheme.radiusMedium)
+                .stroke(LOSTheme.cardBorder, lineWidth: 1)
         )
+        .shadow(color: Color.black.opacity(0.025), radius: 6, y: 2)
     }
 }
 
@@ -540,53 +549,54 @@ private struct InteractiveMetricCard: View {
     
     var body: some View {
         Button(action: onTap) {
-            VStack(alignment: .leading, spacing: 8) {
-                HStack(alignment: .center, spacing: 4) {
+            VStack(alignment: .leading, spacing: 10) {
+                HStack(alignment: .center, spacing: 6) {
                     ZStack {
                         Circle()
                             .fill(badgeColor.opacity(0.12))
-                            .frame(width: 26, height: 26)
+                            .frame(width: 28, height: 28)
                         Image(systemName: iconName)
-                            .font(.system(size: 11, weight: .semibold))
+                            .font(.system(size: 12, weight: .bold))
                             .foregroundStyle(badgeColor)
                     }
                     Spacer(minLength: 2)
                     Text(badgeText)
                         .font(.system(size: 9, weight: .bold, design: .rounded))
-                        .padding(.horizontal, 6)
+                        .padding(.horizontal, 7)
                         .padding(.vertical, 3)
-                        .background(badgeColor.opacity(0.12))
+                        .background(badgeColor.opacity(0.14))
                         .foregroundStyle(badgeColor)
                         .clipShape(Capsule())
                         .layoutPriority(1)
                 }
                 
-                VStack(alignment: .leading, spacing: 2) {
+                VStack(alignment: .leading, spacing: 3) {
                     Text(title)
-                        .font(.system(size: 9, weight: .bold, design: .rounded))
+                        .font(.system(size: 10, weight: .bold, design: .rounded))
                         .foregroundStyle(Color.secondary)
                         .tracking(0.6)
                         .lineLimit(1)
                     Text(value)
-                        .font(.system(size: 16, weight: .bold, design: .rounded))
+                        .font(.system(size: 19, weight: .bold, design: .rounded))
                         .foregroundStyle(isNegative ? LOSTheme.criticalRed : Color.primary)
                         .lineLimit(1)
                         .minimumScaleFactor(0.70)
                     Text(subtitle)
-                        .font(.system(size: 10))
+                        .font(.system(size: 11))
                         .foregroundStyle(Color.secondary)
                         .lineLimit(2)
                         .fixedSize(horizontal: false, vertical: true)
                 }
             }
             .frame(maxWidth: .infinity, alignment: .leading)
-            .padding(12)
+            .padding(14)
             .background(LOSTheme.cardBackground)
-            .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
+            .clipShape(.rect(cornerRadius: LOSTheme.radiusMedium))
             .overlay(
-                RoundedRectangle(cornerRadius: 16, style: .continuous)
+                RoundedRectangle(cornerRadius: LOSTheme.radiusMedium)
                     .stroke(LOSTheme.cardBorder, lineWidth: 1)
             )
+            .shadow(color: Color.black.opacity(0.025), radius: 6, y: 2)
         }
         .buttonStyle(.plain)
     }

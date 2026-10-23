@@ -310,7 +310,7 @@ struct ConcallDashboardView: View {
                     .clipShape(RoundedRectangle(cornerRadius: 18))
                     .overlay(RoundedRectangle(cornerRadius: 18).stroke(LOSTheme.cardBorder, lineWidth: 1))
                     .padding(.horizontal)
-                    .padding(.bottom, 24)
+                    .padding(.bottom, 64)
                 }
             }
             .background(LOSTheme.background.ignoresSafeArea())
