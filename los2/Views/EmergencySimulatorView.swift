@@ -136,29 +136,29 @@ struct EmergencySimulatorView: View {
                     
                     // MARK: - Funding Shortfall Warning (If Cash Insufficient)
                     if sim.isShortfall {
-                        HStack(alignment: .top, spacing: 12) {
+                        HStack(alignment: .center, spacing: 12) {
                             Image(systemName: "exclamationmark.octagon.fill")
-                                .font(.title2)
+                                .font(.title3)
                                 .foregroundStyle(LOSTheme.criticalRed)
                             
-                            VStack(alignment: .leading, spacing: 4) {
+                            VStack(alignment: .leading, spacing: 2) {
                                 Text("FUNDING SHORTFALL: \(LOSTheme.formatRupee(sim.fundingShortfall))")
                                     .font(.system(size: 13, weight: .bold, design: .rounded))
                                     .foregroundStyle(LOSTheme.criticalRed)
                                     .minimumScaleFactor(0.85)
                                     .lineLimit(1)
-                                Text("Liquid cash (\(LOSTheme.formatRupeeCompact(sim.preShockCash))) cannot cover this \(LOSTheme.formatRupeeCompact(sim.totalEmergencyDrain)) shock. Requires \(LOSTheme.formatRupee(sim.fundingShortfall)) from debt or emergency borrowing.")
+                                Text("Liquid cash cannot cover this shock without external borrowing.")
                                     .font(.system(size: 11))
                                     .foregroundStyle(Color.secondary)
-                                    .lineSpacing(2)
-                                    .fixedSize(horizontal: false, vertical: true)
+                                    .lineLimit(1)
                             }
+                            Spacer()
                         }
-                        .padding(14)
+                        .padding(12)
                         .background(LOSTheme.criticalRed.opacity(0.12))
-                        .clipShape(RoundedRectangle(cornerRadius: 14))
+                        .clipShape(RoundedRectangle(cornerRadius: 12))
                         .overlay(
-                            RoundedRectangle(cornerRadius: 14)
+                            RoundedRectangle(cornerRadius: 12)
                                 .stroke(LOSTheme.criticalRed.opacity(0.4), lineWidth: 1)
                         )
                         .padding(.horizontal)
@@ -167,10 +167,10 @@ struct EmergencySimulatorView: View {
                     // MARK: - Minimum Cash Reserve Status Card
                     HStack(spacing: 12) {
                         Image(systemName: sim.isReserveBreached ? "shield.slash.fill" : "shield.checkerboard")
-                            .font(.title2)
+                            .font(.title3)
                             .foregroundStyle(sim.isReserveBreached ? LOSTheme.warningAmber : LOSTheme.safeGreen)
                         
-                        VStack(alignment: .leading, spacing: 3) {
+                        VStack(alignment: .leading, spacing: 2) {
                             HStack {
                                 Text(sim.isReserveBreached ? "SAFETY FLOOR BREACHED" : "SAFETY FLOOR INTACT")
                                     .font(.system(size: 11, weight: .bold, design: .rounded))
@@ -181,24 +181,17 @@ struct EmergencySimulatorView: View {
                                     .foregroundStyle(Color.secondary)
                             }
                             
-                            if sim.isReserveBreached {
-                                Text("Remaining liquid cash (\(LOSTheme.formatRupeeCompact(sim.postShockCash))) drops \(LOSTheme.formatRupeeCompact(sim.reserveBreachAmount)) below your \(LOSTheme.formatRupeeCompact(sim.minimumReserveTarget)) safety floor.")
-                                    .font(.system(size: 11))
-                                    .foregroundStyle(Color.secondary)
-                                    .fixedSize(horizontal: false, vertical: true)
-                            } else {
-                                Text("Remaining liquid cash (\(LOSTheme.formatRupeeCompact(sim.postShockCash))) safely preserves your \(LOSTheme.formatRupeeCompact(sim.minimumReserveTarget)) safety floor.")
-                                    .font(.system(size: 11))
-                                    .foregroundStyle(Color.secondary)
-                                    .fixedSize(horizontal: false, vertical: true)
-                            }
+                            Text(sim.isReserveBreached ? "Drops \(LOSTheme.formatRupee(sim.reserveBreachAmount)) below your desired cash floor." : "Preserves your minimum reserve floor.")
+                                .font(.system(size: 11))
+                                .foregroundStyle(Color.secondary)
+                                .lineLimit(1)
                         }
                     }
-                    .padding(14)
+                    .padding(12)
                     .background(LOSTheme.cardBackground)
-                    .clipShape(RoundedRectangle(cornerRadius: 14))
+                    .clipShape(RoundedRectangle(cornerRadius: 12))
                     .overlay(
-                        RoundedRectangle(cornerRadius: 14)
+                        RoundedRectangle(cornerRadius: 12)
                             .stroke(sim.isReserveBreached ? LOSTheme.warningAmber.opacity(0.3) : LOSTheme.cardBorder, lineWidth: 1)
                     )
                     .padding(.horizontal)

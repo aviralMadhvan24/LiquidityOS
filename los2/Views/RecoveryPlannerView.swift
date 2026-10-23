@@ -230,11 +230,10 @@ struct RecoveryPlannerView: View {
                                 .foregroundStyle(Color.secondary.opacity(0.6))
                             Text("No Active Recovery Plan")
                                 .font(.system(size: 16, weight: .bold, design: .rounded))
-                            Text("Tap 'Generate AI Recovery Plan' to synthesize tailored expense adjustments and runway extensions.")
+                            Text("Tap above to generate personalized recovery strategies.")
                                 .font(.system(size: 13))
                                 .foregroundStyle(Color.secondary)
                                 .multilineTextAlignment(.center)
-                                .padding(.horizontal, 20)
                         }
                         .padding(36)
                         .frame(maxWidth: .infinity)

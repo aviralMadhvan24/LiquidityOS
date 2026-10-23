@@ -119,40 +119,7 @@ struct RunwayView: View {
                             .stroke(LOSTheme.cardBorder, lineWidth: 1)
                     )
                     .padding(.horizontal)
-                    
-                    // Formula Card (Slide 06 Educational Breakdown)
-                    VStack(alignment: .leading, spacing: 10) {
-                        Text("HOW RUNWAY IS CALCULATED")
-                            .font(.system(size: 11, weight: .bold, design: .rounded))
-                            .foregroundStyle(.secondary)
-                            .tracking(0.8)
-                        
-                        Text("Runway = Cash / Monthly Net Cash Burn")
-                            .font(.system(size: 13, weight: .bold, design: .monospaced))
-                            .foregroundStyle(LOSTheme.primary)
-                        
-                        Text("Net cash burn = Expenses (\(LOSTheme.formatRupeeCompact(report.monthlyExpenses))) − Income (\(LOSTheme.formatRupeeCompact(report.monthlyIncome))) = \(LOSTheme.formatRupeeCompact(report.monthlyNetBurn))")
-                            .font(.system(size: 12))
-                            .foregroundStyle(.secondary)
-                            .fixedSize(horizontal: false, vertical: true)
-                        
-                        if report.monthlyNetBurn > 0 && report.remainingCashAfterEmergency > 0 {
-                            Text("Runway = \(LOSTheme.formatRupeeCompact(report.remainingCashAfterEmergency)) ÷ \(LOSTheme.formatRupeeCompact(report.monthlyNetBurn)) = \(String(format: "%.1f", report.runwayMonths)) months")
-                                .font(.system(size: 12, weight: .semibold))
-                                .foregroundStyle(.primary)
-                                .fixedSize(horizontal: false, vertical: true)
-                        }
-                    }
-                    .padding(16)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .background(LOSTheme.cardBackground)
-                    .clipShape(RoundedRectangle(cornerRadius: 16))
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 16)
-                            .stroke(LOSTheme.cardBorder, lineWidth: 1)
-                    )
-                    .padding(.horizontal)
-                    .padding(.bottom, 20)
+                    .padding(.bottom, 24)
                 }
             }
             .navigationTitle("Cash Runway")

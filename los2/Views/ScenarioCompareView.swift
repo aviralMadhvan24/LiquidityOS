@@ -121,21 +121,6 @@ struct ScenarioCompareView: View {
                         }
                     }
                     .padding(.horizontal)
-                    
-                    // Disclaimer Box
-                    HStack(alignment: .top, spacing: 10) {
-                        Image(systemName: "shield.lefthalf.filled")
-                            .font(.subheadline)
-                            .foregroundStyle(Color.secondary)
-                        Text("Mathematical drawdown simulations. Compares portfolio resilience across standard market stress levels.")
-                            .font(.system(size: 11))
-                            .foregroundStyle(Color.secondary)
-                            .fixedSize(horizontal: false, vertical: true)
-                    }
-                    .padding(14)
-                    .background(Color.primary.opacity(0.04))
-                    .clipShape(RoundedRectangle(cornerRadius: 12))
-                    .padding(.horizontal)
                     .padding(.bottom, 24)
                 }
             }

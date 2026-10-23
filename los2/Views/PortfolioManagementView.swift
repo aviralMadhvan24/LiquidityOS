@@ -225,28 +225,8 @@ struct PortfolioManagementView: View {
                             }
                         }
                         .padding(.horizontal)
+                        .padding(.bottom, 24)
                     }
-                    
-                    // Notice on Market Data Compliance
-                    VStack(alignment: .leading, spacing: 6) {
-                        HStack(spacing: 6) {
-                            Image(systemName: "lock.shield.fill")
-                                .font(.system(size: 11))
-                                .foregroundStyle(Color.secondary)
-                            Text("DATA INTEGRITY NOTICE")
-                                .font(.system(size: 10, weight: .bold, design: .rounded))
-                                .foregroundStyle(Color.secondary)
-                        }
-                        Text("Quotes sourced via configured market adapter (Yahoo Finance NSE / Demo). Real-time, delayed, and mock data are explicitly flagged for integrity.")
-                            .font(.system(size: 11))
-                            .foregroundStyle(Color.secondary)
-                            .lineSpacing(2)
-                    }
-                    .padding(14)
-                    .background(LOSTheme.cardBackground.opacity(0.6))
-                    .clipShape(RoundedRectangle(cornerRadius: 12))
-                    .padding(.horizontal)
-                    .padding(.bottom, 24)
                 }
             }
             .navigationTitle("Portfolio Holdings")

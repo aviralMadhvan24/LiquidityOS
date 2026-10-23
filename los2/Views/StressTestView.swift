@@ -145,19 +145,6 @@ struct StressTestView: View {
                         }
                         .frame(height: 220)
                         .padding(.top, 4)
-                        
-                        // Hypothetical Simulation Notice
-                        HStack(spacing: 6) {
-                            Image(systemName: "chart.line.uptrend.xyaxis.circle")
-                                .font(.system(size: 11))
-                                .foregroundStyle(Color.secondary)
-                            Text("Hypothetical stress simulation based on drawdown models. Not investment advice.")
-                                .font(.system(size: 11))
-                                .foregroundStyle(Color.secondary)
-                                .lineLimit(2)
-                                .fixedSize(horizontal: false, vertical: true)
-                        }
-                        .padding(.top, 2)
                     }
                     .padding(18)
                     .background(LOSTheme.cardBackground)
@@ -236,13 +223,13 @@ struct StressTestView: View {
                                         .foregroundStyle(LOSTheme.warningAmber)
                                     
                                     VStack(alignment: .leading, spacing: 2) {
-                                        Text("TOP LOSS CONTRIBUTOR: \(top.holding.ticker)")
+                                        Text("TOP CONTRIBUTOR: \(top.holding.ticker)")
                                             .font(.system(size: 12, weight: .bold, design: .rounded))
                                             .foregroundStyle(Color.primary)
-                                        Text("\(String(format: "%.1f%%", top.lossContributionPercent)) of total loss (−\(LOSTheme.formatRupeeCompact(top.simulatedLoss))) driven by \(top.holding.companyName)")
+                                        Text("\(String(format: "%.0f%%", top.lossContributionPercent)) of total drawdown (−\(LOSTheme.formatRupee(top.simulatedLoss)))")
                                             .font(.system(size: 11))
                                             .foregroundStyle(Color.secondary)
-                                            .fixedSize(horizontal: false, vertical: true)
+                                            .lineLimit(1)
                                     }
                                     Spacer()
                                 }

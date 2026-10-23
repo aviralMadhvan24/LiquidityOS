@@ -38,12 +38,6 @@ struct ResilienceScoreBreakdownSheet: View {
                             .background(report.band.color.opacity(0.15))
                             .foregroundStyle(report.band.color)
                             .clipShape(Capsule())
-                        
-                        Text("Transparent mathematical assessment across 5 core resilience dimensions.")
-                            .font(.system(size: 12))
-                            .foregroundStyle(Color.secondary)
-                            .multilineTextAlignment(.center)
-                            .padding(.horizontal, 16)
                     }
                     .padding(20)
                     .frame(maxWidth: .infinity)

@@ -134,7 +134,7 @@ struct ReverseStressEngine {
             targetText = "portfolio-wide decline"
         }
         
-        let explanation = "If your \(LOSTheme.formatRupee(emergencyBill)) emergency bill occurs and income drops by \(Int(incomeDisruption))% for \(duration) months, a \(targetText) of \(String(format: "%.1f%%", roundedPoint)) breaches your \(assumption.breachCondition.shortTitle)."
+        let explanation = "A \(targetText) of \(String(format: "%.1f%%", roundedPoint)) breaches your \(assumption.breachCondition.shortTitle)."
         
         return ReverseStressResult(
             isBreached: true,

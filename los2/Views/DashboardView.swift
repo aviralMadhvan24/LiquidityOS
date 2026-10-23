@@ -164,34 +164,28 @@ struct DashboardView: View {
                         Divider()
                             .overlay(LOSTheme.cardBorder)
                         
-                        // 5-Pillar Score Preview: Sleek segmented bar + summary
-                        VStack(spacing: 8) {
+                        // 5-Pillar Score Preview: Sleek segmented bar + breakdown button
+                        HStack(spacing: 8) {
                             HStack(spacing: 4) {
                                 ForEach(baselineReport.pillars) { p in
-                                    GeometryReader { geo in
-                                        RoundedRectangle(cornerRadius: 3)
-                                            .fill(p.statusColor)
-                                    }
-                                    .frame(height: 5)
+                                    RoundedRectangle(cornerRadius: 3)
+                                        .fill(p.statusColor)
+                                        .frame(height: 5)
                                 }
                             }
                             
-                            HStack {
-                                Text("\(baselineReport.pillars.count) Resilience Pillars Evaluated")
-                                    .font(.system(size: 11, weight: .medium, design: .rounded))
-                                    .foregroundStyle(Color.secondary)
-                                Spacer()
-                                Button {
-                                    viewModel.isShowingScoreBreakdownSheet = true
-                                } label: {
-                                    HStack(spacing: 3) {
-                                        Text("Score Breakdown")
-                                            .font(.system(size: 11, weight: .bold, design: .rounded))
-                                        Image(systemName: "chevron.right")
-                                            .font(.system(size: 9, weight: .bold))
-                                    }
-                                    .foregroundStyle(LOSTheme.primary)
+                            Spacer()
+                            
+                            Button {
+                                viewModel.isShowingScoreBreakdownSheet = true
+                            } label: {
+                                HStack(spacing: 3) {
+                                    Text("Breakdown")
+                                        .font(.system(size: 11, weight: .bold, design: .rounded))
+                                    Image(systemName: "chevron.right")
+                                        .font(.system(size: 9, weight: .bold))
                                 }
+                                .foregroundStyle(LOSTheme.primary)
                             }
                         }
                     }
@@ -356,13 +350,6 @@ struct DashboardView: View {
                                         }
                                     }
                                 }
-                            }
-                            
-                            HStack {
-                                Text("Portfolio retention under simulated 0% to 60% drawdown.")
-                                    .font(.system(size: 11))
-                                    .foregroundStyle(Color.secondary)
-                                Spacer()
                             }
                         }
                         .padding(14)

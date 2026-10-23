@@ -117,34 +117,28 @@ struct ReverseStressTestView: View {
                     .padding(.horizontal)
                     
                     // MARK: - Primary Sensitivity Driver Card
-                    VStack(alignment: .leading, spacing: 8) {
-                        HStack {
-                            Image(systemName: "gauge.with.needle.fill")
-                                .font(.system(size: 13, weight: .bold))
-                                .foregroundStyle(LOSTheme.primary)
-                            Text("PRIMARY SENSITIVITY DRIVER")
-                                .font(.system(size: 11, weight: .bold, design: .rounded))
-                                .foregroundStyle(Color.secondary)
-                                .tracking(0.8)
-                            Spacer()
-                            Text(result.primaryDriver)
-                                .font(.system(size: 11, weight: .bold, design: .rounded))
-                                .padding(.horizontal, 8)
-                                .padding(.vertical, 3)
-                                .background(LOSTheme.primary.opacity(0.12))
-                                .foregroundStyle(LOSTheme.primary)
-                                .clipShape(Capsule())
-                        }
-                        
-                        Text("This factor most impacts your safety threshold, shifting your breaking point.")
-                            .font(.system(size: 12))
+                    HStack {
+                        Image(systemName: "gauge.with.needle.fill")
+                            .font(.system(size: 13, weight: .bold))
+                            .foregroundStyle(LOSTheme.primary)
+                        Text("SENSITIVITY DRIVER")
+                            .font(.system(size: 11, weight: .bold, design: .rounded))
                             .foregroundStyle(Color.secondary)
+                            .tracking(0.8)
+                        Spacer()
+                        Text(result.primaryDriver)
+                            .font(.system(size: 12, weight: .bold, design: .rounded))
+                            .padding(.horizontal, 9)
+                            .padding(.vertical, 4)
+                            .background(LOSTheme.primary.opacity(0.12))
+                            .foregroundStyle(LOSTheme.primary)
+                            .clipShape(Capsule())
                     }
-                    .padding(16)
+                    .padding(14)
                     .background(LOSTheme.cardBackground)
-                    .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
+                    .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
                     .overlay(
-                        RoundedRectangle(cornerRadius: 16, style: .continuous)
+                        RoundedRectangle(cornerRadius: 14, style: .continuous)
                             .stroke(LOSTheme.cardBorder, lineWidth: 1)
                     )
                     .padding(.horizontal)

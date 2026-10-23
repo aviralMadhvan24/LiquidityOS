@@ -60,8 +60,6 @@ struct EditProfileSheet: View {
                     }
                 } header: {
                     Text("Assets & Reserves")
-                } footer: {
-                    Text("Liquid cash includes savings and instant bank deposits. The safety floor is the minimum balance you protect.")
                 }
                 
                 // Section 2: Cash Flow (Earnings & Outflows)
@@ -91,8 +89,6 @@ struct EditProfileSheet: View {
                     }
                 } header: {
                     Text("Monthly Cash Flow & Commitments")
-                } footer: {
-                    Text("Living expenses plus debt commitments determine your total monthly burn rate.")
                 }
                 
                 // Section 3: Stress Testing Emergency Bill
@@ -106,8 +102,6 @@ struct EditProfileSheet: View {
                     }
                 } header: {
                     Text("Stress Shock Baseline")
-                } footer: {
-                    Text("Default baseline expense applied to simulate liquidity shock waves.")
                 }
                 
                 // Section 4: Broker Integration Shortcut
@@ -137,8 +131,6 @@ struct EditProfileSheet: View {
                     }
                 } header: {
                     Text("Broker Integration")
-                } footer: {
-                    Text("Sync real-time equity holdings and cash margins directly from your Zerodha account.")
                 }
                 
                 // Section 5: Reset Actions
@@ -149,7 +141,7 @@ struct EditProfileSheet: View {
                     } label: {
                         HStack {
                             Image(systemName: "arrow.counterclockwise")
-                            Text("Reset to Pitch Deck Example")
+                            Text("Reset to Demo Profile")
                         }
                         .foregroundStyle(LOSTheme.primary)
                     }

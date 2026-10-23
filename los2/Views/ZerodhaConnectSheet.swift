@@ -188,20 +188,6 @@ struct ZerodhaConnectSheet: View {
             }
             .disabled(isLoading)
             
-            if !isConfigured {
-                VStack(alignment: .leading, spacing: 6) {
-                    Text("Developer Setup for Live Account:")
-                        .font(.system(size: 12, weight: .bold))
-                        .foregroundStyle(Color.secondary)
-                    Text("To link a live trading account, register a free app on developers.kite.trade and set ZERODHA_API_KEY and ZERODHA_API_SECRET in backend/.env.")
-                        .font(.system(size: 11))
-                        .foregroundStyle(Color.secondary)
-                }
-                .padding(12)
-                .background(Color.primary.opacity(0.03))
-                .clipShape(RoundedRectangle(cornerRadius: 10))
-            }
-            
             if let error = errorMessage {
                 Text(error)
                     .font(.system(size: 12))
@@ -361,7 +347,7 @@ struct ZerodhaConnectSheet: View {
             isLoading = false
         } catch {
             isLoading = false
-            errorMessage = "Could not connect to Zerodha backend: \(error.localizedDescription)"
+            errorMessage = "Unable to connect to market service. Please try again."
         }
     }
     
