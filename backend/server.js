@@ -6,6 +6,7 @@ const concallRouter = require('./routes/concall');
 const zerodhaRouter = require('./routes/zerodha');
 const marketRouter = require('./routes/market');
 const recoveryRouter = require('./routes/recovery');
+const authRouter = require('./routes/auth');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -49,6 +50,9 @@ app.use('/api/market', marketRouter);
 
 // Mount AI Financial Recovery Planner routes
 app.use('/api/recovery', recoveryRouter);
+
+// Mount Authentication & User Database routes
+app.use('/api/auth', authRouter);
 
 // Root informative endpoint
 app.get('/', (req, res) => {

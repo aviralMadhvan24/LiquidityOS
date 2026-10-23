@@ -9,6 +9,7 @@ struct DashboardView: View {
     @ObservedObject var viewModel: ResilienceViewModel
     @AppStorage("isLoggedIn") private var isLoggedIn: Bool = false
     @AppStorage("loggedInUserEmail") private var loggedInUserEmail: String = "user@gmail.com"
+    @AppStorage("loggedInUserName") private var loggedInUserName: String = "Demo Investor"
     
     @State private var isPreviewingShock: Bool = false
     @State private var isShowingStressSheet: Bool = false
@@ -75,7 +76,8 @@ struct DashboardView: View {
                             // Profile & Sign Out Menu
                             Menu {
                                 Section {
-                                    Label(loggedInUserEmail, systemImage: "person.fill")
+                                    Label(loggedInUserName, systemImage: "person.text.rectangle")
+                                    Label(loggedInUserEmail, systemImage: "envelope")
                                 }
                                 
                                 Button(role: .destructive) {

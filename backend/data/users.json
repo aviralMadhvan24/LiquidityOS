@@ -1,0 +1,47 @@
+[
+  {
+    "id": "usr_demo_1",
+    "name": "Demo Investor",
+    "email": "user@gmail.com",
+    "salt": "b2f6182930cdadc96f96ab7c9b5fa790",
+    "passwordHash": "6686d938f084a9e39e7fd0bb381f8ab727509f74b6d3135c19dde7a73f141601dd2668efdb3f41d4d0ba524d0ff529a8267d5669076597cce6f6f0b3a276053b",
+    "createdAt": "2026-10-23T19:45:28.307Z",
+    "updatedAt": "2026-10-23T19:45:28.308Z"
+  },
+  {
+    "id": "usr_admin_1",
+    "name": "System Admin",
+    "email": "admin@gmail.com",
+    "salt": "a0751cf10b5c094f10b6b883fbb9a3cc",
+    "passwordHash": "c1cb991a8effad64a8cba6f59e6f74f4b967934fa348d6e7214e897b3cc270eb3ca012c92c2980a5ca90bfb14e556a626fbb7c9568c1fdf9da39f626eae3ce73",
+    "createdAt": "2026-10-23T19:45:28.308Z",
+    "updatedAt": "2026-10-23T19:45:28.308Z"
+  },
+  {
+    "id": "usr_1792784728317_1506602b",
+    "name": "Rohit Sharma",
+    "email": "investor_1792784728315@gmail.com",
+    "salt": "7f80bab354e50c4a0a44607430e205a1",
+    "passwordHash": "612d5aba556caeb0d5c9305c0c73c6fa8544cf62a145fc9a4ad092af9b2ea3b30092aeb6b336253e03e029fbcdd013e9a96ddae374493779ac32f1b07cb2007e",
+    "createdAt": "2026-10-23T19:45:28.317Z",
+    "updatedAt": "2026-10-23T19:45:28.317Z"
+  },
+  {
+    "id": "usr_1792784904954_60f37209",
+    "name": "Rohit Sharma",
+    "email": "investor_1792784904952@gmail.com",
+    "salt": "aab8320da5715ac7dc8402e57fdc8a3a",
+    "passwordHash": "90a4434bcac8d0a165917ab1d94c416c458e05aa5a9d16bd5550ae65a3df0b46b74c839a6a431d301002fcdf2b40e883d4a02e175230a0f6f45a7eac26a3a996",
+    "createdAt": "2026-10-23T19:48:24.954Z",
+    "updatedAt": "2026-10-23T19:48:24.955Z"
+  },
+  {
+    "id": "usr_1792784963705_f014a632",
+    "name": "Rohit Sharma",
+    "email": "investor_1792784963703@gmail.com",
+    "salt": "3b31d4bd27e9522f65febc07299511b5",
+    "passwordHash": "7147185b5fee666344641960c1ad9b13ddc64bdd85b0a45f29b045ef7480f0624cbf693971006fa5e4fd5b2849ebc736f530621fda49a0e48863c23393fdcad5",
+    "createdAt": "2026-10-23T19:49:23.705Z",
+    "updatedAt": "2026-10-23T19:49:23.706Z"
+  }
+]
