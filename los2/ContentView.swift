@@ -2,6 +2,7 @@ import SwiftUI
 
 struct ContentView: View {
     @StateObject private var viewModel = ResilienceViewModel()
+    @StateObject private var concallViewModel = ConcallViewModel()
     @State private var selectedTab: Int = 0
     
     var body: some View {
@@ -35,6 +36,15 @@ struct ContentView: View {
                     Label("Compare", systemImage: "rectangle.split.3x1")
                 }
                 .tag(4)
+            
+            ConcallDashboardView(
+                viewModel: concallViewModel,
+                resilienceViewModel: viewModel
+            )
+            .tabItem {
+                Label("Concall", systemImage: "waveform.badge.magnifyingglass")
+            }
+            .tag(5)
         }
         .tint(LOSTheme.primary)
     }
