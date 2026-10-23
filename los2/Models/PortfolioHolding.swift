@@ -31,6 +31,10 @@ enum MarketDataFreshness: String, Codable {
         case .unavailable: return Color.gray
         }
     }
+    
+    var badgeColor: Color {
+        return color
+    }
 }
 
 /// Represents an individual stock holding within the user's investment portfolio.

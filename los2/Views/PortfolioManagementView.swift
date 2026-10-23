@@ -47,15 +47,15 @@ struct PortfolioManagementView: View {
                             // Freshness Indicator Capsule
                             HStack(spacing: 5) {
                                 Circle()
-                                    .fill(viewModel.marketDataFreshnessSummary.badgeColor)
+                                    .fill(viewModel.marketDataFreshnessSummary.color)
                                     .frame(width: 7, height: 7)
                                 Text(viewModel.marketDataFreshnessSummary.displayName)
                                     .font(.system(size: 10, weight: .bold, design: .rounded))
-                                    .foregroundStyle(viewModel.marketDataFreshnessSummary.badgeColor)
+                                    .foregroundStyle(viewModel.marketDataFreshnessSummary.color)
                             }
                             .padding(.horizontal, 9)
                             .padding(.vertical, 5)
-                            .background(viewModel.marketDataFreshnessSummary.badgeColor.opacity(0.12))
+                            .background(viewModel.marketDataFreshnessSummary.color.opacity(0.12))
                             .clipShape(Capsule())
                         }
                         
@@ -284,8 +284,8 @@ private struct HoldingRowCard: View {
                             .font(.system(size: 9, weight: .bold, design: .rounded))
                             .padding(.horizontal, 5)
                             .padding(.vertical, 2)
-                            .background(holding.freshness.badgeColor.opacity(0.12))
-                            .foregroundStyle(holding.freshness.badgeColor)
+                            .background(holding.freshness.color.opacity(0.12))
+                            .foregroundStyle(holding.freshness.color)
                             .clipShape(Capsule())
                     }
                     
