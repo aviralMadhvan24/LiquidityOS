@@ -114,6 +114,35 @@ struct PortfolioHolding: Identifiable, Equatable, Codable {
         self.staleWarning = staleWarning
     }
     
+    /// Convenience initializer supporting legacy mappings and broker sync
+    init(
+        id: UUID = UUID(),
+        companyName: String,
+        ticker: String,
+        sector: String = "Equity",
+        currentValue: Double,
+        portfolioWeightPercent: Double = 0.0,
+        shares: Int? = nil,
+        averageBuyPrice: Double? = nil,
+        freshness: MarketDataFreshness = .realtime,
+        lastUpdated: Date? = nil
+    ) {
+        let sh = max(1, shares ?? 1)
+        let avg = averageBuyPrice ?? (currentValue / Double(sh))
+        self.init(
+            id: id,
+            companyName: companyName,
+            ticker: ticker,
+            sector: sector,
+            shares: sh,
+            averageBuyPrice: avg,
+            currentPrice: currentValue / Double(sh),
+            portfolioWeightPercent: portfolioWeightPercent,
+            freshness: freshness,
+            lastUpdated: lastUpdated ?? Date()
+        )
+    }
+    
     /// Default holdings representing the ₹5,00,000 portfolio from the pitch deck.
     static let pitchDeckHoldings: [PortfolioHolding] = [
         PortfolioHolding(

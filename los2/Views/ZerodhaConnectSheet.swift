@@ -372,15 +372,18 @@ struct ZerodhaConnectSheet: View {
     
     private func applyPortfolioSync(portfolio: ZerodhaPortfolioResponse) {
         let mappedHoldings = portfolio.holdings.map { item in
-            PortfolioHolding(
-                id: UUID(),
+            let sh = max(1, item.shares ?? 1)
+            let avg = item.averageBuyPrice ?? (item.currentValue / Double(sh))
+            return PortfolioHolding(
                 companyName: item.companyName,
                 ticker: item.ticker,
                 sector: item.sector,
-                currentValue: item.currentValue,
+                shares: sh,
+                averageBuyPrice: avg,
+                currentPrice: item.currentValue / Double(sh),
                 portfolioWeightPercent: item.portfolioWeightPercent,
-                shares: item.shares,
-                averageBuyPrice: item.averageBuyPrice
+                freshness: .realtime,
+                lastUpdated: Date()
             )
         }
         
