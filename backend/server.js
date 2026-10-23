@@ -3,6 +3,7 @@ const express = require('express');
 const cors = require('cors');
 const path = require('path');
 const concallRouter = require('./routes/concall');
+const zerodhaRouter = require('./routes/zerodha');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -37,6 +38,9 @@ app.get('/api/health', (req, res) => {
 
 // Mount Concall Intelligence routes
 app.use('/api/concall', concallRouter);
+
+// Mount Zerodha Kite Connect routes
+app.use('/api/zerodha', zerodhaRouter);
 
 // Root informative endpoint
 app.get('/', (req, res) => {

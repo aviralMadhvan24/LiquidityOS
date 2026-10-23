@@ -98,6 +98,36 @@ struct EditProfileSheet: View {
                 }
                 
                 Section {
+                    Button {
+                        dismiss()
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                            viewModel.isShowingZerodhaSheet = true
+                        }
+                    } label: {
+                        HStack {
+                            Image(systemName: "link.circle.fill")
+                                .foregroundStyle(Color(red: 1.0, green: 0.34, blue: 0.13))
+                            Text(viewModel.isZerodhaConnected ? "Manage Zerodha Kite Sync" : "Connect Zerodha Kite Account")
+                                .foregroundStyle(Color.primary)
+                            Spacer()
+                            if viewModel.isZerodhaConnected {
+                                Text("Synced")
+                                    .font(.system(size: 11, weight: .bold))
+                                    .foregroundStyle(LOSTheme.safeGreen)
+                            } else {
+                                Image(systemName: "chevron.right")
+                                    .font(.system(size: 12))
+                                    .foregroundStyle(Color.secondary)
+                            }
+                        }
+                    }
+                } header: {
+                    Text("Broker Integration")
+                } footer: {
+                    Text("Sync real-time equity holdings and cash margins from your Zerodha trading account.")
+                }
+                
+                Section {
                     Button(role: .none) {
                         viewModel.resetToDefaults()
                         loadValuesFromProfile()

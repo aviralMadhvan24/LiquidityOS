@@ -20,6 +20,24 @@ struct DashboardView: View {
                                 .font(.system(size: 26, weight: .bold, design: .rounded))
                         }
                         Spacer()
+                        
+                        // Zerodha Kite Connection Button
+                        Button {
+                            viewModel.isShowingZerodhaSheet = true
+                        } label: {
+                            HStack(spacing: 4) {
+                                Image(systemName: viewModel.isZerodhaConnected ? "checkmark.circle.fill" : "link")
+                                    .font(.system(size: 11, weight: .bold))
+                                Text(viewModel.isZerodhaConnected ? "Kite Synced" : "Connect Zerodha")
+                                    .font(.system(size: 12, weight: .bold, design: .rounded))
+                            }
+                            .padding(.horizontal, 10)
+                            .padding(.vertical, 7)
+                            .background(Color(red: 1.0, green: 0.34, blue: 0.13).opacity(viewModel.isZerodhaConnected ? 0.15 : 0.10))
+                            .foregroundStyle(Color(red: 1.0, green: 0.34, blue: 0.13))
+                            .clipShape(Capsule())
+                        }
+                        
                         Button {
                             viewModel.isShowingEditSheet = true
                         } label: {
@@ -193,6 +211,9 @@ struct DashboardView: View {
             .background(LOSTheme.background.ignoresSafeArea())
             .sheet(isPresented: $viewModel.isShowingEditSheet) {
                 EditProfileSheet(viewModel: viewModel)
+            }
+            .sheet(isPresented: $viewModel.isShowingZerodhaSheet) {
+                ZerodhaConnectSheet(resilienceViewModel: viewModel)
             }
         }
     }

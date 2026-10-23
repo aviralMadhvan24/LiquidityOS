@@ -21,8 +21,14 @@ final class ResilienceViewModel: ObservableObject {
     @Published var customDeclinePercentage: Double = 15.0
     @Published var isUsingCustomDecline: Bool = false
     
-    // UI sheet state
+    // UI sheet states
     @Published var isShowingEditSheet: Bool = false
+    @Published var isShowingZerodhaSheet: Bool = false
+    
+    // Broker Sync State (Zerodha Kite)
+    @Published var isZerodhaConnected: Bool = false
+    @Published var zerodhaUser: ZerodhaUser? = nil
+    @Published var lastZerodhaSyncDate: Date? = nil
     
     init() {
         if let saved = ResilienceViewModel.loadFromUserDefaults() {
@@ -30,6 +36,8 @@ final class ResilienceViewModel: ObservableObject {
         } else {
             self.profile = .pitchDeckSample
         }
+        
+        loadZerodhaSession()
     }
     
     var currentDeclinePercentage: Double {
@@ -70,6 +78,48 @@ final class ResilienceViewModel: ObservableObject {
         selectedScenario = .stress
         customDeclinePercentage = 15.0
         isUsingCustomDecline = false
+    }
+    
+    // MARK: - Zerodha Kite Sync
+    func syncWithZerodha(portfolioValue: Double, cashBalance: Double?, holdings: [PortfolioHolding], user: ZerodhaUser?) {
+        profile.portfolioValue = portfolioValue
+        if let cash = cashBalance, cash > 0 {
+            profile.liquidCash = cash
+        }
+        if !holdings.isEmpty {
+            profile.holdings = holdings
+        }
+        self.zerodhaUser = user
+        self.isZerodhaConnected = true
+        self.lastZerodhaSyncDate = Date()
+        saveZerodhaSession()
+    }
+    
+    func disconnectZerodha() {
+        isZerodhaConnected = false
+        zerodhaUser = nil
+        lastZerodhaSyncDate = nil
+        UserDefaults.standard.removeObject(forKey: zerodhaStorageKey)
+        Task {
+            try? await ZerodhaAPIService.shared.disconnect()
+        }
+    }
+    
+    private let zerodhaStorageKey = "LiquidityOS_ZerodhaUser_v1"
+    
+    private func saveZerodhaSession() {
+        if let user = zerodhaUser, let encoded = try? JSONEncoder().encode(user) {
+            UserDefaults.standard.set(encoded, forKey: zerodhaStorageKey)
+        }
+    }
+    
+    private func loadZerodhaSession() {
+        guard let data = UserDefaults.standard.data(forKey: zerodhaStorageKey),
+              let decoded = try? JSONDecoder().decode(ZerodhaUser.self, from: data) else {
+            return
+        }
+        self.zerodhaUser = decoded
+        self.isZerodhaConnected = true
     }
     
     // MARK: - Persistence
