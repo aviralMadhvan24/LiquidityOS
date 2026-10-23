@@ -40,14 +40,16 @@ struct ZerodhaPortfolioResponse: Codable {
 final class ZerodhaAPIService {
     static let shared = ZerodhaAPIService()
     
-    private var baseURL: URL {
-        ConcallAPIService.shared.baseURL
+    private func endpoint(_ path: String) -> URL {
+        let base = ConcallAPIService.shared.baseURLString.trimmingCharacters(in: CharacterSet(charactersIn: "/"))
+        let sub = path.trimmingCharacters(in: CharacterSet(charactersIn: "/"))
+        return URL(string: "\(base)/\(sub)") ?? URL(string: "http://localhost:3000/\(sub)")!
     }
     
     func fetchStatus() async throws -> ZerodhaStatusResponse {
-        let url = baseURL.appendingPathComponent("api/zerodha/status")
+        let url = endpoint("api/zerodha/status")
         var request = URLRequest(url: url)
-        request.timeoutInterval = 4.0
+        request.timeoutInterval = 5.0
         
         let (data, response) = try await URLSession.shared.data(for: request)
         guard let http = response as? HTTPURLResponse, http.statusCode == 200 else {
@@ -57,9 +59,9 @@ final class ZerodhaAPIService {
     }
     
     func getLoginURL() async throws -> URL {
-        let url = baseURL.appendingPathComponent("api/zerodha/login-url")
+        let url = endpoint("api/zerodha/login-url")
         var request = URLRequest(url: url)
-        request.timeoutInterval = 4.0
+        request.timeoutInterval = 5.0
         
         let (data, response) = try await URLSession.shared.data(for: request)
         guard let http = response as? HTTPURLResponse, http.statusCode == 200 else {
@@ -80,29 +82,40 @@ final class ZerodhaAPIService {
     }
     
     func connectDemo() async throws -> ZerodhaPortfolioResponse {
-        let url = baseURL.appendingPathComponent("api/zerodha/demo-connect")
+        let url = endpoint("api/zerodha/demo-connect")
         var request = URLRequest(url: url)
         request.httpMethod = "POST"
-        request.timeoutInterval = 4.0
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        request.timeoutInterval = 5.0
         
-        _ = try await URLSession.shared.data(for: request)
+        let (data, response) = try await URLSession.shared.data(for: request)
+        guard let http = response as? HTTPURLResponse, http.statusCode == 200 else {
+            struct Err: Codable { let message: String? }
+            let err = try? JSONDecoder().decode(Err.self, from: data)
+            let msg = err?.message ?? "Backend returned HTTP \((response as? HTTPURLResponse)?.statusCode ?? 500). Ensure backend server is running with latest code."
+            throw NSError(domain: "Zerodha", code: 500, userInfo: [NSLocalizedDescriptionKey: msg])
+        }
+        
         return try await fetchPortfolio()
     }
     
     func fetchPortfolio() async throws -> ZerodhaPortfolioResponse {
-        let url = baseURL.appendingPathComponent("api/zerodha/portfolio")
+        let url = endpoint("api/zerodha/portfolio")
         var request = URLRequest(url: url)
         request.timeoutInterval = 6.0
         
         let (data, response) = try await URLSession.shared.data(for: request)
         guard let http = response as? HTTPURLResponse, http.statusCode == 200 else {
-            throw URLError(.badServerResponse)
+            struct Err: Codable { let message: String? }
+            let err = try? JSONDecoder().decode(Err.self, from: data)
+            let msg = err?.message ?? "Failed to fetch portfolio from backend."
+            throw NSError(domain: "Zerodha", code: 500, userInfo: [NSLocalizedDescriptionKey: msg])
         }
         return try JSONDecoder().decode(ZerodhaPortfolioResponse.self, from: data)
     }
     
     func disconnect() async throws {
-        let url = baseURL.appendingPathComponent("api/zerodha/disconnect")
+        let url = endpoint("api/zerodha/disconnect")
         var request = URLRequest(url: url)
         request.httpMethod = "POST"
         request.timeoutInterval = 4.0

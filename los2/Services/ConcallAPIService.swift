@@ -20,6 +20,12 @@ final class ConcallAPIService {
         URL(string: baseURLString) ?? URL(string: "http://localhost:3000")!
     }
     
+    func endpoint(_ path: String) -> URL {
+        let base = baseURLString.trimmingCharacters(in: CharacterSet(charactersIn: "/"))
+        let sub = path.trimmingCharacters(in: CharacterSet(charactersIn: "/"))
+        return URL(string: "\(base)/\(sub)") ?? URL(string: "http://localhost:3000/\(sub)")!
+    }
+    
     // MARK: - Errors
     enum ConcallAPIError: LocalizedError {
         case offline(String)
@@ -54,7 +60,7 @@ final class ConcallAPIService {
     }
     
     func checkServerHealth() async throws -> HealthResponse {
-        let url = baseURL.appendingPathComponent("api/health")
+        let url = endpoint("api/health")
         var request = URLRequest(url: url)
         request.timeoutInterval = 4.0
         
@@ -104,7 +110,7 @@ final class ConcallAPIService {
         transcriptSource: String? = nil,
         holdingInfo: String? = nil
     ) async throws -> ConcallAnalysis {
-        let url = baseURL.appendingPathComponent("api/concall/analyze")
+        let url = endpoint("api/concall/analyze")
         var request = URLRequest(url: url)
         request.httpMethod = "POST"
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
