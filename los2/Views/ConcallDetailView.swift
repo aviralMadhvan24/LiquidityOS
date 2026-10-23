@@ -74,7 +74,7 @@ struct ConcallDetailView: View {
                     } label: {
                         HStack {
                             Image(systemName: "chart.line.downtrend.xyaxis")
-                            Text("Stress Test Portfolio Under These Risks")
+                            Text("Stress Test Portfolio Under Risks")
                                 .fontWeight(.bold)
                             Spacer()
                             Image(systemName: "arrow.right")

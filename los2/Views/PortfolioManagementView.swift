@@ -177,9 +177,6 @@ struct PortfolioManagementView: View {
                             .foregroundStyle(Color.secondary)
                             .tracking(0.8)
                         Spacer()
-                        Text("Swipe to edit/delete")
-                            .font(.system(size: 11))
-                            .foregroundStyle(Color.secondary)
                     }
                     .padding(.horizontal)
                     .padding(.top, 4)
@@ -187,15 +184,15 @@ struct PortfolioManagementView: View {
                     if viewModel.profile.activeHoldings.isEmpty {
                         VStack(spacing: 12) {
                             Image(systemName: "chart.pie")
-                                .font(.system(size: 44))
+                                .font(.system(size: 40))
                                 .foregroundStyle(Color.secondary.opacity(0.5))
                             Text("No Holdings in Portfolio")
                                 .font(.system(size: 16, weight: .bold, design: .rounded))
-                            Text("Add your Indian stock holdings (NSE/BSE) to run realistic stress simulations and track liquidity health.")
+                            Text("Add your Indian stock holdings to model portfolio drawdown and evaluate liquidity risk.")
                                 .font(.system(size: 13))
                                 .foregroundStyle(Color.secondary)
                                 .multilineTextAlignment(.center)
-                                .padding(.horizontal, 24)
+                                .padding(.horizontal, 20)
                             Button {
                                 showingAddSheet = true
                             } label: {
@@ -208,7 +205,7 @@ struct PortfolioManagementView: View {
                                     .clipShape(Capsule())
                             }
                         }
-                        .padding(32)
+                        .padding(28)
                         .frame(maxWidth: .infinity)
                         .background(LOSTheme.cardBackground)
                         .clipShape(RoundedRectangle(cornerRadius: 18))
@@ -240,7 +237,7 @@ struct PortfolioManagementView: View {
                                 .font(.system(size: 10, weight: .bold, design: .rounded))
                                 .foregroundStyle(Color.secondary)
                         }
-                        Text("Quotes are fetched via the configured backend adapter (Yahoo Finance NSE 15-min delayed or demo simulation). All delayed and mock prices are strictly labelled to ensure transparency.")
+                        Text("Quotes sourced via configured market adapter (Yahoo Finance NSE / Demo). Real-time, delayed, and mock data are explicitly flagged for integrity.")
                             .font(.system(size: 11))
                             .foregroundStyle(Color.secondary)
                             .lineSpacing(2)

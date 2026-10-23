@@ -32,15 +32,10 @@ struct ResilienceGaugeView: View {
                     .animation(.spring(response: 0.8, dampingFraction: 0.75), value: animatedScore)
                 
                 // Score Labels
-                VStack(spacing: 2) {
-                    Text("RESILIENCE SCORE")
-                        .font(.system(size: 11, weight: .bold, design: .rounded))
-                        .foregroundStyle(Color.secondary)
-                        .tracking(1.0)
-                    
+                VStack(spacing: 3) {
                     HStack(alignment: .firstTextBaseline, spacing: 2) {
                         Text("\(Int(animatedScore))")
-                            .font(.system(size: 46, weight: .bold, design: .rounded))
+                            .font(.system(size: 48, weight: .bold, design: .rounded))
                             .contentTransition(.numericText())
                             .minimumScaleFactor(0.8)
                         

@@ -117,7 +117,7 @@ struct RecoveryPlannerView: View {
                                     Image(systemName: "wand.and.stars")
                                         .font(.system(size: 13, weight: .bold))
                                 }
-                                Text(viewModel.isGeneratingRecoveryPlan ? "Synthesizing Blueprint..." : "Generate AI Recovery Blueprint")
+                                Text(viewModel.isGeneratingRecoveryPlan ? "Generating Plan..." : "Generate AI Recovery Plan")
                                     .font(.system(size: 13, weight: .bold, design: .rounded))
                             }
                             .frame(maxWidth: .infinity)
@@ -230,11 +230,11 @@ struct RecoveryPlannerView: View {
                                 .foregroundStyle(Color.secondary.opacity(0.6))
                             Text("No Active Recovery Plan")
                                 .font(.system(size: 16, weight: .bold, design: .rounded))
-                            Text("Tap 'Generate AI Recovery Blueprint' above to calculate personalized emergency repair strategies.")
+                            Text("Tap 'Generate AI Recovery Plan' to synthesize tailored expense adjustments and runway extensions.")
                                 .font(.system(size: 13))
                                 .foregroundStyle(Color.secondary)
                                 .multilineTextAlignment(.center)
-                                .padding(.horizontal, 24)
+                                .padding(.horizontal, 20)
                         }
                         .padding(36)
                         .frame(maxWidth: .infinity)
@@ -334,7 +334,7 @@ private struct PlanDetailCard: View {
                 )
                 
                 MetricPill(
-                    label: "REBUILD EMERGENCY FUND",
+                    label: "REBUILD BUFFER",
                     value: plan.monthsToRebuildEmergencyFund >= 99 ? "N/A" : "\(plan.monthsToRebuildEmergencyFund) Months",
                     highlightColor: LOSTheme.primary
                 )

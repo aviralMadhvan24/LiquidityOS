@@ -26,7 +26,7 @@ struct ConcallHistoryView: View {
                             .foregroundStyle(Color.secondary)
                         Text("No Concall Analyses Found")
                             .font(.system(size: 16, weight: .semibold))
-                        Text("Upload or paste an earnings call transcript to generate your first business intelligence report.")
+                        Text("Upload or paste an earnings call transcript to generate intelligence reports.")
                             .font(.system(size: 13))
                             .foregroundStyle(Color.secondary)
                             .multilineTextAlignment(.center)

@@ -114,10 +114,14 @@ struct EmergencySimulatorView: View {
                                 Text("\(Int(sim.cashDrainedPercentage))% of liquid cash consumed")
                                     .font(.system(size: 11, weight: .bold, design: .rounded))
                                     .foregroundStyle(sim.statusColor)
+                                    .lineLimit(1)
+                                    .minimumScaleFactor(0.8)
                                 Spacer()
                                 Text("Total Drain: −\(LOSTheme.formatRupee(sim.totalEmergencyDrain))")
                                     .font(.system(size: 11, weight: .bold, design: .rounded))
                                     .foregroundStyle(LOSTheme.criticalRed)
+                                    .lineLimit(1)
+                                    .minimumScaleFactor(0.8)
                             }
                         }
                     }
@@ -141,10 +145,13 @@ struct EmergencySimulatorView: View {
                                 Text("FUNDING SHORTFALL: \(LOSTheme.formatRupee(sim.fundingShortfall))")
                                     .font(.system(size: 13, weight: .bold, design: .rounded))
                                     .foregroundStyle(LOSTheme.criticalRed)
-                                Text("Your bank savings (\(LOSTheme.formatRupee(sim.preShockCash))) cannot cover this \(LOSTheme.formatRupee(sim.totalEmergencyDrain)) expense. You would need \(LOSTheme.formatRupee(sim.fundingShortfall)) from high-cost debt, friends/family, or forced equity liquidation at distressed prices.")
+                                    .minimumScaleFactor(0.85)
+                                    .lineLimit(1)
+                                Text("Liquid cash (\(LOSTheme.formatRupeeCompact(sim.preShockCash))) cannot cover this \(LOSTheme.formatRupeeCompact(sim.totalEmergencyDrain)) shock. Requires \(LOSTheme.formatRupee(sim.fundingShortfall)) from debt or emergency borrowing.")
                                     .font(.system(size: 11))
                                     .foregroundStyle(Color.secondary)
                                     .lineSpacing(2)
+                                    .fixedSize(horizontal: false, vertical: true)
                             }
                         }
                         .padding(14)
@@ -175,13 +182,15 @@ struct EmergencySimulatorView: View {
                             }
                             
                             if sim.isReserveBreached {
-                                Text("Remaining liquid cash (\(LOSTheme.formatRupee(sim.postShockCash))) drops \(LOSTheme.formatRupee(sim.reserveBreachAmount)) below your desired \(LOSTheme.formatRupee(sim.minimumReserveTarget)) minimum reserve.")
+                                Text("Remaining liquid cash (\(LOSTheme.formatRupeeCompact(sim.postShockCash))) drops \(LOSTheme.formatRupeeCompact(sim.reserveBreachAmount)) below your \(LOSTheme.formatRupeeCompact(sim.minimumReserveTarget)) safety floor.")
                                     .font(.system(size: 11))
                                     .foregroundStyle(Color.secondary)
+                                    .fixedSize(horizontal: false, vertical: true)
                             } else {
-                                Text("After absorbing this shock, your remaining \(LOSTheme.formatRupee(sim.postShockCash)) safely preserves your \(LOSTheme.formatRupee(sim.minimumReserveTarget)) safety floor.")
+                                Text("Remaining liquid cash (\(LOSTheme.formatRupeeCompact(sim.postShockCash))) safely preserves your \(LOSTheme.formatRupeeCompact(sim.minimumReserveTarget)) safety floor.")
                                     .font(.system(size: 11))
                                     .foregroundStyle(Color.secondary)
+                                    .fixedSize(horizontal: false, vertical: true)
                             }
                         }
                     }
@@ -196,7 +205,7 @@ struct EmergencySimulatorView: View {
                     
                     // MARK: - Emergency Category Presets
                     VStack(alignment: .leading, spacing: 10) {
-                        Text("1. CHOOSE EMERGENCY CATEGORY")
+                        Text("EMERGENCY CATEGORY")
                             .font(.system(size: 11, weight: .bold, design: .rounded))
                             .foregroundStyle(Color.secondary)
                             .tracking(0.8)
@@ -250,7 +259,7 @@ struct EmergencySimulatorView: View {
                     
                     // MARK: - Expense Frequency & Configuration
                     VStack(alignment: .leading, spacing: 16) {
-                        Text("2. EXPENSE FREQUENCY & DURATION")
+                        Text("FREQUENCY & DURATION")
                             .font(.system(size: 11, weight: .bold, design: .rounded))
                             .foregroundStyle(Color.secondary)
                             .tracking(0.8)
@@ -302,7 +311,7 @@ struct EmergencySimulatorView: View {
                     // MARK: - Amount Adjuster (Slider + Quick Pills)
                     VStack(alignment: .leading, spacing: 14) {
                         HStack {
-                            Text("3. ADJUST AMOUNT")
+                            Text("AMOUNT")
                                 .font(.system(size: 11, weight: .bold, design: .rounded))
                                 .foregroundStyle(Color.secondary)
                                 .tracking(0.8)

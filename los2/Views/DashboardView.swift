@@ -71,30 +71,30 @@ struct DashboardView: View {
                     
                     // MARK: - Empty State (If Profile Unconfigured)
                     if viewModel.isProfileIncomplete && viewModel.profile.portfolioValue == 0 && viewModel.profile.liquidCash == 0 {
-                        VStack(spacing: 14) {
+                        VStack(spacing: 12) {
                             Image(systemName: "wallet.pass.fill")
-                                .font(.system(size: 44))
+                                .font(.system(size: 38))
                                 .foregroundStyle(LOSTheme.primary)
                             Text("Setup Your Financial Snapshot")
-                                .font(.system(size: 18, weight: .bold, design: .rounded))
-                            Text("Enter your bank cash, monthly expenses, and investments to calculate your personalized Resilience Score and cash runway.")
-                                .font(.system(size: 13))
+                                .font(.system(size: 17, weight: .bold, design: .rounded))
+                            Text("Add your bank cash, expenses, and investments to calculate your personalized Resilience Score.")
+                                .font(.system(size: 12))
                                 .foregroundStyle(Color.secondary)
                                 .multilineTextAlignment(.center)
-                                .padding(.horizontal, 20)
+                                .padding(.horizontal, 16)
                             Button {
                                 viewModel.isShowingEditSheet = true
                             } label: {
-                                Text("Enter Finances Now")
-                                    .font(.system(size: 14, weight: .bold, design: .rounded))
-                                    .padding(.horizontal, 24)
-                                    .padding(.vertical, 10)
+                                Text("Enter Finances")
+                                    .font(.system(size: 13, weight: .bold, design: .rounded))
+                                    .padding(.horizontal, 20)
+                                    .padding(.vertical, 9)
                                     .background(LOSTheme.primary)
                                     .foregroundStyle(Color.black)
                                     .clipShape(Capsule())
                             }
                         }
-                        .padding(28)
+                        .padding(22)
                         .frame(maxWidth: .infinity)
                         .background(LOSTheme.cardBackground)
                         .clipShape(RoundedRectangle(cornerRadius: 18))
@@ -164,32 +164,35 @@ struct DashboardView: View {
                         Divider()
                             .overlay(LOSTheme.cardBorder)
                         
-                        // 5-Pillar Score Preview Badges
-                        HStack(spacing: 8) {
-                            ForEach(baselineReport.pillars.prefix(3)) { p in
-                                HStack(spacing: 4) {
-                                    Circle()
-                                        .fill(p.statusColor)
-                                        .frame(width: 6, height: 6)
-                                    Text("\(p.name): \(Int(p.earnedPoints))/\(Int(p.maxPoints))")
-                                        .font(.system(size: 10, weight: .semibold, design: .rounded))
-                                        .foregroundStyle(Color.secondary)
+                        // 5-Pillar Score Preview: Sleek segmented bar + summary
+                        VStack(spacing: 8) {
+                            HStack(spacing: 4) {
+                                ForEach(baselineReport.pillars) { p in
+                                    GeometryReader { geo in
+                                        RoundedRectangle(cornerRadius: 3)
+                                            .fill(p.statusColor)
+                                    }
+                                    .frame(height: 5)
                                 }
                             }
-                            Spacer()
-                        }
-                        
-                        // Tap target for full 5-pillar breakdown
-                        Button {
-                            viewModel.isShowingScoreBreakdownSheet = true
-                        } label: {
-                            HStack(spacing: 4) {
-                                Text("Inspect Complete 5-Pillar Formula")
-                                    .font(.system(size: 12, weight: .bold, design: .rounded))
-                                Image(systemName: "chevron.right")
-                                    .font(.system(size: 10, weight: .bold))
+                            
+                            HStack {
+                                Text("\(baselineReport.pillars.count) Resilience Pillars Evaluated")
+                                    .font(.system(size: 11, weight: .medium, design: .rounded))
+                                    .foregroundStyle(Color.secondary)
+                                Spacer()
+                                Button {
+                                    viewModel.isShowingScoreBreakdownSheet = true
+                                } label: {
+                                    HStack(spacing: 3) {
+                                        Text("Score Breakdown")
+                                            .font(.system(size: 11, weight: .bold, design: .rounded))
+                                        Image(systemName: "chevron.right")
+                                            .font(.system(size: 9, weight: .bold))
+                                    }
+                                    .foregroundStyle(LOSTheme.primary)
+                                }
                             }
-                            .foregroundStyle(LOSTheme.primary)
                         }
                     }
                     .padding(18)
@@ -213,9 +216,6 @@ struct DashboardView: View {
                                     .foregroundStyle(Color.secondary)
                                     .tracking(0.8)
                                 Spacer()
-                                Text("\(viewModel.attentionItems.count) Actionable")
-                                    .font(.system(size: 11, weight: .medium))
-                                    .foregroundStyle(Color.secondary)
                             }
                             .padding(.horizontal)
                             
@@ -238,9 +238,6 @@ struct DashboardView: View {
                                 .foregroundStyle(Color.secondary)
                                 .tracking(0.8)
                             Spacer()
-                            Text("Tap card to inspect")
-                                .font(.system(size: 11))
-                                .foregroundStyle(Color.secondary)
                         }
                         .padding(.horizontal)
                         
@@ -276,7 +273,7 @@ struct DashboardView: View {
                             InteractiveMetricCard(
                                 title: "MONTHLY NET BURN",
                                 value: "\(LOSTheme.formatRupee(max(0, netBurn)))/mo",
-                                subtitle: "Spend \(LOSTheme.formatRupee(viewModel.profile.totalMonthlyOutflows)) vs \(LOSTheme.formatRupee(viewModel.profile.monthlyIncome))",
+                                subtitle: "Outflows \(LOSTheme.formatRupeeCompact(viewModel.profile.totalMonthlyOutflows)) vs \(LOSTheme.formatRupeeCompact(viewModel.profile.monthlyIncome))",
                                 badgeText: netBurn <= 0 ? "Surplus" : "Drain",
                                 badgeColor: netBurn <= 0 ? LOSTheme.safeGreen : LOSTheme.warningAmber,
                                 iconName: "flame.fill",
@@ -362,7 +359,7 @@ struct DashboardView: View {
                             }
                             
                             HStack {
-                                Text("Portfolio retention curve across hypothetical shocks (0% to 60%).")
+                                Text("Portfolio retention under simulated 0% to 60% drawdown.")
                                     .font(.system(size: 11))
                                     .foregroundStyle(Color.secondary)
                                 Spacer()

@@ -127,9 +127,10 @@ struct ScenarioCompareView: View {
                         Image(systemName: "shield.lefthalf.filled")
                             .font(.subheadline)
                             .foregroundStyle(Color.secondary)
-                        Text("Illustrative stress testing simulations based on mathematical scenarios. Does not predict market performance, but prepares your liquidity cushion for the worst case.")
-                            .font(.system(size: 12))
+                        Text("Mathematical drawdown simulations. Compares portfolio resilience across standard market stress levels.")
+                            .font(.system(size: 11))
                             .foregroundStyle(Color.secondary)
+                            .fixedSize(horizontal: false, vertical: true)
                     }
                     .padding(14)
                     .background(Color.primary.opacity(0.04))

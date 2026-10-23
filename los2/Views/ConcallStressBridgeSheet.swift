@@ -127,33 +127,39 @@ struct ConcallStressBridgeSheet: View {
                         
                         HStack(spacing: 12) {
                             VStack(alignment: .leading, spacing: 4) {
-                                Text("Est. Portfolio Hit")
+                                Text("Est. Hit")
                                     .font(.system(size: 11, weight: .medium))
                                     .foregroundStyle(Color.secondary)
                                 Text("−\(LOSTheme.formatRupee(simulatedReport.estimatedPortfolioLoss))")
-                                    .font(.system(size: 20, weight: .bold, design: .rounded))
+                                    .font(.system(size: 17, weight: .bold, design: .rounded))
                                     .foregroundStyle(LOSTheme.criticalRed)
+                                    .lineLimit(1)
+                                    .minimumScaleFactor(0.70)
                             }
                             
                             Spacer()
                             
                             VStack(alignment: .leading, spacing: 4) {
-                                Text("Remaining Portfolio")
+                                Text("Remaining")
                                     .font(.system(size: 11, weight: .medium))
                                     .foregroundStyle(Color.secondary)
                                 Text(LOSTheme.formatRupee(simulatedReport.remainingPortfolioValue))
-                                    .font(.system(size: 20, weight: .bold, design: .rounded))
+                                    .font(.system(size: 17, weight: .bold, design: .rounded))
+                                    .lineLimit(1)
+                                    .minimumScaleFactor(0.70)
                             }
                             
                             Spacer()
                             
                             VStack(alignment: .trailing, spacing: 4) {
-                                Text("Cash Runway")
+                                Text("Runway")
                                     .font(.system(size: 11, weight: .medium))
                                     .foregroundStyle(Color.secondary)
                                 Text("\(String(format: "%.1f", simulatedReport.runwayMonths)) mos")
-                                    .font(.system(size: 20, weight: .bold, design: .rounded))
+                                    .font(.system(size: 17, weight: .bold, design: .rounded))
                                     .foregroundStyle(simulatedReport.runwayMonths < 3.0 ? LOSTheme.criticalRed : LOSTheme.safeGreen)
+                                    .lineLimit(1)
+                                    .minimumScaleFactor(0.85)
                             }
                         }
                         
@@ -162,6 +168,7 @@ struct ConcallStressBridgeSheet: View {
                         Text(simulatedReport.summaryVerdict)
                             .font(.system(size: 13, weight: .medium))
                             .foregroundStyle(Color.primary)
+                            .fixedSize(horizontal: false, vertical: true)
                     }
                     .padding(18)
                     .background(LOSTheme.cardBackground)
@@ -177,9 +184,10 @@ struct ConcallStressBridgeSheet: View {
                         Image(systemName: "shield.lefthalf.filled")
                             .font(.subheadline)
                             .foregroundStyle(Color.secondary)
-                        Text("Scenario drawdown percentages are user-selected assumptions. The AI does not predict stock price changes, and concall operational challenges do not imply guaranteed price declines.")
-                            .font(.system(size: 12))
+                        Text("Stress test drawdown assumptions are hypothetical simulations. Concall risk signals do not constitute price forecasts.")
+                            .font(.system(size: 11))
                             .foregroundStyle(Color.secondary)
+                            .fixedSize(horizontal: false, vertical: true)
                     }
                     .padding(14)
                     .background(Color.primary.opacity(0.04))

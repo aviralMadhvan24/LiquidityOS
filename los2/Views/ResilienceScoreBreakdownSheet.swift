@@ -39,7 +39,7 @@ struct ResilienceScoreBreakdownSheet: View {
                             .foregroundStyle(report.band.color)
                             .clipShape(Capsule())
                         
-                        Text("A deterministic assessment across 5 core resilience dimensions. Every point is calculated transparently without black-box AI guessing.")
+                        Text("Transparent mathematical assessment across 5 core resilience dimensions.")
                             .font(.system(size: 12))
                             .foregroundStyle(Color.secondary)
                             .multilineTextAlignment(.center)

@@ -36,7 +36,7 @@ struct EditProfileSheet: View {
                 // Section 1: Assets & Liquid Cash
                 Section {
                     HStack {
-                        Label("Liquid Cash & Savings", systemImage: "banknote.fill")
+                        Label("Liquid Cash", systemImage: "banknote.fill")
                         Spacer()
                         TextField("₹", text: $cashText)
                             .keyboardType(.numberPad)
@@ -44,7 +44,7 @@ struct EditProfileSheet: View {
                     }
                     
                     HStack {
-                        Label("Desired Safety Reserve Floor", systemImage: "shield.fill")
+                        Label("Safety Floor", systemImage: "shield.fill")
                         Spacer()
                         TextField("₹", text: $reserveFloorText)
                             .keyboardType(.numberPad)
@@ -52,7 +52,7 @@ struct EditProfileSheet: View {
                     }
                     
                     HStack {
-                        Label("Portfolio Equity Value", systemImage: "chart.pie.fill")
+                        Label("Portfolio Value", systemImage: "chart.pie.fill")
                         Spacer()
                         TextField("₹", text: $portfolioText)
                             .keyboardType(.numberPad)
@@ -61,13 +61,13 @@ struct EditProfileSheet: View {
                 } header: {
                     Text("Assets & Reserves")
                 } footer: {
-                    Text("Liquid cash includes savings and instant bank deposits. The safety reserve floor is the minimum cash balance you want to protect.")
+                    Text("Liquid cash includes savings and instant bank deposits. The safety floor is the minimum balance you protect.")
                 }
                 
                 // Section 2: Cash Flow (Earnings & Outflows)
                 Section {
                     HStack {
-                        Label("Monthly Take-Home Income", systemImage: "arrow.down.left.circle.fill")
+                        Label("Monthly Income", systemImage: "arrow.down.left.circle.fill")
                         Spacer()
                         TextField("₹", text: $incomeText)
                             .keyboardType(.numberPad)
@@ -75,7 +75,7 @@ struct EditProfileSheet: View {
                     }
                     
                     HStack {
-                        Label("Monthly Living Expenses", systemImage: "arrow.up.right.circle.fill")
+                        Label("Living Expenses", systemImage: "arrow.up.right.circle.fill")
                         Spacer()
                         TextField("₹", text: $expensesText)
                             .keyboardType(.numberPad)
@@ -83,7 +83,7 @@ struct EditProfileSheet: View {
                     }
                     
                     HStack {
-                        Label("Monthly Debt & EMI Payments", systemImage: "creditcard.fill")
+                        Label("Debt & EMI Payments", systemImage: "creditcard.fill")
                         Spacer()
                         TextField("₹", text: $debtText)
                             .keyboardType(.numberPad)
@@ -98,7 +98,7 @@ struct EditProfileSheet: View {
                 // Section 3: Stress Testing Emergency Bill
                 Section {
                     HStack {
-                        Label("Sample Emergency Bill", systemImage: "bolt.shield.fill")
+                        Label("Emergency Bill", systemImage: "bolt.shield.fill")
                         Spacer()
                         TextField("₹", text: $billText)
                             .keyboardType(.numberPad)
@@ -107,7 +107,7 @@ struct EditProfileSheet: View {
                 } header: {
                     Text("Stress Shock Baseline")
                 } footer: {
-                    Text("Default emergency bill applied to simulate liquidity shock waves.")
+                    Text("Default baseline expense applied to simulate liquidity shock waves.")
                 }
                 
                 // Section 4: Broker Integration Shortcut

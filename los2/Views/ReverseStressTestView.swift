@@ -136,7 +136,7 @@ struct ReverseStressTestView: View {
                                 .clipShape(Capsule())
                         }
                         
-                        Text("This factor has the greatest mathematical influence on reaching your safety threshold. Adjusting it will dramatically alter your breaking point.")
+                        Text("This factor most impacts your safety threshold, shifting your breaking point.")
                             .font(.system(size: 12))
                             .foregroundStyle(Color.secondary)
                     }
@@ -182,7 +182,7 @@ struct ReverseStressTestView: View {
                     
                     // MARK: - Safety Limit Definition
                     VStack(alignment: .leading, spacing: 14) {
-                        Text("1. DEFINE YOUR SAFETY LIMIT")
+                        Text("SAFETY LIMIT")
                             .font(.system(size: 11, weight: .bold, design: .rounded))
                             .foregroundStyle(Color.secondary)
                             .tracking(0.8)
@@ -226,7 +226,7 @@ struct ReverseStressTestView: View {
                     
                     // MARK: - Scenario Duration & Income Shock
                     VStack(alignment: .leading, spacing: 16) {
-                        Text("2. FINANCIAL SHOCK ASSUMPTIONS")
+                        Text("SHOCK ASSUMPTIONS")
                             .font(.system(size: 11, weight: .bold, design: .rounded))
                             .foregroundStyle(Color.secondary)
                             .tracking(0.8)
@@ -305,7 +305,7 @@ struct ReverseStressTestView: View {
                     // MARK: - Shock Target (Portfolio-Wide vs Single Stock)
                     if !viewModel.profile.activeHoldings.isEmpty {
                         VStack(alignment: .leading, spacing: 12) {
-                            Text("3. SHOCK TARGET")
+                            Text("SHOCK TARGET")
                                 .font(.system(size: 11, weight: .bold, design: .rounded))
                                 .foregroundStyle(Color.secondary)
                                 .tracking(0.8)

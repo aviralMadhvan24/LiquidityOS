@@ -131,14 +131,16 @@ struct RunwayView: View {
                             .font(.system(size: 13, weight: .bold, design: .monospaced))
                             .foregroundStyle(LOSTheme.primary)
                         
-                        Text("Net cash burn = Expenses (\(LOSTheme.formatRupee(report.monthlyExpenses))) − Income (\(LOSTheme.formatRupee(report.monthlyIncome))) = \(LOSTheme.formatRupee(report.monthlyNetBurn))")
+                        Text("Net cash burn = Expenses (\(LOSTheme.formatRupeeCompact(report.monthlyExpenses))) − Income (\(LOSTheme.formatRupeeCompact(report.monthlyIncome))) = \(LOSTheme.formatRupeeCompact(report.monthlyNetBurn))")
                             .font(.system(size: 12))
                             .foregroundStyle(.secondary)
+                            .fixedSize(horizontal: false, vertical: true)
                         
                         if report.monthlyNetBurn > 0 && report.remainingCashAfterEmergency > 0 {
-                            Text("Runway = \(LOSTheme.formatRupee(report.remainingCashAfterEmergency)) / \(LOSTheme.formatRupee(report.monthlyNetBurn)) = \(String(format: "%.1f", report.runwayMonths)) months")
+                            Text("Runway = \(LOSTheme.formatRupeeCompact(report.remainingCashAfterEmergency)) ÷ \(LOSTheme.formatRupeeCompact(report.monthlyNetBurn)) = \(String(format: "%.1f", report.runwayMonths)) months")
                                 .font(.system(size: 12, weight: .semibold))
                                 .foregroundStyle(.primary)
+                                .fixedSize(horizontal: false, vertical: true)
                         }
                     }
                     .padding(16)
