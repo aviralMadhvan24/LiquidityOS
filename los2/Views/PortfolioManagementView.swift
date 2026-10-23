@@ -40,7 +40,9 @@ struct PortfolioManagementView: View {
                                     .foregroundStyle(Color.secondary)
                                     .tracking(0.8)
                                 Text(LOSTheme.formatRupee(totalMarketValue))
-                                    .font(.system(size: 32, weight: .bold, design: .rounded))
+                                    .font(.system(size: 30, weight: .bold, design: .rounded))
+                                    .lineLimit(1)
+                                    .minimumScaleFactor(0.70)
                             }
                             Spacer()
                             
@@ -63,13 +65,15 @@ struct PortfolioManagementView: View {
                             .overlay(LOSTheme.cardBorder)
                         
                         // Invested vs Unrealized P/L
-                        HStack(spacing: 20) {
+                        HStack(spacing: 16) {
                             VStack(alignment: .leading, spacing: 3) {
                                 Text("INVESTED CAPITAL")
                                     .font(.system(size: 10, weight: .bold, design: .rounded))
                                     .foregroundStyle(Color.secondary)
                                 Text(LOSTheme.formatRupee(totalInvested))
-                                    .font(.system(size: 16, weight: .semibold, design: .rounded))
+                                    .font(.system(size: 15, weight: .semibold, design: .rounded))
+                                    .lineLimit(1)
+                                    .minimumScaleFactor(0.75)
                             }
                             
                             Spacer()
@@ -82,7 +86,9 @@ struct PortfolioManagementView: View {
                                     Image(systemName: totalUnrealizedPnL >= 0 ? "arrow.up.right" : "arrow.down.right")
                                         .font(.system(size: 11, weight: .bold))
                                     Text("\(LOSTheme.formatRupee(abs(totalUnrealizedPnL))) (\(String(format: "%+.1f%%", totalUnrealizedPnLPercent)))")
-                                        .font(.system(size: 15, weight: .bold, design: .rounded))
+                                        .font(.system(size: 14, weight: .bold, design: .rounded))
+                                        .lineLimit(1)
+                                        .minimumScaleFactor(0.75)
                                 }
                                 .foregroundStyle(totalUnrealizedPnL >= 0 ? LOSTheme.safeGreen : LOSTheme.criticalRed)
                             }
@@ -292,7 +298,8 @@ private struct HoldingRowCard: View {
                     Text(holding.companyName)
                         .font(.system(size: 12))
                         .foregroundStyle(Color.secondary)
-                        .lineLimit(1)
+                        .lineLimit(2)
+                        .fixedSize(horizontal: false, vertical: true)
                 }
                 
                 Spacer()
@@ -300,12 +307,16 @@ private struct HoldingRowCard: View {
                 VStack(alignment: .trailing, spacing: 3) {
                     Text(LOSTheme.formatRupee(holding.currentValue))
                         .font(.system(size: 15, weight: .bold, design: .rounded))
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.8)
                     
                     HStack(spacing: 3) {
                         Image(systemName: holding.unrealizedPnL >= 0 ? "arrow.up.right" : "arrow.down.right")
                             .font(.system(size: 10, weight: .bold))
                         Text("\(LOSTheme.formatRupee(abs(holding.unrealizedPnL))) (\(String(format: "%+.1f%%", holding.unrealizedPnLPercent)))")
                             .font(.system(size: 11, weight: .bold, design: .rounded))
+                            .lineLimit(1)
+                            .minimumScaleFactor(0.75)
                     }
                     .foregroundStyle(holding.unrealizedPnL >= 0 ? LOSTheme.safeGreen : LOSTheme.criticalRed)
                 }

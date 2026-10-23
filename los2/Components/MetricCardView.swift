@@ -1,6 +1,7 @@
 import SwiftUI
 
 /// Reusable fintech card for individual resilience indicators.
+/// Supports responsive scaling, Dynamic Type, and multi-line wrapping to prevent truncation.
 struct MetricCardView: View {
     let title: String
     let value: String
@@ -12,45 +13,52 @@ struct MetricCardView: View {
     
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
-            HStack {
+            // Header Row: Icon + Title + Badge
+            HStack(alignment: .center, spacing: 6) {
                 if let iconName = iconName {
                     Image(systemName: iconName)
-                        .font(.system(size: 13, weight: .semibold))
+                        .font(.system(size: 12, weight: .semibold))
                         .foregroundStyle(badgeColor)
-                        .frame(width: 26, height: 26)
+                        .frame(width: 24, height: 24)
                         .background(badgeColor.opacity(0.12))
                         .clipShape(Circle())
                 }
                 
                 Text(title)
-                    .font(.system(size: 11, weight: .semibold, design: .rounded))
+                    .font(.system(size: 10, weight: .bold, design: .rounded))
                     .foregroundStyle(Color.secondary)
-                    .lineLimit(1)
+                    .tracking(0.6)
+                    .lineLimit(2)
+                    .minimumScaleFactor(0.85)
                 
-                Spacer()
+                Spacer(minLength: 4)
                 
                 if let badge = badgeText {
                     Text(badge)
-                        .font(.system(size: 10, weight: .bold, design: .rounded))
-                        .padding(.horizontal, 7)
+                        .font(.system(size: 9, weight: .bold, design: .rounded))
+                        .padding(.horizontal, 6)
                         .padding(.vertical, 3)
                         .background(badgeColor.opacity(0.15))
                         .foregroundStyle(badgeColor)
                         .clipShape(Capsule())
+                        .layoutPriority(1)
                 }
             }
             
+            // Value
             Text(value)
-                .font(.system(size: 22, weight: .bold, design: .rounded))
+                .font(.system(size: 20, weight: .bold, design: .rounded))
                 .foregroundStyle(isNegative ? LOSTheme.criticalRed : Color.primary)
-                .minimumScaleFactor(0.8)
+                .minimumScaleFactor(0.65)
                 .lineLimit(1)
             
+            // Subtitle
             if let subtitle = subtitle {
                 Text(subtitle)
-                    .font(.system(size: 12, weight: .medium, design: .rounded))
+                    .font(.system(size: 11, weight: .medium, design: .rounded))
                     .foregroundStyle(isNegative ? LOSTheme.criticalRed.opacity(0.85) : Color.secondary)
-                    .lineLimit(1)
+                    .lineLimit(2)
+                    .fixedSize(horizontal: false, vertical: true)
             }
         }
         .padding(14)

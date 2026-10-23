@@ -124,11 +124,14 @@ struct ConcallDashboardView: View {
                                             Text(holding.companyName)
                                                 .font(.system(size: 12, weight: .medium))
                                                 .foregroundStyle(Color.primary)
-                                                .lineLimit(1)
+                                                .lineLimit(2)
+                                                .fixedSize(horizontal: false, vertical: true)
                                             
                                             Text(LOSTheme.formatRupee(holding.currentValue))
                                                 .font(.system(size: 11))
                                                 .foregroundStyle(Color.secondary)
+                                                .lineLimit(1)
+                                                .minimumScaleFactor(0.85)
                                         }
                                         .frame(width: 145, alignment: .leading)
                                         .padding(12)

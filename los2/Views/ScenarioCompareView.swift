@@ -70,35 +70,45 @@ struct ScenarioCompareView: View {
                                 
                                 Divider()
                                 
-                                HStack(spacing: 16) {
+                                HStack(spacing: 8) {
                                     VStack(alignment: .leading, spacing: 2) {
                                         Text("Portfolio Hit")
-                                            .font(.system(size: 11, weight: .medium))
+                                            .font(.system(size: 10, weight: .medium))
                                             .foregroundStyle(Color.secondary)
+                                            .lineLimit(1)
                                         Text("−\(LOSTheme.formatRupee(report.estimatedPortfolioLoss))")
-                                            .font(.system(size: 15, weight: .bold, design: .rounded))
+                                            .font(.system(size: 14, weight: .bold, design: .rounded))
                                             .foregroundStyle(LOSTheme.criticalRed)
+                                            .lineLimit(1)
+                                            .minimumScaleFactor(0.75)
                                     }
+                                    .frame(maxWidth: .infinity, alignment: .leading)
                                     
                                     VStack(alignment: .leading, spacing: 2) {
                                         Text("Remaining Assets")
-                                            .font(.system(size: 11, weight: .medium))
+                                            .font(.system(size: 10, weight: .medium))
                                             .foregroundStyle(Color.secondary)
+                                            .lineLimit(1)
                                         Text(LOSTheme.formatRupee(report.remainingPortfolioValue))
-                                            .font(.system(size: 15, weight: .bold, design: .rounded))
+                                            .font(.system(size: 14, weight: .bold, design: .rounded))
                                             .foregroundStyle(Color.primary)
+                                            .lineLimit(1)
+                                            .minimumScaleFactor(0.75)
                                     }
-                                    
-                                    Spacer()
+                                    .frame(maxWidth: .infinity, alignment: .leading)
                                     
                                     VStack(alignment: .trailing, spacing: 2) {
                                         Text("Runway")
-                                            .font(.system(size: 11, weight: .medium))
+                                            .font(.system(size: 10, weight: .medium))
                                             .foregroundStyle(Color.secondary)
+                                            .lineLimit(1)
                                         Text(report.runwayState == .cashSurplus ? "Surplus" : "\(String(format: "%.1f", report.runwayMonths)) mos")
-                                            .font(.system(size: 15, weight: .bold, design: .rounded))
+                                            .font(.system(size: 14, weight: .bold, design: .rounded))
                                             .foregroundStyle(report.runwayMonths < 3.0 ? LOSTheme.criticalRed : LOSTheme.safeGreen)
+                                            .lineLimit(1)
+                                            .minimumScaleFactor(0.80)
                                     }
+                                    .frame(maxWidth: .infinity, alignment: .trailing)
                                 }
                             }
                             .padding(16)

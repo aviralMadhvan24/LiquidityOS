@@ -246,16 +246,20 @@ struct ZerodhaConnectSheet: View {
                         .font(.system(size: 11))
                         .foregroundStyle(Color.secondary)
                     Text(LOSTheme.formatRupee(portfolio.totalPortfolioValue))
-                        .font(.system(size: 20, weight: .bold, design: .rounded))
+                        .font(.system(size: 18, weight: .bold, design: .rounded))
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.75)
                 }
-                Spacer()
+                Spacer(minLength: 8)
                 VStack(alignment: .trailing, spacing: 2) {
                     Text("Available Cash Margin")
                         .font(.system(size: 11))
                         .foregroundStyle(Color.secondary)
                     Text(LOSTheme.formatRupee(portfolio.availableCash))
-                        .font(.system(size: 20, weight: .bold, design: .rounded))
+                        .font(.system(size: 18, weight: .bold, design: .rounded))
                         .foregroundStyle(LOSTheme.safeGreen)
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.75)
                 }
             }
             
@@ -272,17 +276,23 @@ struct ZerodhaConnectSheet: View {
                         VStack(alignment: .leading, spacing: 2) {
                             Text(item.companyName)
                                 .font(.system(size: 13, weight: .semibold))
+                                .lineLimit(2)
+                                .fixedSize(horizontal: false, vertical: true)
                             Text("\(item.ticker) • \(item.shares ?? 0) shares")
                                 .font(.system(size: 11))
                                 .foregroundStyle(Color.secondary)
+                                .lineLimit(1)
                         }
-                        Spacer()
+                        Spacer(minLength: 8)
                         VStack(alignment: .trailing, spacing: 2) {
                             Text(LOSTheme.formatRupee(item.currentValue))
                                 .font(.system(size: 13, weight: .bold))
+                                .lineLimit(1)
+                                .minimumScaleFactor(0.8)
                             Text("\(String(format: "%.1f", item.portfolioWeightPercent))%")
                                 .font(.system(size: 11, weight: .bold))
                                 .foregroundStyle(kiteOrange)
+                                .lineLimit(1)
                         }
                     }
                     .padding(.vertical, 4)

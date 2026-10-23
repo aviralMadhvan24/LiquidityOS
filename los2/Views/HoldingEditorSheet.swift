@@ -172,26 +172,34 @@ struct HoldingEditorSheet: View {
                 Section {
                     HStack {
                         Text("Invested Capital")
-                        Spacer()
+                        Spacer(minLength: 8)
                         Text(LOSTheme.formatRupee(investedValue))
                             .fontWeight(.semibold)
+                            .lineLimit(1)
+                            .minimumScaleFactor(0.8)
                     }
                     
                     HStack {
                         Text("Current Market Value")
-                        Spacer()
+                        Spacer(minLength: 8)
                         Text(LOSTheme.formatRupee(marketValue))
                             .fontWeight(.bold)
+                            .lineLimit(1)
+                            .minimumScaleFactor(0.8)
                     }
                     
                     HStack {
                         Text("Unrealized Profit / Loss")
-                        Spacer()
+                        Spacer(minLength: 8)
                         HStack(spacing: 4) {
                             Text(LOSTheme.formatRupee(unrealizedPnL, showSign: true))
                                 .fontWeight(.bold)
+                                .lineLimit(1)
+                                .minimumScaleFactor(0.8)
                             Text("(\(String(format: "%+.1f%%", unrealizedPnLPercent)))")
                                 .font(.system(size: 12, weight: .semibold))
+                                .lineLimit(1)
+                                .minimumScaleFactor(0.85)
                         }
                         .foregroundStyle(unrealizedPnL >= 0 ? LOSTheme.safeGreen : LOSTheme.criticalRed)
                     }

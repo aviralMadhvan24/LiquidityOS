@@ -51,40 +51,47 @@ struct EmergencySimulatorView: View {
                             .overlay(LOSTheme.cardBorder)
                         
                         // Before vs After Cash & Runway Comparison
-                        HStack(spacing: 16) {
+                        HStack(spacing: 12) {
                             // BEFORE
-                            VStack(alignment: .leading, spacing: 6) {
+                            VStack(alignment: .leading, spacing: 4) {
                                 Text("BEFORE SHOCK")
                                     .font(.system(size: 10, weight: .bold, design: .rounded))
                                     .foregroundStyle(Color.secondary)
                                     .tracking(0.6)
                                 Text(LOSTheme.formatRupee(sim.preShockCash))
-                                    .font(.system(size: 20, weight: .bold, design: .rounded))
+                                    .font(.system(size: 18, weight: .bold, design: .rounded))
+                                    .lineLimit(1)
+                                    .minimumScaleFactor(0.70)
                                 Text("Runway: \(String(format: "%.1f", sim.preShockRunwayMonths)) mos")
                                     .font(.system(size: 11, weight: .semibold, design: .rounded))
                                     .foregroundStyle(Color.secondary)
+                                    .lineLimit(1)
                             }
                             
-                            Spacer()
+                            Spacer(minLength: 4)
                             
                             Image(systemName: "arrow.right.circle.fill")
-                                .font(.title2)
+                                .font(.title3)
                                 .foregroundStyle(sim.statusColor)
+                                .layoutPriority(1)
                             
-                            Spacer()
+                            Spacer(minLength: 4)
                             
                             // AFTER
-                            VStack(alignment: .trailing, spacing: 6) {
+                            VStack(alignment: .trailing, spacing: 4) {
                                 Text("AFTER SHOCK")
                                     .font(.system(size: 10, weight: .bold, design: .rounded))
                                     .foregroundStyle(Color.secondary)
                                     .tracking(0.6)
                                 Text(LOSTheme.formatRupee(sim.postShockCash))
-                                    .font(.system(size: 20, weight: .bold, design: .rounded))
+                                    .font(.system(size: 18, weight: .bold, design: .rounded))
                                     .foregroundStyle(sim.isShortfall ? LOSTheme.criticalRed : Color.primary)
+                                    .lineLimit(1)
+                                    .minimumScaleFactor(0.70)
                                 Text("Runway: \(String(format: "%.1f", sim.postShockRunwayMonths)) mos")
                                     .font(.system(size: 11, weight: .bold, design: .rounded))
                                     .foregroundStyle(sim.postShockRunwayMonths < 3.0 ? LOSTheme.criticalRed : LOSTheme.safeGreen)
+                                    .lineLimit(1)
                             }
                         }
                         
@@ -217,13 +224,15 @@ struct EmergencySimulatorView: View {
                                             
                                             Text(cat.rawValue)
                                                 .font(.system(size: 12, weight: .bold, design: .rounded))
-                                                .lineLimit(1)
+                                                .lineLimit(2)
+                                                .fixedSize(horizontal: false, vertical: true)
                                             
                                             Text(LOSTheme.formatRupeeCompact(cat.defaultAmount))
                                                 .font(.system(size: 11, weight: .semibold, design: .rounded))
                                                 .foregroundStyle(isSelected ? Color.black : Color.secondary)
+                                                .lineLimit(1)
                                         }
-                                        .frame(width: 135)
+                                        .frame(width: 145, alignment: .leading)
                                         .padding(12)
                                         .background(isSelected ? LOSTheme.primary : LOSTheme.cardBackground)
                                         .foregroundStyle(isSelected ? Color.black : Color.primary)

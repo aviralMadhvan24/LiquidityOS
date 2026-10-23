@@ -164,16 +164,17 @@ private struct PillarDetailCard: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
             // Title & Earned Points
-            HStack {
+            HStack(alignment: .top, spacing: 10) {
                 VStack(alignment: .leading, spacing: 2) {
                     Text(pillar.name)
                         .font(.system(size: 14, weight: .bold, design: .rounded))
                     Text(pillar.formulaDescription)
                         .font(.system(size: 11))
                         .foregroundStyle(Color.secondary)
-                        .lineLimit(2)
+                        .lineSpacing(2)
+                        .fixedSize(horizontal: false, vertical: true)
                 }
-                Spacer()
+                Spacer(minLength: 8)
                 
                 VStack(alignment: .trailing, spacing: 2) {
                     HStack(spacing: 2) {
@@ -184,6 +185,8 @@ private struct PillarDetailCard: View {
                             .font(.system(size: 11, weight: .semibold, design: .rounded))
                             .foregroundStyle(Color.secondary)
                     }
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.85)
                     
                     Text(pillar.rating)
                         .font(.system(size: 9, weight: .bold, design: .rounded))
@@ -193,6 +196,7 @@ private struct PillarDetailCard: View {
                         .foregroundStyle(pillar.statusColor)
                         .clipShape(Capsule())
                 }
+                .layoutPriority(1)
             }
             
             // Progress Bar

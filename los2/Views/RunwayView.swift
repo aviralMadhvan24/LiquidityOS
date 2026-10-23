@@ -63,32 +63,51 @@ struct RunwayView: View {
                     VStack(spacing: 12) {
                         HStack {
                             Label("Post-Emergency Cash", systemImage: "banknote")
-                            Spacer()
+                            Spacer(minLength: 8)
                             Text(LOSTheme.formatRupee(report.remainingCashAfterEmergency))
                                 .fontWeight(.bold)
+                                .lineLimit(1)
+                                .minimumScaleFactor(0.8)
                         }
                         Divider()
                         HStack {
                             Label("Monthly Living Expenses", systemImage: "arrow.up.right")
-                            Spacer()
+                            Spacer(minLength: 8)
                             Text(LOSTheme.formatRupee(report.monthlyExpenses))
                                 .fontWeight(.semibold)
+                                .lineLimit(1)
+                                .minimumScaleFactor(0.8)
+                        }
+                        if viewModel.profile.monthlyDebtPayments > 0 {
+                            Divider()
+                            HStack {
+                                Label("Monthly Debt & EMIs", systemImage: "creditcard")
+                                Spacer(minLength: 8)
+                                Text(LOSTheme.formatRupee(viewModel.profile.monthlyDebtPayments))
+                                    .fontWeight(.semibold)
+                                    .lineLimit(1)
+                                    .minimumScaleFactor(0.8)
+                            }
                         }
                         Divider()
                         HStack {
                             Label("Monthly Income", systemImage: "arrow.down.left")
-                            Spacer()
+                            Spacer(minLength: 8)
                             Text(LOSTheme.formatRupee(report.monthlyIncome))
                                 .fontWeight(.semibold)
+                                .lineLimit(1)
+                                .minimumScaleFactor(0.8)
                         }
                         Divider()
                         HStack {
                             Label("Monthly Cash Burn", systemImage: "flame.fill")
                                 .foregroundStyle(LOSTheme.criticalRed)
-                            Spacer()
+                            Spacer(minLength: 8)
                             Text("−\(LOSTheme.formatRupee(report.monthlyNetBurn))/mo")
                                 .fontWeight(.bold)
                                 .foregroundStyle(LOSTheme.criticalRed)
+                                .lineLimit(1)
+                                .minimumScaleFactor(0.8)
                         }
                     }
                     .font(.system(size: 14))

@@ -1,6 +1,7 @@
 import SwiftUI
 
 /// Month-by-month visual runway timeline component.
+/// Responsive across screen widths and Dynamic Type settings.
 struct RunwayTimelineView: View {
     let startingCash: Double
     let monthlyBurn: Double
@@ -28,7 +29,8 @@ struct RunwayTimelineView: View {
                             .font(.system(size: 14, weight: .semibold))
                         Text("Your cash is accumulating each month instead of burning.")
                             .font(.system(size: 12))
-                            .foregroundStyle(.secondary)
+                            .foregroundStyle(Color.secondary)
+                            .fixedSize(horizontal: false, vertical: true)
                     }
                 }
                 .padding(.vertical, 8)
@@ -42,7 +44,8 @@ struct RunwayTimelineView: View {
                             .font(.system(size: 14, weight: .semibold))
                         Text("Cash balances stay steady at current spending behavior.")
                             .font(.system(size: 12))
-                            .foregroundStyle(.secondary)
+                            .foregroundStyle(Color.secondary)
+                            .fixedSize(horizontal: false, vertical: true)
                     }
                 }
                 .padding(.vertical, 8)
@@ -57,7 +60,8 @@ struct RunwayTimelineView: View {
                             .foregroundStyle(LOSTheme.criticalRed)
                         Text("Emergency bill exceeds available cash. Immediate risk of debt or forced asset liquidation.")
                             .font(.system(size: 12))
-                            .foregroundStyle(.secondary)
+                            .foregroundStyle(Color.secondary)
+                            .fixedSize(horizontal: false, vertical: true)
                     }
                 }
                 .padding(.vertical, 8)
@@ -66,14 +70,14 @@ struct RunwayTimelineView: View {
                 let displayMonths = min(6, max(1, Int(ceil(runwayMonths))))
                 
                 VStack(spacing: 10) {
-                    HStack(spacing: 8) {
+                    HStack(spacing: 6) {
                         ForEach(1...displayMonths, id: \.self) { month in
                             let remaining = max(0, startingCash - (monthlyBurn * Double(month)))
                             let isLast = month == displayMonths
                             
                             VStack(spacing: 6) {
                                 Text("M\(month)")
-                                    .font(.system(size: 12, weight: .bold, design: .monospaced))
+                                    .font(.system(size: 11, weight: .bold, design: .monospaced))
                                     .foregroundStyle(isLast ? LOSTheme.criticalRed : Color.primary)
                                 
                                 ZStack(alignment: .bottom) {
@@ -91,8 +95,10 @@ struct RunwayTimelineView: View {
                                 }
                                 
                                 Text(LOSTheme.formatRupeeCompact(remaining))
-                                    .font(.system(size: 10, weight: .semibold, design: .rounded))
-                                    .foregroundStyle(.secondary)
+                                    .font(.system(size: 9, weight: .semibold, design: .rounded))
+                                    .foregroundStyle(Color.secondary)
+                                    .lineLimit(1)
+                                    .minimumScaleFactor(0.75)
                             }
                             .frame(maxWidth: .infinity)
                         }
@@ -100,12 +106,15 @@ struct RunwayTimelineView: View {
                     
                     HStack {
                         Text("Burn Rate: \(LOSTheme.formatRupee(monthlyBurn))/mo")
-                            .font(.system(size: 12, weight: .medium))
-                            .foregroundStyle(.secondary)
+                            .font(.system(size: 11, weight: .medium))
+                            .foregroundStyle(Color.secondary)
+                            .lineLimit(1)
+                            .minimumScaleFactor(0.85)
                         Spacer()
-                        Text("Estimated: \(String(format: "%.1f", runwayMonths)) Months")
-                            .font(.system(size: 12, weight: .bold))
+                        Text("Estimated: \(String(format: "%.1f", runwayMonths)) Mos")
+                            .font(.system(size: 11, weight: .bold))
                             .foregroundStyle(runwayMonths < 3.0 ? LOSTheme.criticalRed : LOSTheme.safeGreen)
+                            .lineLimit(1)
                     }
                 }
             }

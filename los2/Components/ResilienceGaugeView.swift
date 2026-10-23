@@ -1,6 +1,7 @@
 import SwiftUI
 
 /// Animated circular gauge visualizing the 0-100 Resilience Score.
+/// Designed for responsive scaling across small, regular, and Max iPhone viewports.
 struct ResilienceGaugeView: View {
     let score: Int
     let band: ResilienceBand
@@ -9,7 +10,7 @@ struct ResilienceGaugeView: View {
     @State private var animatedScore: Double = 0
     
     var body: some View {
-        VStack(spacing: 12) {
+        VStack(spacing: 10) {
             ZStack {
                 // Background Track
                 Circle()
@@ -33,18 +34,19 @@ struct ResilienceGaugeView: View {
                 // Score Labels
                 VStack(spacing: 2) {
                     Text("RESILIENCE SCORE")
-                        .font(.system(size: 11, weight: .semibold, design: .rounded))
-                        .foregroundStyle(.secondary)
+                        .font(.system(size: 11, weight: .bold, design: .rounded))
+                        .foregroundStyle(Color.secondary)
                         .tracking(1.0)
                     
                     HStack(alignment: .firstTextBaseline, spacing: 2) {
                         Text("\(Int(animatedScore))")
-                            .font(.system(size: 48, weight: .bold, design: .rounded))
+                            .font(.system(size: 46, weight: .bold, design: .rounded))
                             .contentTransition(.numericText())
+                            .minimumScaleFactor(0.8)
                         
                         Text("/ 100")
-                            .font(.system(size: 16, weight: .medium, design: .rounded))
-                            .foregroundStyle(.secondary)
+                            .font(.system(size: 15, weight: .semibold, design: .rounded))
+                            .foregroundStyle(Color.secondary)
                     }
                     
                     // Band Status Pill
@@ -57,14 +59,19 @@ struct ResilienceGaugeView: View {
                         .clipShape(Capsule())
                 }
             }
-            .frame(width: 210, height: 180)
+            .frame(width: 200, height: 175)
             
             // Subtitle status line
             Text(headline)
-                .font(.system(size: 13, weight: .semibold, design: .monospaced))
-                .foregroundStyle(.secondary)
+                .font(.system(size: 12, weight: .semibold, design: .monospaced))
+                .foregroundStyle(Color.secondary)
+                .multilineTextAlignment(.center)
+                .lineLimit(2)
+                .minimumScaleFactor(0.85)
+                .fixedSize(horizontal: false, vertical: true)
+                .padding(.horizontal, 12)
         }
-        .padding(.vertical, 8)
+        .padding(.vertical, 4)
         .onAppear {
             animatedScore = Double(score)
         }

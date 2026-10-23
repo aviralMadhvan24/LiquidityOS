@@ -26,17 +26,23 @@ struct ReverseStressTestView: View {
                                 if let breakingPercent = result.breakingPointDeclinePercent {
                                     if breakingPercent == 0 {
                                         Text("0% Decline")
-                                            .font(.system(size: 34, weight: .bold, design: .rounded))
+                                            .font(.system(size: 32, weight: .bold, design: .rounded))
                                             .foregroundStyle(LOSTheme.criticalRed)
+                                            .lineLimit(1)
+                                            .minimumScaleFactor(0.75)
                                     } else {
                                         Text("\(String(format: "%.1f%%", breakingPercent)) Crash")
-                                            .font(.system(size: 34, weight: .bold, design: .rounded))
+                                            .font(.system(size: 32, weight: .bold, design: .rounded))
                                             .foregroundStyle(breakingPercent < 20 ? LOSTheme.criticalRed : LOSTheme.warningAmber)
+                                            .lineLimit(1)
+                                            .minimumScaleFactor(0.75)
                                     }
                                 } else {
                                     Text("Safe > 100%")
-                                        .font(.system(size: 34, weight: .bold, design: .rounded))
+                                        .font(.system(size: 32, weight: .bold, design: .rounded))
                                         .foregroundStyle(LOSTheme.safeGreen)
+                                        .lineLimit(1)
+                                        .minimumScaleFactor(0.75)
                                 }
                             }
                             
@@ -45,9 +51,9 @@ struct ReverseStressTestView: View {
                             ZStack {
                                 Circle()
                                     .fill(statusColor.opacity(0.12))
-                                    .frame(width: 56, height: 56)
+                                    .frame(width: 52, height: 52)
                                 Image(systemName: statusIcon)
-                                    .font(.system(size: 26, weight: .bold))
+                                    .font(.system(size: 24, weight: .bold))
                                     .foregroundStyle(statusColor)
                             }
                         }
@@ -56,20 +62,23 @@ struct ReverseStressTestView: View {
                             .font(.system(size: 13, weight: .medium, design: .rounded))
                             .foregroundStyle(Color.primary)
                             .lineSpacing(2)
+                            .fixedSize(horizontal: false, vertical: true)
                             .frame(maxWidth: .infinity, alignment: .leading)
                         
                         Divider()
                             .overlay(LOSTheme.cardBorder)
                         
                         // 3 Sub-Metrics at Breaking Point
-                        HStack(spacing: 12) {
+                        HStack(spacing: 8) {
                             VStack(alignment: .leading, spacing: 3) {
                                 Text("REMAINING CASH")
                                     .font(.system(size: 10, weight: .bold, design: .rounded))
                                     .foregroundStyle(Color.secondary)
                                 Text(LOSTheme.formatRupee(result.remainingCashAtBreach))
-                                    .font(.system(size: 14, weight: .bold, design: .rounded))
+                                    .font(.system(size: 13, weight: .bold, design: .rounded))
                                     .foregroundStyle(result.remainingCashAtBreach < 0 ? LOSTheme.criticalRed : Color.primary)
+                                    .lineLimit(1)
+                                    .minimumScaleFactor(0.75)
                             }
                             
                             Spacer()
@@ -79,7 +88,9 @@ struct ReverseStressTestView: View {
                                     .font(.system(size: 10, weight: .bold, design: .rounded))
                                     .foregroundStyle(Color.secondary)
                                 Text(LOSTheme.formatRupee(result.remainingPortfolioAtBreach))
-                                    .font(.system(size: 14, weight: .bold, design: .rounded))
+                                    .font(.system(size: 13, weight: .bold, design: .rounded))
+                                    .lineLimit(1)
+                                    .minimumScaleFactor(0.75)
                             }
                             
                             Spacer()
@@ -89,8 +100,10 @@ struct ReverseStressTestView: View {
                                     .font(.system(size: 10, weight: .bold, design: .rounded))
                                     .foregroundStyle(Color.secondary)
                                 Text(result.estimatedRunwayAtBreach >= 90 ? "Surplus" : String(format: "%.1f mos", result.estimatedRunwayAtBreach))
-                                    .font(.system(size: 14, weight: .bold, design: .rounded))
+                                    .font(.system(size: 13, weight: .bold, design: .rounded))
                                     .foregroundStyle(result.estimatedRunwayAtBreach < 3.0 ? LOSTheme.criticalRed : LOSTheme.safeGreen)
+                                    .lineLimit(1)
+                                    .minimumScaleFactor(0.85)
                             }
                         }
                     }
@@ -385,6 +398,8 @@ private struct PresetPill: View {
                     .font(.system(size: 11, weight: .bold))
                 Text(title)
                     .font(.system(size: 12, weight: .semibold, design: .rounded))
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.85)
             }
             .padding(.horizontal, 12)
             .padding(.vertical, 8)

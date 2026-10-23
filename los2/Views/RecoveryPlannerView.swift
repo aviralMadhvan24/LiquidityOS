@@ -274,9 +274,12 @@ private struct BaselineMetric: View {
             Text(title)
                 .font(.system(size: 9, weight: .bold, design: .rounded))
                 .foregroundStyle(Color.secondary)
+                .lineLimit(1)
             Text(value)
                 .font(.system(size: 14, weight: .bold, design: .rounded))
                 .foregroundStyle(isAlert ? LOSTheme.criticalRed : Color.primary)
+                .lineLimit(1)
+                .minimumScaleFactor(0.75)
         }
     }
 }
@@ -392,10 +395,13 @@ private struct MetricPill: View {
             Text(label)
                 .font(.system(size: 9, weight: .bold, design: .rounded))
                 .foregroundStyle(Color.secondary)
+                .lineLimit(1)
             HStack(spacing: 4) {
                 Text(value)
-                    .font(.system(size: 14, weight: .bold, design: .rounded))
+                    .font(.system(size: 13, weight: .bold, design: .rounded))
                     .foregroundStyle(highlightColor)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.75)
                 if let b = badge {
                     Text(b)
                         .font(.system(size: 9, weight: .bold, design: .rounded))
@@ -404,6 +410,7 @@ private struct MetricPill: View {
                         .background(highlightColor.opacity(0.12))
                         .foregroundStyle(highlightColor)
                         .clipShape(Capsule())
+                        .layoutPriority(1)
                 }
             }
         }

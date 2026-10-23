@@ -42,7 +42,9 @@ struct StressTestView: View {
                                     .foregroundStyle(Color.secondary)
                                     .tracking(0.8)
                                 Text(LOSTheme.formatRupee(viewModel.profile.portfolioValue))
-                                    .font(.system(size: 30, weight: .bold, design: .rounded))
+                                    .font(.system(size: 28, weight: .bold, design: .rounded))
+                                    .lineLimit(1)
+                                    .minimumScaleFactor(0.75)
                             }
                             Spacer()
                             
@@ -57,14 +59,16 @@ struct StressTestView: View {
                         }
                         
                         // Retained vs Loss Split
-                        HStack(spacing: 16) {
+                        HStack(spacing: 12) {
                             VStack(alignment: .leading, spacing: 2) {
                                 Text("RETAINED VALUE")
                                     .font(.system(size: 10, weight: .bold, design: .rounded))
                                     .foregroundStyle(Color.secondary)
                                 Text(LOSTheme.formatRupee(report.remainingPortfolioValue))
-                                    .font(.system(size: 16, weight: .bold, design: .rounded))
+                                    .font(.system(size: 15, weight: .bold, design: .rounded))
                                     .foregroundStyle(LOSTheme.safeGreen)
+                                    .lineLimit(1)
+                                    .minimumScaleFactor(0.8)
                             }
                             Spacer()
                             VStack(alignment: .trailing, spacing: 2) {
@@ -72,8 +76,10 @@ struct StressTestView: View {
                                     .font(.system(size: 10, weight: .bold, design: .rounded))
                                     .foregroundStyle(Color.secondary)
                                 Text("−\(LOSTheme.formatRupee(report.estimatedPortfolioLoss))")
-                                    .font(.system(size: 16, weight: .bold, design: .rounded))
+                                    .font(.system(size: 15, weight: .bold, design: .rounded))
                                     .foregroundStyle(LOSTheme.criticalRed)
+                                    .lineLimit(1)
+                                    .minimumScaleFactor(0.8)
                             }
                         }
                     }
@@ -585,7 +591,8 @@ private struct IndividualStockShockCard: View {
                     Text(item.holding.companyName)
                         .font(.system(size: 11))
                         .foregroundStyle(Color.secondary)
-                        .lineLimit(1)
+                        .lineLimit(2)
+                        .fixedSize(horizontal: false, vertical: true)
                 }
                 
                 Spacer()
@@ -594,9 +601,12 @@ private struct IndividualStockShockCard: View {
                     Text("−\(LOSTheme.formatRupee(item.simulatedLoss))")
                         .font(.system(size: 14, weight: .bold, design: .rounded))
                         .foregroundStyle(LOSTheme.criticalRed)
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.8)
                     Text("\(String(format: "%.1f%%", item.lossContributionPercent)) of total loss")
                         .font(.system(size: 10, weight: .semibold, design: .rounded))
                         .foregroundStyle(Color.secondary)
+                        .lineLimit(1)
                 }
             }
             
@@ -652,12 +662,17 @@ private struct MetricBox: View {
                 .font(.system(size: 9, weight: .bold, design: .rounded))
                 .foregroundStyle(Color.secondary)
                 .tracking(0.6)
+                .lineLimit(1)
             Text(value)
                 .font(.system(size: 15, weight: .bold, design: .rounded))
                 .foregroundStyle(isNegative ? LOSTheme.criticalRed : Color.primary)
+                .lineLimit(1)
+                .minimumScaleFactor(0.75)
             Text(subtitle)
                 .font(.system(size: 10))
                 .foregroundStyle(Color.secondary)
+                .lineLimit(2)
+                .fixedSize(horizontal: false, vertical: true)
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(12)

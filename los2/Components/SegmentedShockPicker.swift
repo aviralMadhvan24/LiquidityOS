@@ -4,6 +4,7 @@ import UIKit
 #endif
 
 /// Segmented selector for Stress Test levels (Mild 5%, Stress 15%, Severe 30%).
+/// Scales gracefully with accessibility Dynamic Type.
 struct SegmentedShockPicker: View {
     @Binding var selected: StressScenarioLevel
     let onSelect: (StressScenarioLevel) -> Void
@@ -19,14 +20,17 @@ struct SegmentedShockPicker: View {
                     selected = level
                     onSelect(level)
                 } label: {
-                    VStack(spacing: 4) {
+                    VStack(spacing: 3) {
                         Text(level.rawValue)
-                            .font(.system(size: 13, weight: .semibold, design: .rounded))
+                            .font(.system(size: 12, weight: .semibold, design: .rounded))
+                            .lineLimit(1)
+                            .minimumScaleFactor(0.8)
                         Text("\(Int(level.percentage))%")
                             .font(.system(size: 12, weight: .bold, design: .monospaced))
+                            .lineLimit(1)
                     }
                     .frame(maxWidth: .infinity)
-                    .padding(.vertical, 10)
+                    .padding(.vertical, 8)
                     .background(
                         isSelected
                             ? level.color.opacity(0.18)

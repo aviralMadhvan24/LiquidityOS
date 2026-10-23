@@ -470,9 +470,9 @@ private struct AttentionCard: View {
     let onAction: () -> Void
     
     var body: some View {
-        HStack(alignment: .top, spacing: 12) {
+        HStack(alignment: .top, spacing: 10) {
             Image(systemName: item.iconName)
-                .font(.system(size: 16, weight: .bold))
+                .font(.system(size: 15, weight: .bold))
                 .foregroundStyle(item.severityColor)
                 .padding(.top, 2)
             
@@ -480,13 +480,15 @@ private struct AttentionCard: View {
                 Text(item.title)
                     .font(.system(size: 13, weight: .bold, design: .rounded))
                     .foregroundStyle(Color.primary)
+                    .lineLimit(2)
                 Text(item.message)
                     .font(.system(size: 11))
                     .foregroundStyle(Color.secondary)
                     .lineSpacing(2)
+                    .fixedSize(horizontal: false, vertical: true)
             }
             
-            Spacer()
+            Spacer(minLength: 6)
             
             Button(action: onAction) {
                 Text(item.actionLabel)
@@ -497,6 +499,7 @@ private struct AttentionCard: View {
                     .foregroundStyle(item.severityColor)
                     .clipShape(Capsule())
             }
+            .layoutPriority(1)
         }
         .padding(12)
         .background(LOSTheme.cardBackground)
@@ -521,17 +524,17 @@ private struct InteractiveMetricCard: View {
     
     var body: some View {
         Button(action: onTap) {
-            VStack(alignment: .leading, spacing: 10) {
-                HStack {
+            VStack(alignment: .leading, spacing: 8) {
+                HStack(alignment: .center, spacing: 4) {
                     ZStack {
                         Circle()
                             .fill(badgeColor.opacity(0.12))
-                            .frame(width: 28, height: 28)
+                            .frame(width: 26, height: 26)
                         Image(systemName: iconName)
-                            .font(.system(size: 12, weight: .semibold))
+                            .font(.system(size: 11, weight: .semibold))
                             .foregroundStyle(badgeColor)
                     }
-                    Spacer()
+                    Spacer(minLength: 2)
                     Text(badgeText)
                         .font(.system(size: 9, weight: .bold, design: .rounded))
                         .padding(.horizontal, 6)
@@ -539,6 +542,7 @@ private struct InteractiveMetricCard: View {
                         .background(badgeColor.opacity(0.12))
                         .foregroundStyle(badgeColor)
                         .clipShape(Capsule())
+                        .layoutPriority(1)
                 }
                 
                 VStack(alignment: .leading, spacing: 2) {
@@ -546,18 +550,21 @@ private struct InteractiveMetricCard: View {
                         .font(.system(size: 9, weight: .bold, design: .rounded))
                         .foregroundStyle(Color.secondary)
                         .tracking(0.6)
+                        .lineLimit(1)
                     Text(value)
                         .font(.system(size: 16, weight: .bold, design: .rounded))
                         .foregroundStyle(isNegative ? LOSTheme.criticalRed : Color.primary)
                         .lineLimit(1)
+                        .minimumScaleFactor(0.70)
                     Text(subtitle)
                         .font(.system(size: 10))
                         .foregroundStyle(Color.secondary)
-                        .lineLimit(1)
+                        .lineLimit(2)
+                        .fixedSize(horizontal: false, vertical: true)
                 }
             }
             .frame(maxWidth: .infinity, alignment: .leading)
-            .padding(14)
+            .padding(12)
             .background(LOSTheme.cardBackground)
             .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
             .overlay(
@@ -583,6 +590,8 @@ private struct CommandHubPill: View {
                     .font(.system(size: 11, weight: .bold))
                 Text(title)
                     .font(.system(size: 12, weight: .semibold, design: .rounded))
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.85)
             }
             .padding(.horizontal, 12)
             .padding(.vertical, 8)
