@@ -215,6 +215,57 @@ struct DashboardView: View {
                     .shadow(color: Color.black.opacity(0.04), radius: 12, y: 5)
                     .padding(.horizontal)
                     
+                    // MARK: - Strategic Tools (What-If Stocks, Reverse Stress, AI Recovery)
+                    VStack(alignment: .leading, spacing: LOSTheme.space10) {
+                        SectionHeader(
+                            title: "Strategic Tools",
+                            subtitle: "Instant simulations & intelligence"
+                        )
+                        .padding(.horizontal)
+                        
+                        ScrollView(.horizontal) {
+                            HStack(spacing: LOSTheme.space12) {
+                                StrategicToolCard(
+                                    title: "What-If Stocks",
+                                    subtitle: "Model NSE/BSE",
+                                    icon: "wand.and.stars",
+                                    color: LOSTheme.accent
+                                ) {
+                                    viewModel.isShowingWhatIfSheet = true
+                                }
+                                
+                                StrategicToolCard(
+                                    title: "Reverse Stress",
+                                    subtitle: "Crash Capacity",
+                                    icon: "gauge.with.needle.fill",
+                                    color: LOSTheme.warning
+                                ) {
+                                    viewModel.isShowingReverseStressSheet = true
+                                }
+                                
+                                StrategicToolCard(
+                                    title: "AI Recovery",
+                                    subtitle: "Reach 85+ Score",
+                                    icon: "sparkles",
+                                    color: LOSTheme.positive
+                                ) {
+                                    viewModel.isShowingRecoverySheet = true
+                                }
+                                
+                                StrategicToolCard(
+                                    title: "Holdings Audit",
+                                    subtitle: "Asset Weights",
+                                    icon: "chart.pie.fill",
+                                    color: Color(hex: "6366F1")
+                                ) {
+                                    viewModel.isShowingPortfolioSheet = true
+                                }
+                            }
+                            .padding(.horizontal)
+                        }
+                        .scrollIndicators(.hidden)
+                    }
+                    
                     // MARK: - "What Needs Attention?" Actionable Carousel
                     if !viewModel.attentionItems.isEmpty {
                         VStack(alignment: .leading, spacing: LOSTheme.space12) {
@@ -384,44 +435,7 @@ struct DashboardView: View {
                         }
                         .padding(.horizontal)
                     }
-                    
-                    // MARK: - Quick Action Hub
-                    VStack(alignment: .leading, spacing: LOSTheme.space12) {
-                        SectionHeader(title: "Quick Hubs")
-                            .padding(.horizontal)
-                        
-                        ScrollView(.horizontal) {
-                            HStack(spacing: LOSTheme.space8) {
-                                QuickHubPill(title: "Edit Finances", icon: "pencil.line", color: LOSTheme.accent) {
-                                    viewModel.isShowingEditSheet = true
-                                }
-                                QuickHubPill(title: "Stress Test", icon: "chart.line.downtrend.xyaxis", color: LOSTheme.critical) {
-                                    isShowingStressSheet = true
-                                }
-                                QuickHubPill(title: "Simulate Shock", icon: "bolt.shield.fill", color: LOSTheme.warning) {
-                                    isShowingEmergencySheet = true
-                                }
-                                QuickHubPill(title: "Cash Runway", icon: "hourglass", color: LOSTheme.positive) {
-                                    isShowingRunwaySheet = true
-                                }
-                                QuickHubPill(title: "Portfolio", icon: "chart.pie.fill", color: LOSTheme.accent) {
-                                    viewModel.isShowingPortfolioSheet = true
-                                }
-                                QuickHubPill(title: "Reverse Stress", icon: "gauge.with.needle.fill", color: LOSTheme.warning) {
-                                    viewModel.isShowingReverseStressSheet = true
-                                }
-                                QuickHubPill(title: "What-If Stocks", icon: "wand.and.stars", color: LOSTheme.accent) {
-                                    viewModel.isShowingWhatIfSheet = true
-                                }
-                                QuickHubPill(title: "AI Recovery", icon: "sparkles", color: LOSTheme.positive) {
-                                    viewModel.isShowingRecoverySheet = true
-                                }
-                            }
-                            .padding(.horizontal)
-                        }
-                        .scrollIndicators(.hidden)
-                    }
-                    .padding(.bottom, LOSTheme.space32 + 16)
+                    .padding(.bottom, LOSTheme.space32)
                 }
             }
             .background(LOSTheme.backgroundGradient.ignoresSafeArea())
@@ -535,29 +549,55 @@ private struct AttentionTile: View {
     }
 }
 
-/// Pill button for the Quick Action Command Bar.
-private struct QuickHubPill: View {
+/// Dedicated Intelligence Tool Card for high-priority features: What-If Stocks, Reverse Stress, AI Recovery.
+private struct StrategicToolCard: View {
     let title: String
+    let subtitle: String
     let icon: String
     let color: Color
     let action: () -> Void
     
     var body: some View {
         Button(action: action) {
-            HStack(spacing: LOSTheme.space6) {
-                Image(systemName: icon)
-                    .font(.caption.weight(.bold))
-                Text(title)
-                    .font(.subheadline.weight(.medium))
+            VStack(alignment: .leading, spacing: LOSTheme.space8) {
+                HStack {
+                    ZStack {
+                        Circle()
+                            .fill(color.opacity(0.14))
+                            .frame(width: 36, height: 36)
+                        Image(systemName: icon)
+                            .font(.system(size: 16, weight: .bold))
+                            .foregroundStyle(color)
+                    }
+                    
+                    Spacer()
+                    
+                    Image(systemName: "arrow.up.right")
+                        .font(.system(size: 11, weight: .bold))
+                        .foregroundStyle(LOSTheme.textSecondary.opacity(0.7))
+                }
+                
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(title)
+                        .font(.subheadline.weight(.bold))
+                        .foregroundStyle(LOSTheme.textPrimary)
+                        .lineLimit(1)
+                    
+                    Text(subtitle)
+                        .font(.caption2)
+                        .foregroundStyle(LOSTheme.textSecondary)
+                        .lineLimit(1)
+                }
             }
-            .padding(.horizontal, LOSTheme.space12 + 2)
-            .padding(.vertical, LOSTheme.space8)
+            .padding(LOSTheme.space12)
+            .frame(width: 148, height: 96, alignment: .leading)
             .background(LOSTheme.surface)
-            .foregroundStyle(LOSTheme.textPrimary)
-            .clipShape(Capsule())
+            .clipShape(.rect(cornerRadius: LOSTheme.radiusCard, style: .continuous))
             .overlay(
-                Capsule().stroke(color.opacity(0.35), lineWidth: LOSTheme.hairline * 2)
+                RoundedRectangle(cornerRadius: LOSTheme.radiusCard, style: .continuous)
+                    .stroke(LOSTheme.borderHairline, lineWidth: LOSTheme.hairline)
             )
+            .shadow(color: Color.black.opacity(0.03), radius: 6, y: 3)
         }
         .sensoryFeedback(.selection, trigger: title)
     }
