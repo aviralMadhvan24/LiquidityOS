@@ -19,7 +19,7 @@ final class RecoveryAPIService {
         var req = URLRequest(url: url)
         req.httpMethod = "POST"
         req.setValue("application/json", forHTTPHeaderField: "Content-Type")
-        req.timeoutInterval = 25.0
+        req.timeoutInterval = 2.5
         
         let payload: [String: Any] = [
             "currentCash": profile.liquidCash,
@@ -33,12 +33,12 @@ final class RecoveryAPIService {
             "userGoals": userGoals
         ]
         
-        req.httpBody = try JSONSerialization.data(withJSONObject: payload)
+        req.httpBody = try? JSONSerialization.data(withJSONObject: payload)
         
         do {
             let (data, response) = try await URLSession.shared.data(for: req)
             guard let http = response as? HTTPURLResponse, http.statusCode == 200 else {
-                return localFallbackPlans(profile: profile, simulatedLoss: simulatedLoss)
+                return Self.localFallbackPlans(profile: profile, simulatedLoss: simulatedLoss)
             }
             
             struct PlanAPIResponse: Codable {
@@ -49,12 +49,12 @@ final class RecoveryAPIService {
             let decoded = try JSONDecoder().decode(PlanAPIResponse.self, from: data)
             return (baseline: decoded.baseline, recovery: decoded.recovery)
         } catch {
-            // Graceful fallback to client deterministic arithmetic if backend offline
-            return localFallbackPlans(profile: profile, simulatedLoss: simulatedLoss)
+            // Graceful fast fallback to client deterministic arithmetic if backend offline
+            return Self.localFallbackPlans(profile: profile, simulatedLoss: simulatedLoss)
         }
     }
     
-    private func localFallbackPlans(profile: FinancialProfile, simulatedLoss: Double) -> (baseline: RecoveryBaseline, recovery: RecoveryPlanResponse) {
+    static func localFallbackPlans(profile: FinancialProfile, simulatedLoss: Double) -> (baseline: RecoveryBaseline, recovery: RecoveryPlanResponse) {
         let postShockCash = max(0, profile.liquidCash - profile.unexpectedExpense)
         let totalOutflow = profile.monthlyExpenses + profile.monthlyDebtPayments
         let netBurn = max(0, totalOutflow - profile.monthlyIncome)

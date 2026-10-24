@@ -75,6 +75,13 @@ final class ResilienceViewModel: ObservableObject {
         loadZerodhaSession()
         recalculatePortfolioValueFromHoldings()
         
+        let initialPlans = RecoveryAPIService.localFallbackPlans(
+            profile: self.profile,
+            simulatedLoss: 0.0
+        )
+        self.recoveryBaseline = initialPlans.baseline
+        self.recoveryPlanResponse = initialPlans.recovery
+        
         if ProcessInfo.processInfo.arguments.contains("-showWhatIf") {
             self.isShowingWhatIfSheet = true
         }
@@ -516,8 +523,29 @@ final class ResilienceViewModel: ObservableObject {
             recoveryPlanResponse = res.recovery
             isGeneratingRecoveryPlan = false
         } catch {
+            let fallback = RecoveryAPIService.localFallbackPlans(
+                profile: profile,
+                simulatedLoss: currentReport.estimatedPortfolioLoss
+            )
+            recoveryBaseline = fallback.baseline
+            recoveryPlanResponse = fallback.recovery
             isGeneratingRecoveryPlan = false
         }
+    }
+    
+    func applyRecoveryPlan(_ plan: RecoveryPlanOption) {
+        // Optimize monthly expenses by applying the reduction
+        let optimizedExpenses = max(2_000, profile.monthlyExpenses - plan.monthlyExpenseReduction)
+        profile.monthlyExpenses = optimizedExpenses
+        saveToUserDefaults()
+        
+        // Re-generate fresh recovery options with updated baseline
+        let freshPlans = RecoveryAPIService.localFallbackPlans(
+            profile: profile,
+            simulatedLoss: currentReport.estimatedPortfolioLoss
+        )
+        recoveryBaseline = freshPlans.baseline
+        recoveryPlanResponse = freshPlans.recovery
     }
     
     // MARK: - Zerodha Kite Sync
