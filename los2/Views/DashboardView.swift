@@ -15,6 +15,7 @@ struct DashboardView: View {
     @State private var isShowingStressSheet: Bool = false
     @State private var isShowingEmergencySheet: Bool = false
     @State private var isShowingRunwaySheet: Bool = false
+    @State private var isShowingMarketWatchSheet: Bool = false
     @State private var isShowingSignOutAlert: Bool = false
     
     var baselineReport: ExplainableResilienceReport {
@@ -225,6 +226,15 @@ struct DashboardView: View {
                         
                         ScrollView(.horizontal) {
                             HStack(spacing: LOSTheme.space12) {
+                                StrategicToolCard(
+                                    title: "Live Market",
+                                    subtitle: "NSE & BSE Tickers",
+                                    icon: "chart.line.uptrend.xyaxis",
+                                    color: Color(hex: "0284C7")
+                                ) {
+                                    isShowingMarketWatchSheet = true
+                                }
+                                
                                 StrategicToolCard(
                                     title: "What-If Stocks",
                                     subtitle: "Model NSE/BSE",
@@ -470,6 +480,9 @@ struct DashboardView: View {
             }
             .sheet(isPresented: $isShowingRunwaySheet) {
                 RunwayView(viewModel: viewModel)
+            }
+            .sheet(isPresented: $isShowingMarketWatchSheet) {
+                LiveMarketWatchView(viewModel: viewModel)
             }
             .alert("Sign Out", isPresented: $isShowingSignOutAlert) {
                 Button("Cancel", role: .cancel) { }
