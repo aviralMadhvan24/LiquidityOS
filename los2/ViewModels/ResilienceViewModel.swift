@@ -52,16 +52,16 @@ final class ResilienceViewModel: ObservableObject {
     @Published var isShowingWhatIfSheet: Bool = false
     
     // MARK: - What-If Stock Simulator State
-    @Published var whatIfTicker: String = "TATAMOTORS"
-    @Published var whatIfCompanyName: String = "Tata Motors Limited"
+    @Published var whatIfTicker: String = "RELIANCE"
+    @Published var whatIfCompanyName: String = "Reliance Industries Limited"
     @Published var whatIfExchange: String = "NSE"
-    @Published var whatIfSector: String = "Automotive"
-    @Published var whatIfShares: Int = 50
-    @Published var whatIfPrice: Double = 980.40
+    @Published var whatIfSector: String = "Energy & Telecom"
+    @Published var whatIfShares: Int = 20
+    @Published var whatIfPrice: Double = 1190.00
     @Published var whatIfSimulatedDecline: Double = 25.0
     @Published var isFetchingWhatIfPrice: Bool = false
     @Published var whatIfPriceChangePercent: Double? = nil
-    @Published var whatIfPriceFreshness: String = "Benchmark Price"
+    @Published var whatIfPriceFreshness: String = "Live NSE"
     
     // Broker Sync State (Zerodha Kite)
     @Published var isZerodhaConnected: Bool = false
@@ -462,7 +462,23 @@ final class ResilienceViewModel: ObservableObject {
         whatIfExchange = catalogItem.exchange
         whatIfSector = catalogItem.sector
         whatIfPrice = catalogItem.defaultPrice
-        whatIfPriceFreshness = "Benchmark Price"
+        whatIfPriceFreshness = "Live \(catalogItem.exchange)"
+        whatIfPriceChangePercent = nil
+        
+        Task { @MainActor in
+            await fetchLiveWhatIfPrice()
+        }
+    }
+    
+    func selectWhatIfStock(symbol: String, name: String, exchange: String, sector: String?, initialPrice: Double? = nil) {
+        whatIfTicker = symbol
+        whatIfCompanyName = name
+        whatIfExchange = exchange
+        whatIfSector = sector ?? "Equity"
+        if let p = initialPrice, p > 0 {
+            whatIfPrice = p
+        }
+        whatIfPriceFreshness = "Live \(exchange)"
         whatIfPriceChangePercent = nil
         
         Task { @MainActor in

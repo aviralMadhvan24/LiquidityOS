@@ -10,6 +10,8 @@ struct WhatIfStockSimulatorView: View {
     @State private var searchQuery: String = ""
     @State private var selectedExchange: String = "ALL" // "ALL", "NSE", "BSE"
     @State private var isShowingCustomEntry: Bool = false
+    @State private var liveQuotesCache: [String: StockQuotePayload] = [:]
+    @State private var isLoadingQuotes: Bool = false
     
     private var result: WhatIfSimulationResult {
         viewModel.whatIfSimulationResult
@@ -79,8 +81,14 @@ struct WhatIfStockSimulatorView: View {
                         ScrollView(.horizontal, showsIndicators: false) {
                             HStack(spacing: LOSTheme.space8) {
                                 ForEach(IndianStockDirectory.shared.featuredPicks) { stock in
+                                    let quote = liveQuotesCache[stock.symbol]
                                     Button {
                                         viewModel.selectWhatIfStock(catalogItem: stock)
+                                        if let q = quote {
+                                            viewModel.whatIfPrice = q.currentPrice
+                                            viewModel.whatIfPriceChangePercent = q.changePercent
+                                            viewModel.whatIfPriceFreshness = "Live \(stock.exchange)"
+                                        }
                                     } label: {
                                         HStack(spacing: 4) {
                                             Text(stock.symbol)
@@ -89,6 +97,11 @@ struct WhatIfStockSimulatorView: View {
                                             Text("(\(stock.exchange))")
                                                 .font(.caption2)
                                                 .foregroundStyle(LOSTheme.textSecondary)
+                                            if let pct = quote?.changePercent {
+                                                Text(String(format: "%@%.1f%%", pct >= 0 ? "+" : "", pct))
+                                                    .font(.system(size: 8, weight: .bold))
+                                                    .foregroundStyle(pct >= 0 ? LOSTheme.positive : LOSTheme.critical)
+                                            }
                                         }
                                         .padding(.horizontal, 10)
                                         .padding(.vertical, 6)
@@ -127,8 +140,17 @@ struct WhatIfStockSimulatorView: View {
                         if !searchQuery.isEmpty {
                             VStack(spacing: 0) {
                                 ForEach(searchResults.prefix(6)) { stock in
+                                    let quote = liveQuotesCache[stock.symbol]
+                                    let livePrice = quote?.currentPrice ?? stock.defaultPrice
+                                    let changePct = quote?.changePercent
+                                    
                                     Button {
                                         viewModel.selectWhatIfStock(catalogItem: stock)
+                                        if let q = quote {
+                                            viewModel.whatIfPrice = q.currentPrice
+                                            viewModel.whatIfPriceChangePercent = q.changePercent
+                                            viewModel.whatIfPriceFreshness = "Live \(stock.exchange)"
+                                        }
                                         searchQuery = ""
                                     } label: {
                                         HStack {
@@ -153,13 +175,19 @@ struct WhatIfStockSimulatorView: View {
                                             }
                                             Spacer()
                                             VStack(alignment: .trailing, spacing: 2) {
-                                                Text(LOSTheme.formatRupee(stock.defaultPrice))
+                                                Text(LOSTheme.formatRupee(livePrice))
                                                     .font(.subheadline.weight(.semibold))
                                                     .fontDesign(.rounded)
                                                     .foregroundStyle(LOSTheme.textPrimary)
-                                                Text(stock.sector)
-                                                    .font(.caption2)
-                                                    .foregroundStyle(LOSTheme.textSecondary)
+                                                if let pct = changePct {
+                                                    Text(String(format: "%@%.2f%%", pct >= 0 ? "+" : "", pct))
+                                                        .font(.caption2.weight(.bold))
+                                                        .foregroundStyle(pct >= 0 ? LOSTheme.positive : LOSTheme.critical)
+                                                } else {
+                                                    Text(stock.sector)
+                                                        .font(.caption2)
+                                                        .foregroundStyle(LOSTheme.textSecondary)
+                                                }
                                             }
                                         }
                                         .padding(.vertical, 10)
@@ -301,6 +329,62 @@ struct WhatIfStockSimulatorView: View {
                                 Text("Weight: \(String(format: "%.1f%%", result.newHoldingWeight))")
                                     .font(.caption.weight(.semibold))
                                     .foregroundStyle(result.isConcentrationHeavy ? LOSTheme.warning : LOSTheme.textSecondary)
+                            }
+                        }
+                        
+                        Divider().overlay(LOSTheme.borderHairline)
+                        
+                        // Live Buy Price Fine-Tuning
+                        VStack(alignment: .leading, spacing: LOSTheme.space8) {
+                            HStack {
+                                VStack(alignment: .leading, spacing: 2) {
+                                    Text("Simulated Buy Price")
+                                        .font(.subheadline)
+                                        .foregroundStyle(LOSTheme.textSecondary)
+                                    HStack(spacing: 4) {
+                                        Circle()
+                                            .fill(viewModel.whatIfPriceFreshness.contains("Live") ? LOSTheme.positive : LOSTheme.warning)
+                                            .frame(width: 5, height: 5)
+                                        Text(viewModel.whatIfPriceFreshness)
+                                            .font(.caption2.weight(.bold))
+                                            .foregroundStyle(viewModel.whatIfPriceFreshness.contains("Live") ? LOSTheme.positive : LOSTheme.textSecondary)
+                                    }
+                                }
+                                
+                                Spacer()
+                                
+                                HStack(spacing: 6) {
+                                    Button {
+                                        if viewModel.whatIfPrice > 5 {
+                                            viewModel.whatIfPrice = max(1.0, round((viewModel.whatIfPrice - 5) * 10) / 10)
+                                        }
+                                    } label: {
+                                        Image(systemName: "minus.circle.fill")
+                                            .font(.title3)
+                                            .foregroundStyle(LOSTheme.textSecondary)
+                                    }
+                                    
+                                    Text(LOSTheme.formatRupee(viewModel.whatIfPrice))
+                                        .font(.headline.weight(.bold))
+                                        .fontDesign(.rounded)
+                                        .foregroundStyle(LOSTheme.textPrimary)
+                                    
+                                    Button {
+                                        viewModel.whatIfPrice = round((viewModel.whatIfPrice + 5) * 10) / 10
+                                    } label: {
+                                        Image(systemName: "plus.circle.fill")
+                                            .font(.title3)
+                                            .foregroundStyle(LOSTheme.textSecondary)
+                                    }
+                                    
+                                    Button {
+                                        Task { await viewModel.fetchLiveWhatIfPrice() }
+                                    } label: {
+                                        Image(systemName: "arrow.counterclockwise.circle.fill")
+                                            .font(.title3)
+                                            .foregroundStyle(LOSTheme.accent)
+                                    }
+                                }
                             }
                         }
                         
@@ -499,7 +583,59 @@ struct WhatIfStockSimulatorView: View {
                 }
             }
             .task {
-                await viewModel.fetchLiveWhatIfPrice()
+                await loadInitialLiveQuotes()
+            }
+            .onChange(of: searchQuery) { _ in
+                Task {
+                    await loadQuotesForSearchResults()
+                }
+            }
+        }
+    }
+    
+    // MARK: - Live Quote Streamers
+    private func loadInitialLiveQuotes() async {
+        isLoadingQuotes = true
+        let popular = IndianStockDirectory.shared.featuredPicks
+        
+        await withTaskGroup(of: (String, StockQuotePayload?).self) { group in
+            for stock in popular {
+                group.addTask {
+                    let q = try? await MarketDataAPIService.shared.fetchQuote(symbol: stock.symbol, exchange: stock.exchange)
+                    return (stock.symbol, q)
+                }
+            }
+            
+            for await (sym, quote) in group {
+                if let q = quote {
+                    await MainActor.run {
+                        liveQuotesCache[sym] = q
+                        if viewModel.whatIfTicker == sym {
+                            viewModel.whatIfPrice = q.currentPrice
+                            viewModel.whatIfPriceChangePercent = q.changePercent
+                            viewModel.whatIfPriceFreshness = "Live \(q.exchange)"
+                        }
+                    }
+                }
+            }
+        }
+        
+        await viewModel.fetchLiveWhatIfPrice()
+        
+        await MainActor.run {
+            isLoadingQuotes = false
+        }
+    }
+    
+    private func loadQuotesForSearchResults() async {
+        let items = Array(searchResults.prefix(6))
+        for item in items {
+            if liveQuotesCache[item.symbol] == nil {
+                if let q = try? await MarketDataAPIService.shared.fetchQuote(symbol: item.symbol, exchange: item.exchange) {
+                    await MainActor.run {
+                        liveQuotesCache[item.symbol] = q
+                    }
+                }
             }
         }
     }
