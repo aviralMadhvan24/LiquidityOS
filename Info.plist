@@ -9,5 +9,7 @@
 		<key>NSAllowsLocalNetworking</key>
 		<true/>
 	</dict>
+	<key>NSLocalNetworkUsageDescription</key>
+	<string>FinSight requires access to your local network to connect to the Node.js backend server running on your Mac.</string>
 </dict>
 </plist>

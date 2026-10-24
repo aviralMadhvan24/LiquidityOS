@@ -199,13 +199,24 @@ struct EditProfileSheet: View {
                         }
                         
                         // Fast Presets
-                        HStack(spacing: 8) {
-                            Text("Fast Presets:")
+                        HStack(spacing: 6) {
+                            Text("Presets:")
                                 .font(.system(size: 10, weight: .bold))
                                 .foregroundStyle(Color.secondary)
                             
-                            Button("Mac IP (10.21.70.139)") {
+                            Button("10.21.70.139") {
                                 serverURLText = "http://10.21.70.139:3000"
+                                ConcallAPIService.shared.baseURLString = serverURLText
+                            }
+                            .font(.system(size: 10, weight: .semibold))
+                            .foregroundStyle(LOSTheme.accent)
+                            
+                            Text("•")
+                                .font(.system(size: 10))
+                                .foregroundStyle(Color.secondary)
+                            
+                            Button("KIET37s-iMac.local") {
+                                serverURLText = "http://KIET37s-iMac.local:3000"
                                 ConcallAPIService.shared.baseURLString = serverURLText
                             }
                             .font(.system(size: 10, weight: .semibold))
@@ -226,7 +237,7 @@ struct EditProfileSheet: View {
                 } header: {
                     Text("Backend Server Connection")
                 } footer: {
-                    Text("For physical iPhone testing, set this to your Mac's Wi-Fi IP address (http://10.21.70.139:3000) so your iPhone can reach the local Node.js server.")
+                    Text("For physical iPhone testing, ensure your iPhone is on the same Wi-Fi or connected via Personal Hotspot to this Mac. Use '10.21.70.139' or 'KIET37s-iMac.local' and tap 'Test Connection'.")
                 }
                 
                 // Section 6: Reset Actions
