@@ -23,6 +23,7 @@ struct HoldingEditorSheet: View {
     @State private var currentPrice: Double = 1000.0
     @State private var freshness: MarketDataFreshness = .demoData
     @State private var isFetchingQuote: Bool = false
+    @State private var showDeleteConfirmation: Bool = false
     
     private let availableSectors = [
         "Banking",
@@ -337,6 +338,26 @@ struct HoldingEditorSheet: View {
                 } header: {
                     Text("Valuation Summary")
                 }
+                
+                // MARK: - Section 5: Remove Holding (Only when editing existing)
+                if let holding = existingHolding {
+                    Section {
+                        Button(role: .destructive) {
+                            showDeleteConfirmation = true
+                        } label: {
+                            HStack {
+                                Spacer()
+                                Image(systemName: "trash.fill")
+                                Text("Remove \(holding.ticker) from Portfolio")
+                                    .fontWeight(.bold)
+                                Spacer()
+                            }
+                            .foregroundStyle(LOSTheme.critical)
+                        }
+                    } footer: {
+                        Text("Removing this stock will delete all \(holding.shares) shares and update your total portfolio valuation.")
+                    }
+                }
             }
             .navigationTitle(existingHolding == nil ? "Add NSE / BSE Stock" : "Edit Holding")
             .navigationBarTitleDisplayMode(.inline)
@@ -350,6 +371,21 @@ struct HoldingEditorSheet: View {
                     }
                     .bold()
                     .disabled(ticker.isEmpty || shares <= 0 || avgBuyPrice <= 0)
+                }
+            }
+            .alert("Remove \(existingHolding?.ticker ?? "Holding") from Portfolio?", isPresented: $showDeleteConfirmation) {
+                Button("Remove Stock", role: .destructive) {
+                    if let h = existingHolding {
+                        viewModel.deleteHolding(id: h.id)
+                        dismiss()
+                    }
+                }
+                Button("Cancel", role: .cancel) {}
+            } message: {
+                if let h = existingHolding {
+                    Text("Are you sure you want to remove \(h.shares) shares of \(h.companyName) from your portfolio?")
+                } else {
+                    Text("This stock will be permanently removed.")
                 }
             }
             .onAppear {

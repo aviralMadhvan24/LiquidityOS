@@ -42,7 +42,7 @@ struct FinancialProfile: Equatable, Codable {
     
     /// Returns active holdings or standard defaults
     var activeHoldings: [PortfolioHolding] {
-        if let h = holdings, !h.isEmpty {
+        if let h = holdings {
             return h
         }
         return PortfolioHolding.pitchDeckHoldings

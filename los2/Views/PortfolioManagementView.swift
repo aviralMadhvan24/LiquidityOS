@@ -9,6 +9,9 @@ struct PortfolioManagementView: View {
     
     @State private var showingAddSheet: Bool = false
     @State private var editingHolding: PortfolioHolding? = nil
+    @State private var holdingToDelete: PortfolioHolding? = nil
+    @State private var showDeleteConfirmation: Bool = false
+    @State private var toastMessage: String? = nil
     
     var totalInvested: Double {
         viewModel.profile.activeHoldings.reduce(0.0) { $0 + $1.investedValue }
@@ -230,7 +233,8 @@ struct PortfolioManagementView: View {
                                         editingHolding = holding
                                     },
                                     onDelete: {
-                                        viewModel.deleteHolding(id: holding.id)
+                                        holdingToDelete = holding
+                                        showDeleteConfirmation = true
                                     }
                                 )
                             }
@@ -258,6 +262,49 @@ struct PortfolioManagementView: View {
             }
             .sheet(isPresented: $viewModel.isShowingWhatIfSheet) {
                 WhatIfStockSimulatorView(viewModel: viewModel)
+            }
+            .alert("Remove \(holdingToDelete?.ticker ?? "Holding") from Portfolio?", isPresented: $showDeleteConfirmation) {
+                Button("Remove", role: .destructive) {
+                    if let h = holdingToDelete {
+                        let ticker = h.ticker
+                        viewModel.deleteHolding(id: h.id)
+                        withAnimation(.spring(response: 0.35, dampingFraction: 0.8)) {
+                            toastMessage = "Removed \(ticker) from portfolio"
+                        }
+                        Task {
+                            try? await Task.sleep(nanoseconds: 2_500_000_000)
+                            withAnimation(.spring(response: 0.35, dampingFraction: 0.8)) {
+                                toastMessage = nil
+                            }
+                        }
+                    }
+                }
+                Button("Cancel", role: .cancel) {}
+            } message: {
+                if let h = holdingToDelete {
+                    Text("This will remove \(h.shares) shares of \(h.companyName) and update your portfolio total valuation.")
+                } else {
+                    Text("This holding will be permanently removed from your portfolio.")
+                }
+            }
+            .overlay(alignment: .top) {
+                if let msg = toastMessage {
+                    HStack(spacing: 8) {
+                        Image(systemName: "trash.fill")
+                            .foregroundStyle(LOSTheme.critical)
+                        Text(msg)
+                            .font(.subheadline.weight(.semibold))
+                            .foregroundStyle(LOSTheme.textPrimary)
+                    }
+                    .padding(.horizontal, 16)
+                    .padding(.vertical, 10)
+                    .background(LOSTheme.surfaceElevated)
+                    .clipShape(Capsule())
+                    .overlay(Capsule().stroke(LOSTheme.borderHairline, lineWidth: 1))
+                    .shadow(color: Color.black.opacity(0.35), radius: 8, y: 4)
+                    .padding(.top, 10)
+                    .transition(.move(edge: .top).combined(with: .opacity))
+                }
             }
         }
     }
@@ -347,20 +394,42 @@ private struct HoldingRowCard: View {
                         .foregroundStyle(LOSTheme.primary)
                 }
                 
-                // Action Menu
-                Menu {
+                // Action Menu & Fast Delete
+                HStack(spacing: 6) {
                     Button(action: onEdit) {
-                        Label("Edit Holding", systemImage: "pencil")
+                        Image(systemName: "pencil")
+                            .font(.system(size: 11, weight: .bold))
+                            .foregroundStyle(Color.secondary)
+                            .padding(6)
+                            .background(Color.secondary.opacity(0.12))
+                            .clipShape(Circle())
                     }
+                    .accessibilityLabel("Edit \(holding.ticker)")
+                    
                     Button(role: .destructive, action: onDelete) {
-                        Label("Remove Holding", systemImage: "trash")
+                        Image(systemName: "trash")
+                            .font(.system(size: 11, weight: .bold))
+                            .foregroundStyle(LOSTheme.critical)
+                            .padding(6)
+                            .background(LOSTheme.critical.opacity(0.12))
+                            .clipShape(Circle())
                     }
-                } label: {
-                    Image(systemName: "ellipsis")
-                        .font(.system(size: 14, weight: .semibold))
-                        .foregroundStyle(Color.secondary)
-                        .padding(.leading, 8)
-                        .padding(.vertical, 4)
+                    .accessibilityLabel("Remove \(holding.ticker) from portfolio")
+                    
+                    Menu {
+                        Button(action: onEdit) {
+                            Label("Edit Holding", systemImage: "pencil")
+                        }
+                        Button(role: .destructive, action: onDelete) {
+                            Label("Remove Holding", systemImage: "trash")
+                        }
+                    } label: {
+                        Image(systemName: "ellipsis")
+                            .font(.system(size: 14, weight: .semibold))
+                            .foregroundStyle(Color.secondary)
+                            .padding(.leading, 4)
+                            .padding(.vertical, 4)
+                    }
                 }
             }
         }

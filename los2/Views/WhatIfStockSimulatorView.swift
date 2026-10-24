@@ -12,6 +12,8 @@ struct WhatIfStockSimulatorView: View {
     @State private var isShowingCustomEntry: Bool = false
     @State private var liveQuotesCache: [String: StockQuotePayload] = [:]
     @State private var isLoadingQuotes: Bool = false
+    @State private var showRemoveConfirmation: Bool = false
+    @State private var toastBannerMessage: String? = nil
     
     private var result: WhatIfSimulationResult {
         viewModel.whatIfSimulationResult
@@ -26,8 +28,9 @@ struct WhatIfStockSimulatorView: View {
     
     var body: some View {
         NavigationStack {
-            ScrollView {
-                VStack(spacing: LOSTheme.space20) {
+            ScrollViewReader { scrollProxy in
+                ScrollView {
+                    VStack(spacing: LOSTheme.space20) {
                     
                     // MARK: - Hero Explanation Banner
                     VStack(alignment: .leading, spacing: LOSTheme.space8) {
@@ -281,6 +284,31 @@ struct WhatIfStockSimulatorView: View {
                         .padding(LOSTheme.space12)
                         .background(LOSTheme.surfaceElevated)
                         .clipShape(.rect(cornerRadius: LOSTheme.radiusMedium, style: .continuous))
+                        
+                        // Active Portfolio Indicator (if stock already owned)
+                        if let existing = viewModel.getHolding(ticker: viewModel.whatIfTicker) {
+                            HStack(spacing: 8) {
+                                Image(systemName: "checkmark.circle.fill")
+                                    .foregroundStyle(LOSTheme.positive)
+                                    .font(.subheadline)
+                                VStack(alignment: .leading, spacing: 2) {
+                                    Text("Currently in Active Portfolio")
+                                        .font(.caption.weight(.bold))
+                                        .foregroundStyle(LOSTheme.positive)
+                                    Text("\(existing.shares) shares owned @ \(LOSTheme.formatRupee(existing.averageBuyPrice)) avg • Total \(LOSTheme.formatRupee(existing.currentValue))")
+                                        .font(.caption2)
+                                        .foregroundStyle(LOSTheme.textSecondary)
+                                }
+                                Spacer()
+                            }
+                            .padding(LOSTheme.space10)
+                            .background(LOSTheme.positive.opacity(0.12))
+                            .clipShape(.rect(cornerRadius: LOSTheme.radiusSmall, style: .continuous))
+                            .overlay(
+                                RoundedRectangle(cornerRadius: LOSTheme.radiusSmall, style: .continuous)
+                                    .stroke(LOSTheme.positive.opacity(0.3), lineWidth: 1)
+                            )
+                        }
                     }
                     .padding(LOSTheme.space16)
                     .background(LOSTheme.surface)
@@ -527,20 +555,71 @@ struct WhatIfStockSimulatorView: View {
                     
                     // MARK: - Action Buttons
                     VStack(spacing: LOSTheme.space12) {
-                        Button {
-                            viewModel.commitWhatIfHoldingToRealPortfolio()
-                            dismiss()
-                        } label: {
-                            HStack {
-                                Image(systemName: "plus.circle.fill")
-                                Text("Add to Active Portfolio")
+                        if let existing = viewModel.getHolding(ticker: viewModel.whatIfTicker) {
+                            // Primary Destructive: Remove from Portfolio
+                            Button(role: .destructive) {
+                                showRemoveConfirmation = true
+                            } label: {
+                                HStack(spacing: 8) {
+                                    Image(systemName: "trash.fill")
+                                    Text("Remove \(viewModel.whatIfTicker) from Portfolio")
+                                }
+                                .font(.headline.weight(.bold))
+                                .foregroundStyle(Color.white)
+                                .frame(maxWidth: .infinity)
+                                .padding(.vertical, LOSTheme.space14)
+                                .background(LOSTheme.critical)
+                                .clipShape(Capsule())
                             }
-                            .font(.headline.weight(.bold))
-                            .foregroundStyle(Color.black)
-                            .frame(maxWidth: .infinity)
-                            .padding(.vertical, LOSTheme.space14)
-                            .background(LOSTheme.primary)
-                            .clipShape(Capsule())
+                            
+                            // Secondary: Add More Shares to Existing Position
+                            Button {
+                                viewModel.addWhatIfSharesToExistingHolding()
+                                withAnimation(.spring(response: 0.35, dampingFraction: 0.8)) {
+                                    toastBannerMessage = "Added +\(viewModel.whatIfShares) shares to \(viewModel.whatIfTicker)"
+                                }
+                                Task {
+                                    try? await Task.sleep(nanoseconds: 2_500_000_000)
+                                    withAnimation(.spring(response: 0.35, dampingFraction: 0.8)) {
+                                        toastBannerMessage = nil
+                                    }
+                                }
+                            } label: {
+                                HStack(spacing: 8) {
+                                    Image(systemName: "plus.circle.fill")
+                                    Text("Add +\(viewModel.whatIfShares) Shares (Total \(existing.shares + viewModel.whatIfShares))")
+                                }
+                                .font(.subheadline.weight(.bold))
+                                .foregroundStyle(Color.black)
+                                .frame(maxWidth: .infinity)
+                                .padding(.vertical, LOSTheme.space12)
+                                .background(LOSTheme.primary)
+                                .clipShape(Capsule())
+                            }
+                        } else {
+                            Button {
+                                viewModel.commitWhatIfHoldingToRealPortfolio()
+                                withAnimation(.spring(response: 0.35, dampingFraction: 0.8)) {
+                                    toastBannerMessage = "Added \(viewModel.whatIfTicker) to active portfolio"
+                                }
+                                Task {
+                                    try? await Task.sleep(nanoseconds: 2_500_000_000)
+                                    withAnimation(.spring(response: 0.35, dampingFraction: 0.8)) {
+                                        toastBannerMessage = nil
+                                    }
+                                }
+                            } label: {
+                                HStack {
+                                    Image(systemName: "plus.circle.fill")
+                                    Text("Add to Active Portfolio")
+                                }
+                                .font(.headline.weight(.bold))
+                                .foregroundStyle(Color.black)
+                                .frame(maxWidth: .infinity)
+                                .padding(.vertical, LOSTheme.space14)
+                                .background(LOSTheme.primary)
+                                .clipShape(Capsule())
+                            }
                         }
                         
                         Button {
@@ -552,11 +631,22 @@ struct WhatIfStockSimulatorView: View {
                         }
                         .padding(.top, 4)
                     }
+                    .id("bottom_action_buttons")
                     .padding(.horizontal)
                     .padding(.bottom, LOSTheme.space24)
                 }
                 .padding(.top, LOSTheme.space8)
             }
+            .onAppear {
+                if ProcessInfo.processInfo.arguments.contains("-scrollToBottom") {
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                        withAnimation {
+                            scrollProxy.scrollTo("bottom_action_buttons", anchor: .bottom)
+                        }
+                    }
+                }
+            }
+        }
             .background(LOSTheme.background.ignoresSafeArea())
             .navigationTitle("What-If Stock Simulator")
             .navigationBarTitleDisplayMode(.inline)
@@ -580,6 +670,47 @@ struct WhatIfStockSimulatorView: View {
                         }
                     }
                     .disabled(viewModel.isFetchingWhatIfPrice)
+                }
+            }
+            .alert("Remove \(viewModel.whatIfTicker) from Portfolio?", isPresented: $showRemoveConfirmation) {
+                Button("Remove Stock", role: .destructive) {
+                    let ticker = viewModel.whatIfTicker
+                    viewModel.removeHoldingByTicker(ticker)
+                    withAnimation(.spring(response: 0.35, dampingFraction: 0.8)) {
+                        toastBannerMessage = "Removed \(ticker) from active portfolio"
+                    }
+                    Task {
+                        try? await Task.sleep(nanoseconds: 2_500_000_000)
+                        withAnimation(.spring(response: 0.35, dampingFraction: 0.8)) {
+                            toastBannerMessage = nil
+                        }
+                    }
+                }
+                Button("Cancel", role: .cancel) {}
+            } message: {
+                if let existing = viewModel.getHolding(ticker: viewModel.whatIfTicker) {
+                    Text("This will remove all \(existing.shares) shares of \(viewModel.whatIfTicker) and update your total portfolio valuation.")
+                } else {
+                    Text("This will remove \(viewModel.whatIfTicker) from your active portfolio.")
+                }
+            }
+            .overlay(alignment: .top) {
+                if let msg = toastBannerMessage {
+                    HStack(spacing: 8) {
+                        Image(systemName: msg.contains("Removed") ? "trash.fill" : "checkmark.circle.fill")
+                            .foregroundStyle(msg.contains("Removed") ? LOSTheme.critical : LOSTheme.positive)
+                        Text(msg)
+                            .font(.subheadline.weight(.semibold))
+                            .foregroundStyle(LOSTheme.textPrimary)
+                    }
+                    .padding(.horizontal, 16)
+                    .padding(.vertical, 10)
+                    .background(LOSTheme.surfaceElevated)
+                    .clipShape(Capsule())
+                    .overlay(Capsule().stroke(LOSTheme.borderHairline, lineWidth: 1))
+                    .shadow(color: Color.black.opacity(0.35), radius: 8, y: 4)
+                    .padding(.top, 10)
+                    .transition(.move(edge: .top).combined(with: .opacity))
                 }
             }
             .task {

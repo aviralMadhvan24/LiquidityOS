@@ -88,6 +88,9 @@ final class ResilienceViewModel: ObservableObject {
         if ProcessInfo.processInfo.arguments.contains("-showWhatIf") {
             self.isShowingWhatIfSheet = true
         }
+        if ProcessInfo.processInfo.arguments.contains("-showPortfolio") {
+            self.isShowingPortfolioSheet = true
+        }
     }
     
     // MARK: - Active Drawdown Percent (Mode A)
@@ -362,6 +365,7 @@ final class ResilienceViewModel: ObservableObject {
         
         profile.holdings = list
         recalculatePortfolioValueFromHoldings()
+        saveToUserDefaults()
     }
     
     func deleteHolding(id: UUID) {
@@ -369,11 +373,34 @@ final class ResilienceViewModel: ObservableObject {
         list.removeAll { $0.id == id }
         profile.holdings = list
         recalculatePortfolioValueFromHoldings()
+        saveToUserDefaults()
+    }
+
+    func removeHoldingByTicker(_ ticker: String) {
+        let cleanTicker = ticker.trimmingCharacters(in: .whitespacesAndNewlines).uppercased()
+        var list = profile.activeHoldings
+        list.removeAll { $0.ticker.uppercased() == cleanTicker }
+        profile.holdings = list
+        recalculatePortfolioValueFromHoldings()
+        saveToUserDefaults()
+    }
+    
+    func isHoldingInPortfolio(ticker: String) -> Bool {
+        let cleanTicker = ticker.trimmingCharacters(in: .whitespacesAndNewlines).uppercased()
+        return profile.activeHoldings.contains { $0.ticker.uppercased() == cleanTicker }
+    }
+    
+    func getHolding(ticker: String) -> PortfolioHolding? {
+        let cleanTicker = ticker.trimmingCharacters(in: .whitespacesAndNewlines).uppercased()
+        return profile.activeHoldings.first { $0.ticker.uppercased() == cleanTicker }
     }
     
     func recalculatePortfolioValueFromHoldings() {
         let list = profile.activeHoldings
-        guard !list.isEmpty else { return }
+        guard !list.isEmpty else {
+            profile.portfolioValue = 0.0
+            return
+        }
         
         let totalVal = list.reduce(0.0) { $0 + $1.currentValue }
         profile.portfolioValue = totalVal
@@ -513,6 +540,25 @@ final class ResilienceViewModel: ObservableObject {
             sector: whatIfSector,
             currentPrice: whatIfPrice
         )
+    }
+    
+    func addWhatIfSharesToExistingHolding() {
+        if let existing = getHolding(ticker: whatIfTicker) {
+            let combinedShares = existing.shares + whatIfShares
+            let totalInvested = (Double(existing.shares) * existing.averageBuyPrice) + (Double(whatIfShares) * whatIfPrice)
+            let newAvgPrice = combinedShares > 0 ? (totalInvested / Double(combinedShares)) : whatIfPrice
+            
+            addOrUpdateHolding(
+                ticker: whatIfTicker,
+                companyName: whatIfCompanyName,
+                shares: combinedShares,
+                averageBuyPrice: newAvgPrice,
+                sector: whatIfSector,
+                currentPrice: whatIfPrice
+            )
+        } else {
+            commitWhatIfHoldingToRealPortfolio()
+        }
     }
     
     // MARK: - Live Market Data Refresh
