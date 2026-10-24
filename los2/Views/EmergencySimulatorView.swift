@@ -18,10 +18,10 @@ struct EmergencySimulatorView: View {
                     VStack(spacing: LOSTheme.space16) {
                         HStack {
                             VStack(alignment: .leading, spacing: LOSTheme.space4) {
-                                Text("SHOCK IMPACT")
+                                Text("EMERGENCY SHOCK IMPACT")
                                     .font(.footnote.weight(.semibold))
                                     .foregroundStyle(LOSTheme.textSecondary)
-                                    .tracking(0.6)
+                                    .tracking(0.8)
                                 Text(sim.severityRating.uppercased())
                                     .font(.title2.weight(.bold))
                                     .foregroundStyle(sim.statusColor)
@@ -243,10 +243,10 @@ struct EmergencySimulatorView: View {
                     
                     // MARK: - Frequency & Duration
                     VStack(alignment: .leading, spacing: LOSTheme.space12) {
-                        Text("EXPENSE FREQUENCY")
+                        Text("FREQUENCY & DURATION")
                             .font(.footnote.weight(.semibold))
                             .foregroundStyle(LOSTheme.textSecondary)
-                            .tracking(0.6)
+                            .tracking(0.8)
                         
                         Picker("Expense Type", selection: $viewModel.emergencyScenario.expenseType) {
                             ForEach(EmergencyExpenseType.allCases) { type in
@@ -352,7 +352,8 @@ struct EmergencySimulatorView: View {
                     .padding(.bottom, LOSTheme.space32 + 24)
                 }
             }
-            .navigationTitle("Emergency")
+            .navigationTitle("")
+            .navigationBarTitleDisplayMode(.inline)
             .background(LOSTheme.backgroundGradient.ignoresSafeArea())
             .toolbar {
                 ToolbarItem(placement: .primaryAction) {

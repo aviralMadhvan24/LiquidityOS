@@ -19,11 +19,18 @@ struct StressTestView: View {
             ScrollView {
                 VStack(spacing: LOSTheme.space24) {
                     // MARK: - Stress Test Engine Mode Picker
-                    Picker("Stress Mode", selection: $viewModel.stressTestMode) {
-                        Text("Portfolio-Wide").tag(0)
-                        Text("Stock-by-Stock").tag(1)
+                    VStack(alignment: .leading, spacing: LOSTheme.space8) {
+                        Text("STRESS TEST ENGINE")
+                            .font(.footnote.weight(.semibold))
+                            .foregroundStyle(LOSTheme.textSecondary)
+                            .tracking(0.8)
+                        
+                        Picker("Stress Mode", selection: $viewModel.stressTestMode) {
+                            Text("Portfolio-Wide").tag(0)
+                            Text("Stock-by-Stock").tag(1)
+                        }
+                        .pickerStyle(.segmented)
                     }
-                    .pickerStyle(.segmented)
                     .padding(.horizontal)
                     .padding(.top, LOSTheme.space4)
                     
@@ -157,10 +164,10 @@ struct StressTestView: View {
                     // MARK: - Mode A Shock Controls (Portfolio-Wide)
                     if viewModel.stressTestMode == 0 {
                         VStack(alignment: .leading, spacing: LOSTheme.space16) {
-                            Text("CRASH SCENARIO")
+                            Text("MARKET DECLINE SCENARIO")
                                 .font(.footnote.weight(.semibold))
                                 .foregroundStyle(LOSTheme.textSecondary)
-                                .tracking(0.6)
+                                .tracking(0.8)
                             
                             SegmentedShockPicker(selected: $viewModel.selectedScenario) { level in
                                 viewModel.selectScenario(level)
@@ -329,7 +336,8 @@ struct StressTestView: View {
                     .padding(.bottom, LOSTheme.space32 + 24)
                 }
             }
-            .navigationTitle("Stress Test")
+            .navigationTitle("")
+            .navigationBarTitleDisplayMode(.inline)
             .background(LOSTheme.backgroundGradient.ignoresSafeArea())
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {

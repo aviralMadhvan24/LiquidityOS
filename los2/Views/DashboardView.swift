@@ -32,12 +32,7 @@ struct DashboardView: View {
                 VStack(spacing: LOSTheme.space24) {
                     // MARK: - Top Header with Greeting & Action Hub
                     HStack(alignment: .center) {
-                        VStack(alignment: .leading, spacing: LOSTheme.space4) {
-                            FinSightHorizontalLogo(showTagline: false, iconSize: 20)
-                            Text("Financial Command")
-                                .font(.title2.weight(.bold))
-                                .foregroundStyle(LOSTheme.textPrimary)
-                        }
+                        FinSightHorizontalLogo(showTagline: false, iconSize: 22)
                         
                         Spacer()
                         

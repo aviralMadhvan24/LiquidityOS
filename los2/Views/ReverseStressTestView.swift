@@ -18,10 +18,10 @@ struct ReverseStressTestView: View {
                     VStack(spacing: 16) {
                         HStack {
                             VStack(alignment: .leading, spacing: 4) {
-                                Text("BREAKING POINT")
+                                Text("REVERSE STRESS BREAKING POINT")
                                     .font(.system(size: 11, weight: .bold, design: .rounded))
                                     .foregroundStyle(Color.secondary)
-                                    .tracking(0.6)
+                                    .tracking(0.8)
                                 
                                 if let breakingPercent = result.breakingPointDeclinePercent {
                                     if breakingPercent == 0 {
