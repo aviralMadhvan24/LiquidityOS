@@ -91,6 +91,9 @@ final class ResilienceViewModel: ObservableObject {
         if ProcessInfo.processInfo.arguments.contains("-showPortfolio") {
             self.isShowingPortfolioSheet = true
         }
+        if ProcessInfo.processInfo.arguments.contains("-showEditProfile") {
+            self.isShowingEditSheet = true
+        }
     }
     
     // MARK: - Active Drawdown Percent (Mode A)

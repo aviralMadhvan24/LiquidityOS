@@ -9,7 +9,14 @@ final class ConcallAPIService {
     
     var baseURLString: String {
         get {
-            UserDefaults.standard.string(forKey: Self.baseURLKey) ?? "http://localhost:3000"
+            if let saved = UserDefaults.standard.string(forKey: Self.baseURLKey), !saved.isEmpty {
+                return saved
+            }
+            #if targetEnvironment(simulator)
+            return "http://localhost:3000"
+            #else
+            return "http://10.21.70.139:3000"
+            #endif
         }
         set {
             UserDefaults.standard.set(newValue, forKey: Self.baseURLKey)
@@ -24,6 +31,27 @@ final class ConcallAPIService {
         let base = baseURLString.trimmingCharacters(in: CharacterSet(charactersIn: "/"))
         let sub = path.trimmingCharacters(in: CharacterSet(charactersIn: "/"))
         return URL(string: "\(base)/\(sub)") ?? URL(string: "http://localhost:3000/\(sub)")!
+    }
+    
+    /// Test server health and check LLM configuration
+    func pingHealth() async -> (isHealthy: Bool, message: String) {
+        let url = endpoint("api/health")
+        var req = URLRequest(url: url)
+        req.timeoutInterval = 3.0
+        do {
+            let (data, response) = try await URLSession.shared.data(for: req)
+            guard let http = response as? HTTPURLResponse, http.statusCode == 200 else {
+                return (false, "HTTP \((response as? HTTPURLResponse)?.statusCode ?? 0)")
+            }
+            if let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
+               let status = json["status"] as? String, status == "healthy" {
+                let provider = json["activeProvider"] as? String ?? "Active"
+                return (true, "Connected • \(provider)")
+            }
+            return (true, "Connected")
+        } catch {
+            return (false, error.localizedDescription)
+        }
     }
     
     // MARK: - Errors

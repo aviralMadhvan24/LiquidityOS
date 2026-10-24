@@ -19,6 +19,11 @@ struct EditProfileSheet: View {
     
     @State private var validationError: String? = nil
     
+    // Backend Server Connection
+    @State private var serverURLText: String = ConcallAPIService.shared.baseURLString
+    @State private var pingStatus: (isHealthy: Bool, message: String)? = nil
+    @State private var isPingingServer: Bool = false
+    
     var body: some View {
         NavigationStack {
             Form {
@@ -135,7 +140,96 @@ struct EditProfileSheet: View {
                     Text("Broker Integration")
                 }
                 
-                // Section 5: Reset Actions
+                // Section 5: Backend Server Connection (for Physical iPhone testing)
+                Section {
+                    VStack(alignment: .leading, spacing: 10) {
+                        HStack {
+                            Label("Server URL", systemImage: "server.rack")
+                            Spacer()
+                            TextField("http://...", text: $serverURLText)
+                                .textInputAutocapitalization(.never)
+                                .autocorrectionDisabled()
+                                .multilineTextAlignment(.trailing)
+                                .font(.system(.subheadline, design: .monospaced))
+                                .onChange(of: serverURLText) { newVal in
+                                    ConcallAPIService.shared.baseURLString = newVal
+                                }
+                        }
+                        
+                        HStack(spacing: 8) {
+                            Button {
+                                isPingingServer = true
+                                Task {
+                                    let res = await ConcallAPIService.shared.pingHealth()
+                                    await MainActor.run {
+                                        pingStatus = res
+                                        isPingingServer = false
+                                    }
+                                }
+                            } label: {
+                                HStack(spacing: 5) {
+                                    if isPingingServer {
+                                        ProgressView().scaleEffect(0.7)
+                                    } else {
+                                        Image(systemName: "bolt.horizontal.circle.fill")
+                                    }
+                                    Text("Test Connection")
+                                }
+                                .font(.caption.weight(.bold))
+                                .padding(.horizontal, 10)
+                                .padding(.vertical, 6)
+                                .background(LOSTheme.primary.opacity(0.15))
+                                .foregroundStyle(LOSTheme.primary)
+                                .clipShape(Capsule())
+                            }
+                            
+                            if let status = pingStatus {
+                                HStack(spacing: 4) {
+                                    Circle()
+                                        .fill(status.isHealthy ? LOSTheme.safeGreen : LOSTheme.criticalRed)
+                                        .frame(width: 6, height: 6)
+                                    Text(status.message)
+                                        .font(.caption2.weight(.semibold))
+                                        .foregroundStyle(status.isHealthy ? LOSTheme.safeGreen : LOSTheme.criticalRed)
+                                        .lineLimit(1)
+                                }
+                            }
+                            
+                            Spacer()
+                        }
+                        
+                        // Fast Presets
+                        HStack(spacing: 8) {
+                            Text("Fast Presets:")
+                                .font(.system(size: 10, weight: .bold))
+                                .foregroundStyle(Color.secondary)
+                            
+                            Button("Mac IP (10.21.70.139)") {
+                                serverURLText = "http://10.21.70.139:3000"
+                                ConcallAPIService.shared.baseURLString = serverURLText
+                            }
+                            .font(.system(size: 10, weight: .semibold))
+                            .foregroundStyle(LOSTheme.accent)
+                            
+                            Text("•")
+                                .font(.system(size: 10))
+                                .foregroundStyle(Color.secondary)
+                            
+                            Button("localhost") {
+                                serverURLText = "http://localhost:3000"
+                                ConcallAPIService.shared.baseURLString = serverURLText
+                            }
+                            .font(.system(size: 10, weight: .semibold))
+                            .foregroundStyle(LOSTheme.accent)
+                        }
+                    }
+                } header: {
+                    Text("Backend Server Connection")
+                } footer: {
+                    Text("For physical iPhone testing, set this to your Mac's Wi-Fi IP address (http://10.21.70.139:3000) so your iPhone can reach the local Node.js server.")
+                }
+                
+                // Section 6: Reset Actions
                 Section {
                     Button(role: .none) {
                         viewModel.resetToDefaults()
