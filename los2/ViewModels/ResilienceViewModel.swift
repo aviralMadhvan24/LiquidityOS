@@ -59,6 +59,9 @@ final class ResilienceViewModel: ObservableObject {
     @Published var whatIfShares: Int = 50
     @Published var whatIfPrice: Double = 980.40
     @Published var whatIfSimulatedDecline: Double = 25.0
+    @Published var isFetchingWhatIfPrice: Bool = false
+    @Published var whatIfPriceChangePercent: Double? = nil
+    @Published var whatIfPriceFreshness: String = "Benchmark Price"
     
     // Broker Sync State (Zerodha Kite)
     @Published var isZerodhaConnected: Bool = false
@@ -459,6 +462,30 @@ final class ResilienceViewModel: ObservableObject {
         whatIfExchange = catalogItem.exchange
         whatIfSector = catalogItem.sector
         whatIfPrice = catalogItem.defaultPrice
+        whatIfPriceFreshness = "Benchmark Price"
+        whatIfPriceChangePercent = nil
+        
+        Task { @MainActor in
+            await fetchLiveWhatIfPrice()
+        }
+    }
+    
+    func fetchLiveWhatIfPrice() async {
+        isFetchingWhatIfPrice = true
+        let symbol = whatIfTicker
+        let exchange = whatIfExchange
+        
+        do {
+            let quote = try await MarketDataAPIService.shared.fetchQuote(symbol: symbol, exchange: exchange)
+            if whatIfTicker == symbol {
+                whatIfPrice = quote.currentPrice
+                whatIfPriceChangePercent = quote.changePercent
+                whatIfPriceFreshness = quote.freshness == "REFERENCE_CATALOG" ? "Benchmark Price" : "Live \(quote.exchange)"
+            }
+        } catch {
+            // Keep default benchmark price
+        }
+        isFetchingWhatIfPrice = false
     }
     
     func commitWhatIfHoldingToRealPortfolio() {

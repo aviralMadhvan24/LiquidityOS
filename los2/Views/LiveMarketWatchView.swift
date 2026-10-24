@@ -291,6 +291,12 @@ struct LiveMarketWatchView: View {
             HStack(spacing: LOSTheme.space8) {
                 // One-tap What-If Simulator
                 Button {
+                    viewModel.selectWhatIfStock(catalogItem: stock)
+                    viewModel.whatIfPrice = currentPrice
+                    if let q = quote {
+                        viewModel.whatIfPriceChangePercent = q.changePercent
+                        viewModel.whatIfPriceFreshness = "Live \(stock.exchange)"
+                    }
                     viewModel.isShowingWhatIfSheet = true
                     dismiss()
                 } label: {

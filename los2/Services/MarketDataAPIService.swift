@@ -54,7 +54,7 @@ final class MarketDataAPIService {
         return decoded.results
     }
     
-    func fetchQuote(symbol: String, force: Bool = false) async throws -> StockQuotePayload {
+    func fetchQuote(symbol: String, exchange: String? = nil, force: Bool = false) async throws -> StockQuotePayload {
         let clean = symbol.trimmingCharacters(in: .whitespacesAndNewlines).uppercased()
         
         // 1. Try backend server if available
@@ -78,7 +78,7 @@ final class MarketDataAPIService {
         }
         
         // 2. Direct on-device live quote from Yahoo Finance
-        if let direct = await fetchDirectLiveQuote(symbol: clean) {
+        if let direct = await fetchDirectLiveQuote(symbol: clean, exchange: exchange) {
             return direct
         }
         
@@ -106,10 +106,26 @@ final class MarketDataAPIService {
         throw NSError(domain: "MarketData", code: 404, userInfo: [NSLocalizedDescriptionKey: "Quote not found for \(clean)"])
     }
     
+    private static let symbolAliases: [String: String] = [
+        "TATAMOTORS": "TMPV.NS",
+        "NIFTY": "^NSEI",
+        "SENSEX": "^BSESN",
+        "BANKNIFTY": "^NSEBANK"
+    ]
+    
     /// Fetches live quote directly from Yahoo Finance on-device (zero backend dependency)
-    func fetchDirectLiveQuote(symbol: String) async -> StockQuotePayload? {
+    func fetchDirectLiveQuote(symbol: String, exchange: String? = nil) async -> StockQuotePayload? {
         let clean = symbol.trimmingCharacters(in: .whitespacesAndNewlines).uppercased()
-        let targetSymbol = clean.contains(".") ? clean : "\(clean).NS"
+        let resolvedExchange = exchange ?? (IndianStockDirectory.shared.find(symbol: clean)?.exchange ?? "NSE")
+        let targetSymbol: String
+        if let alias = Self.symbolAliases[clean] {
+            targetSymbol = alias
+        } else if clean.contains(".") || clean.starts(with: "^") {
+            targetSymbol = clean
+        } else {
+            let suffix = resolvedExchange == "BSE" ? ".BO" : ".NS"
+            targetSymbol = "\(clean)\(suffix)"
+        }
         guard let url = URL(string: "https://query1.finance.yahoo.com/v8/finance/chart/\(targetSymbol)?interval=1d&range=2d") else {
             return nil
         }

@@ -189,25 +189,62 @@ struct WhatIfStockSimulatorView: View {
                                         .font(.headline.weight(.bold))
                                         .fontDesign(.monospaced)
                                         .foregroundStyle(LOSTheme.textPrimary)
+                                        .lineLimit(1)
                                     Text(viewModel.whatIfExchange)
                                         .font(.caption2.weight(.bold))
+                                        .lineLimit(1)
                                         .padding(.horizontal, 6)
                                         .padding(.vertical, 2)
                                         .background(LOSTheme.positive.opacity(0.14))
                                         .foregroundStyle(LOSTheme.positive)
                                         .clipShape(Capsule())
                                 }
+                                .fixedSize(horizontal: true, vertical: false)
                                 Text(viewModel.whatIfCompanyName)
                                     .font(.caption)
                                     .foregroundStyle(LOSTheme.textSecondary)
                                     .lineLimit(1)
                             }
+                            .layoutPriority(1)
                             Spacer()
-                            VStack(alignment: .trailing, spacing: 2) {
-                                Text(LOSTheme.formatRupee(viewModel.whatIfPrice))
-                                    .font(.headline.weight(.bold))
-                                    .fontDesign(.rounded)
-                                    .foregroundStyle(LOSTheme.textPrimary)
+                            VStack(alignment: .trailing, spacing: 3) {
+                                HStack(spacing: 4) {
+                                    if viewModel.isFetchingWhatIfPrice {
+                                        ProgressView()
+                                            .scaleEffect(0.6)
+                                    }
+                                    Text(LOSTheme.formatRupee(viewModel.whatIfPrice))
+                                        .font(.headline.weight(.bold))
+                                        .fontDesign(.rounded)
+                                        .foregroundStyle(LOSTheme.textPrimary)
+                                }
+                                
+                                HStack(spacing: 3) {
+                                    Circle()
+                                        .fill(viewModel.whatIfPriceFreshness.contains("Live") ? LOSTheme.positive : LOSTheme.warning)
+                                        .frame(width: 5, height: 5)
+                                    Text(viewModel.whatIfPriceFreshness)
+                                        .font(.system(size: 8.5, weight: .bold))
+                                        .foregroundStyle(viewModel.whatIfPriceFreshness.contains("Live") ? LOSTheme.positive : LOSTheme.textSecondary)
+                                        .lineLimit(1)
+                                    
+                                    if let pct = viewModel.whatIfPriceChangePercent {
+                                        Text(String(format: "%@%.2f%%", pct >= 0 ? "+" : "", pct))
+                                            .font(.system(size: 8.5, weight: .bold))
+                                            .foregroundStyle(pct >= 0 ? LOSTheme.positive : LOSTheme.critical)
+                                            .lineLimit(1)
+                                    }
+                                    
+                                    Button {
+                                        Task { await viewModel.fetchLiveWhatIfPrice() }
+                                    } label: {
+                                        Image(systemName: "arrow.clockwise")
+                                            .font(.system(size: 8, weight: .bold))
+                                            .foregroundStyle(LOSTheme.textSecondary)
+                                    }
+                                }
+                                .fixedSize(horizontal: true, vertical: false)
+                                
                                 Text(viewModel.whatIfSector)
                                     .font(.caption2)
                                     .foregroundStyle(LOSTheme.textSecondary)
@@ -445,6 +482,24 @@ struct WhatIfStockSimulatorView: View {
                         dismiss()
                     }
                 }
+                
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button {
+                        Task { await viewModel.fetchLiveWhatIfPrice() }
+                    } label: {
+                        if viewModel.isFetchingWhatIfPrice {
+                            ProgressView()
+                                .scaleEffect(0.8)
+                        } else {
+                            Image(systemName: "arrow.clockwise")
+                                .font(.subheadline.weight(.semibold))
+                        }
+                    }
+                    .disabled(viewModel.isFetchingWhatIfPrice)
+                }
+            }
+            .task {
+                await viewModel.fetchLiveWhatIfPrice()
             }
         }
     }
