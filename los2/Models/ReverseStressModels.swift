@@ -12,10 +12,10 @@ enum SafetyBreachCondition: String, CaseIterable, Identifiable, Codable {
     
     var shortTitle: String {
         switch self {
-        case .minimumCashReserve: return "Min Cash Floor"
-        case .runwayUnder3Months: return "< 3.0 Mo Runway"
-        case .runwayUnder1Month: return "< 1.0 Mo Runway"
-        case .completeCashDepletion: return "Cash Exhaustion (₹0)"
+        case .minimumCashReserve: return "Min Floor"
+        case .runwayUnder3Months: return "< 3 Mos"
+        case .runwayUnder1Month: return "< 1 Mo"
+        case .completeCashDepletion: return "Zero Cash"
         }
     }
 }

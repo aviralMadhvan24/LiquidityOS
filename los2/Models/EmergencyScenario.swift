@@ -52,6 +52,13 @@ enum EmergencyExpenseType: String, CaseIterable, Identifiable, Codable {
     case recurring = "Recurring Monthly"
     
     var id: String { rawValue }
+    
+    var shortTitle: String {
+        switch self {
+        case .oneTime: return "One-Time"
+        case .recurring: return "Recurring"
+        }
+    }
 }
 
 /// User configurable parameters for simulating an emergency shock.

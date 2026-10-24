@@ -197,7 +197,7 @@ struct RunwayView: View {
         switch report.runwayState {
         case .cashSurplus:
             HeroMetricCard(
-                category: "Cash Runway",
+                category: "Runway Status",
                 value: "Perpetual",
                 subtitle: "Monthly income exceeds expenses. Reserves are actively accumulating.",
                 statusPill: StatusPill(text: "Surplus", icon: "arrow.up.forward.circle.fill", color: LOSTheme.positive)
@@ -205,7 +205,7 @@ struct RunwayView: View {
             
         case .breakEven:
             HeroMetricCard(
-                category: "Cash Runway",
+                category: "Runway Status",
                 value: "Balanced",
                 subtitle: "Monthly cash inflows exactly balance outflows. Zero net cash burn.",
                 statusPill: StatusPill(text: "Break-Even", icon: "equal.circle.fill", color: LOSTheme.accent)
@@ -213,7 +213,7 @@ struct RunwayView: View {
             
         case .underwater:
             HeroMetricCard(
-                category: "Cash Runway",
+                category: "Runway Status",
                 value: "0.0 Months",
                 subtitle: "Immediate cash deficit. Liquid cash reserves cannot cover current commitments.",
                 statusPill: StatusPill(text: "Deficit", icon: "exclamationmark.octagon.fill", color: LOSTheme.critical)
@@ -225,7 +225,7 @@ struct RunwayView: View {
             let isWarning = report.runwayMonths < 6.0
             
             HeroMetricCard(
-                category: "Estimated Cash Runway",
+                category: "Survival Window",
                 value: monthsVal,
                 subtitle: isCritical
                     ? "Reserves will deplete rapidly under sustained monthly burn. Immediate action advised."

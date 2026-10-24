@@ -19,18 +19,11 @@ struct StressTestView: View {
             ScrollView {
                 VStack(spacing: LOSTheme.space24) {
                     // MARK: - Stress Test Engine Mode Picker
-                    VStack(alignment: .leading, spacing: LOSTheme.space8) {
-                        Text("STRESS TEST ENGINE")
-                            .font(.footnote.weight(.semibold))
-                            .foregroundStyle(LOSTheme.textSecondary)
-                            .tracking(0.8)
-                        
-                        Picker("Stress Mode", selection: $viewModel.stressTestMode) {
-                            Text("Portfolio-Wide").tag(0)
-                            Text("Stock-by-Stock").tag(1)
-                        }
-                        .pickerStyle(.segmented)
+                    Picker("Stress Mode", selection: $viewModel.stressTestMode) {
+                        Text("Portfolio-Wide").tag(0)
+                        Text("Stock-by-Stock").tag(1)
                     }
+                    .pickerStyle(.segmented)
                     .padding(.horizontal)
                     .padding(.top, LOSTheme.space4)
                     
@@ -101,29 +94,22 @@ struct StressTestView: View {
                     .shadow(color: Color.black.opacity(0.04), radius: 10, y: 4)
                     .padding(.horizontal)
                     
-                    // MARK: - Interactive Swift Charts Visualizer
-                    VStack(alignment: .leading, spacing: LOSTheme.space16) {
-                        HStack {
-                            VStack(alignment: .leading, spacing: LOSTheme.space4) {
-                                Text("INTERACTIVE DRAWDOWN VISUALIZER")
-                                    .font(.footnote.weight(.semibold))
-                                    .foregroundStyle(LOSTheme.textSecondary)
-                                    .tracking(0.8)
-                                Text("Simulated portfolio trajectories")
-                                    .font(.caption)
-                                    .foregroundStyle(LOSTheme.textSecondary)
-                            }
-                            
-                            Spacer()
-                            
-                            StatusPill(text: "Swift Charts", icon: "chart.xyaxis.line", color: LOSTheme.accent)
+                    // MARK: - Drawdown Visualizer Chart
+                    VStack(alignment: .leading, spacing: LOSTheme.space14) {
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text("Drawdown Visualizer")
+                                .font(.headline.weight(.bold))
+                                .foregroundStyle(LOSTheme.textPrimary)
+                            Text("Simulated portfolio trajectory under stress")
+                                .font(.caption)
+                                .foregroundStyle(LOSTheme.textSecondary)
                         }
                         
-                        // Chart Selector Tabs
+                        // Chart Selector Tabs (Concise labels to avoid truncation on all screen sizes)
                         Picker("Chart View", selection: $selectedGraphTab) {
-                            Text("Before/After").tag(0)
-                            Text("By Scenario").tag(1)
-                            Text("Stock Loss").tag(2)
+                            Text("Compare").tag(0)
+                            Text("Scenarios").tag(1)
+                            Text("By Stock").tag(2)
                             Text("Curve").tag(3)
                         }
                         .pickerStyle(.segmented)
@@ -171,10 +157,10 @@ struct StressTestView: View {
                     // MARK: - Mode A Shock Controls (Portfolio-Wide)
                     if viewModel.stressTestMode == 0 {
                         VStack(alignment: .leading, spacing: LOSTheme.space16) {
-                            Text("MARKET DECLINE SCENARIO")
+                            Text("CRASH SCENARIO")
                                 .font(.footnote.weight(.semibold))
                                 .foregroundStyle(LOSTheme.textSecondary)
-                                .tracking(0.8)
+                                .tracking(0.6)
                             
                             SegmentedShockPicker(selected: $viewModel.selectedScenario) { level in
                                 viewModel.selectScenario(level)

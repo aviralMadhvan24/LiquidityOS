@@ -74,7 +74,7 @@ struct WhatIfStockSimulatorView: View {
                         
                         // Exchange Filter Tabs
                         Picker("Exchange", selection: $selectedExchange) {
-                            Text("All Indian Equities").tag("ALL")
+                            Text("All").tag("ALL")
                             Text("NSE").tag("NSE")
                             Text("BSE").tag("BSE")
                         }

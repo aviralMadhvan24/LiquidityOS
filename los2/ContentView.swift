@@ -65,5 +65,18 @@ struct ContentView: View {
                 .zIndex(999)
             }
         }
+        .onAppear {
+            if ProcessInfo.processInfo.arguments.contains("-tabStressTest") {
+                selectedTab = .stressTest
+            } else if ProcessInfo.processInfo.arguments.contains("-tabEmergency") {
+                selectedTab = .emergency
+            } else if ProcessInfo.processInfo.arguments.contains("-tabRunway") {
+                selectedTab = .runway
+            } else if ProcessInfo.processInfo.arguments.contains("-tabConcall") {
+                selectedTab = .concall
+            } else if ProcessInfo.processInfo.arguments.contains("-tabOverview") {
+                selectedTab = .overview
+            }
+        }
     }
 }

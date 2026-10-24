@@ -33,13 +33,16 @@ struct RunwayTimelineView: View {
         VStack(alignment: .leading, spacing: LOSTheme.space16) {
             HStack {
                 VStack(alignment: .leading, spacing: LOSTheme.space4) {
-                    Text("DEPLETION TRAJECTORY")
+                    Text("DEPLETION TIMELINE")
                         .font(.footnote.weight(.semibold))
                         .foregroundStyle(LOSTheme.textSecondary)
-                        .tracking(0.8)
+                        .tracking(0.6)
+                        .lineLimit(1)
                     Text("Cash balance across upcoming months")
                         .font(.caption)
                         .foregroundStyle(LOSTheme.textSecondary)
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.85)
                 }
                 
                 Spacer()

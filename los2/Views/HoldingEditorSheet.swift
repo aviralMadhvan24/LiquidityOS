@@ -86,7 +86,7 @@ struct HoldingEditorSheet: View {
                     Section {
                         // Exchange filter tabs
                         Picker("Exchange Filter", selection: $selectedExchangeFilter) {
-                            Text("All Equities").tag("ALL")
+                            Text("All").tag("ALL")
                             Text("NSE").tag("NSE")
                             Text("BSE").tag("BSE")
                         }

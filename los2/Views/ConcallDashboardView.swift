@@ -12,21 +12,18 @@ struct ConcallDashboardView: View {
         NavigationStack {
             ScrollView {
                 VStack(spacing: LOSTheme.space20) {
-                    // MARK: - 1. Compact Header & Server Status Dot
-                    headerBar
-                    
-                    // MARK: - 2. Quick Action Strip (New Transcript / Load Sample)
+                    // MARK: - 1. Quick Action Strip (New Transcript / Load Sample)
                     quickActionCard
                     
-                    // MARK: - 3. Holdings Horizontal Chip Selector
+                    // MARK: - 2. Holdings Horizontal Chip Selector
                     portfolioHoldingsSelector
                     
-                    // MARK: - 4. Active Analysis Hero Card
+                    // MARK: - 3. Active Analysis Hero Card
                     if let analysis = viewModel.currentAnalysis {
                         activeAnalysisCard(analysis: analysis)
                     }
                     
-                    // MARK: - 5. Saved Analyses History
+                    // MARK: - 4. Saved Analyses History
                     savedAnalysesSection
                 }
                 .padding(.horizontal, LOSTheme.space16)
@@ -35,6 +32,22 @@ struct ConcallDashboardView: View {
             }
             .navigationTitle("Concall Intelligence")
             .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .topBarTrailing) {
+                    HStack(spacing: 5) {
+                        Circle()
+                            .fill(statusIndicatorColor)
+                            .frame(width: 7, height: 7)
+                        Text(statusIndicatorText)
+                            .font(.caption2.weight(.medium))
+                            .foregroundStyle(LOSTheme.textSecondary)
+                    }
+                    .padding(.horizontal, 8)
+                    .padding(.vertical, 4)
+                    .background(LOSTheme.surfaceElevated)
+                    .clipShape(Capsule())
+                }
+            }
             .background(LOSTheme.backgroundGradient.ignoresSafeArea())
             .sheet(isPresented: $viewModel.isShowingUploadSheet) {
                 ConcallUploadSheet(
@@ -54,40 +67,6 @@ struct ConcallDashboardView: View {
     }
     
     // MARK: - Subviews
-    
-    private var headerBar: some View {
-        HStack(alignment: .center) {
-            VStack(alignment: .leading, spacing: LOSTheme.space4) {
-                Text("AI EARNINGS INTELLIGENCE")
-                    .font(.footnote.weight(.semibold))
-                    .foregroundStyle(LOSTheme.textSecondary)
-                    .tracking(0.8)
-                Text("Concall Analysis")
-                    .font(.title2.weight(.bold))
-                    .foregroundStyle(LOSTheme.textPrimary)
-            }
-            
-            Spacer()
-            
-            // Subdued tiny server dot (not a loud pill)
-            HStack(spacing: 6) {
-                Circle()
-                    .fill(statusIndicatorColor)
-                    .frame(width: 8, height: 8)
-                Text(statusIndicatorText)
-                    .font(.caption2.weight(.medium))
-                    .foregroundStyle(LOSTheme.textSecondary)
-            }
-            .padding(.horizontal, 10)
-            .padding(.vertical, 5)
-            .background(LOSTheme.surface)
-            .clipShape(Capsule())
-            .overlay(
-                Capsule()
-                    .stroke(LOSTheme.borderHairline, lineWidth: LOSTheme.hairline)
-            )
-        }
-    }
     
     private var quickActionCard: some View {
         VStack(alignment: .leading, spacing: LOSTheme.space12) {
